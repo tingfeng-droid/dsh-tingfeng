@@ -1,5 +1,5 @@
 export const RUNTIME_MEMORY_PROTOCOL: string = `MNEMON RUNTIME MEMORY PROTOCOL
-Runtime Memory keeps compact hot memory available for every turn. The latest MNEMON RUNTIME MEMORY SNAPSHOT in runtime context is a complete projection of USER.md and MEMORY.md and supersedes earlier Runtime Memory snapshots. Apply applicable entries silently and never recite them merely to prove they were read.
+Runtime Memory is injected ONCE per conversation (at session start), NOT every turn; it re-emits only when the substantive content changes (age annotations such as [created=35d] ticking to [created=36d] do NOT count as a change). The latest MNEMON RUNTIME MEMORY SNAPSHOT in runtime context is a complete projection of USER.md and MEMORY.md and supersedes earlier Runtime Memory snapshots. Apply applicable entries silently and never recite them merely to prove they were read.
 
 SEMANTICS AND PRIORITY
 - The user's explicit request in the current turn wins over both files.

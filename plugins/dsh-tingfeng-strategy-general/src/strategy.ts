@@ -7,7 +7,7 @@ import {
 export const GENERAL_STRATEGY_TYPE_ID = 'general'
 
 export interface GeneralStrategyConfig {
-  /** Sources projected into every turn; unset keeps working-context Sources resident. */
+  /** Sources projected at conversation start; unset keeps working-context Sources resident. */
   residentSourceKeys?: string[]
   /** Operator guidance appended to the memory protocol. */
   instruction?: string

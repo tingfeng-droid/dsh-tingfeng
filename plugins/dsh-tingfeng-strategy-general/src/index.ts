@@ -25,10 +25,10 @@ export const memoryStrategyConfiguration = defineMemoryStrategyConfiguration({
   fields: [
     { key: 'residentSourceKeys', input: 'source-list',
       label: { en: 'Resident Sources', 'zh-CN': '常驻 Source' },
-      description: { en: 'Projected into every turn. Unset keeps working-context Sources resident; the others stay on demand.', 'zh-CN': '每轮直接投影到上下文。未设置时常驻工作上下文类 Source，其余按需读取。' } },
+      description: { en: 'Projected at conversation start. Unset keeps working-context Sources resident; the others stay on demand.', 'zh-CN': '每对话开始时投影到上下文。未设置时常驻工作上下文类 Source，其余按需读取。' } },
     { key: 'instruction', input: 'textarea', maximum: 4000,
       label: { en: 'Additional guidance', 'zh-CN': '附加指引' },
-      description: { en: 'Optional guidance appended to the memory protocol for every turn.', 'zh-CN': '可选，每轮追加到记忆协议的指引。' } },
+      description: { en: 'Optional guidance appended to the memory protocol at conversation start.', 'zh-CN': '可选，每对话开始时追加到记忆协议的指引。' } },
   ],
   create: config => ({ plugin: memoryPlugin, strategies: [createGeneralStrategy(config as GeneralStrategyConfig)] }),
 })
