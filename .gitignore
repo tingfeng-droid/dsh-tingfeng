@@ -1,0 +1,29 @@
+node_modules/
+coverage/
+/lib/
+/plugins/*/lib/
+*.log
+.DS_Store
+*.tgz
+
+# Upstream documentation media: PR screenshots, release GIFs and demo videos.
+# They are 179 MB of the upstream tree and are not needed to install, build or
+# run the plugin. The prose under docs/en and docs/zh-CN is kept.
+docs/pr-assets/
+docs/assets/
+
+# Local API keys and endpoints (never committed)
+.env
+.env.*
+!.env.example
+
+# Local IDE settings
+/.idea/
+
+# Local tool state: agent worktrees and settings, research and benchmark caches
+/.claude/worktrees/
+/.claude/settings.local.json
+/.cache/
+
+# Mnemon workspace-local data
+/.mnemon/

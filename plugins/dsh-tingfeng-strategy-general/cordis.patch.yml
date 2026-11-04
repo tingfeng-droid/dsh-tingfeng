@@ -1,0 +1,6 @@
+# Installation registers the main Strategy. Selecting it stays an explicit
+# choice made through Mnemon or the DSH Plugins page.
+- insert:
+    - id: mnemon-strategy-general
+      name: dsh-tingfeng-strategy-general
+      disabled: true

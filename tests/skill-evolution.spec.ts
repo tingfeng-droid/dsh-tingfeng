@@ -1,0 +1,719 @@
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { MemoryCompositionRunner } from '@tingfeng/dsh-tingfeng/testing'
+import * as skillsPlugin from 'dsh-tingfeng-source-skills'
+import * as generalStrategy from 'dsh-tingfeng-strategy-general'
+import type { BacktestRun, EvalCase, EvidencePack, SkillCatalog, SkillDraft, SkillSuggestion, Trajectory } from 'dsh-tingfeng-source-skills/contracts'
+import type { HostAgent, HostAgentContext, HostSessionEvent } from '../src/host/dsh.ts'
+import { DEFAULT_SKILLS_CONFIG, type ResolvedSkillsConfig } from '../src/host/protocol.ts'
+import { SkillEvolution, type SkillsSourcePort } from '../src/host/skill-evolution.ts'
+import { gradeCase, parseSkillDraft, parseSkillReview, renderSteps, skillDraftPrompt, skillReviewPrompt, SKILL_REVIEW_PERSONA } from '../src/host/skill-review.ts'
+import { captureTurn, redact, sessionTitle, TrajectoryWindow, turnSkillUses } from '../src/host/skill-trajectory.ts'
+import { sessionLog } from './fixtures/session-log.ts'
+
+type Listener = (...args: never[]) => unknown
+
+function turn(events: HostSessionEvent[], number: number, user: string, tools: Array<{ name: string; args: unknown; error?: string; output?: string }> = [], answer = 'Done.'): void {
+  const push = (type: string, data: Record<string, unknown>) => events.push({ type, seq: events.length, time: Date.UTC(2026, 9, 21, 8, number), data })
+  push('turn/start', { turn: number })
+  push('user/message', { id: `u${number}`, role: 'user', content: [{ type: 'text', text: user }], source: { kind: 'user' } })
+  push('user/message', { id: `m${number}`, role: 'user', content: [{ type: 'text', text: '[MNEMON] reminder' }], source: { kind: 'plugin:@tingfeng/dsh-tingfeng' } })
+  tools.forEach((tool, index) => {
+    const callId = `c${number}-${index}`
+    push('tool/call', { turn: number, step: 1, callId, name: tool.name, arguments: JSON.stringify(tool.args) })
+    push('tool/result', {
+      turn: number, step: 1,
+      message: { role: 'tool', toolCallId: callId, source: { kind: 'tool', callId }, content: [{ type: 'text', text: tool.output ?? tool.error ?? 'ok' }], ...(tool.error === undefined ? {} : { isError: true }) },
+      ...(tool.error === undefined ? {} : { error: { name: 'Error', code: 'failed', reason: tool.error } }),
+    })
+  })
+  push('assistant/message', { turn: number, step: 2, message: { id: `a${number}`, content: [{ type: 'text', text: answer }] } })
+  push('turn/end', { turn: number, reason: { kind: 'completed' } })
+}
+
+describe('trajectory capture', () => {
+  it('numbers user turns, skill loads, tool results and failures, and drops plugin messages', () => {
+    const events: HostSessionEvent[] = []
+    turn(events, 1, 'Write the release notes', [
+      { name: 'skill', args: { name: 'release-notes' }, output: '<skill_content name="release-notes">…' },
+      { name: 'bash', args: { command: 'git log --oneline', token: 'secret' }, error: 'fatal: not a git repository' },
+      { name: 'bash', args: { command: 'cat CHANGELOG.md' }, output: '## 2.0' },
+    ])
+    events.push({ type: 'session/title', seq: events.length, data: { title: 'Release v2 notes' } })
+    turn(events, 2, 'No — group them by component from now on. api_key=sk-abcdefghijklmnop')
+    const first = captureTurn(events, 1)!
+    expect(first).toMatchObject({ turn: 1, userCharacters: 23, toolCalls: 3, toolFailures: 1, toolNames: ['skill', 'bash'], skills: ['release-notes'], reason: 'completed' })
+    expect(first.steps.map(step => step.kind)).toEqual(['user', 'skill', 'tool', 'tool', 'assistant'])
+    expect(first.steps[2]).toMatchObject({ tool: { name: 'bash', ok: false, input: 'command=git log --oneline token=***', error: 'fatal: not a git repository' } })
+    expect(sessionTitle(events)).toBe('Release v2 notes')
+    const window = new TrajectoryWindow()
+    window.add(first, new Date())
+    window.add(captureTurn(events, 2)!, new Date())
+    window.add(captureTurn(events, 2)!, new Date())
+    expect(window.size).toBe(2)
+    expect(window.score()).toMatchObject({ turnScore: 2, eligible: false })
+    const steps = window.steps()
+    expect(steps.map(step => step.index)).toEqual([1, 2, 3, 4, 5, 6, 7])
+    expect(steps[5]!.text).toBe('No — group them by component from now on. api_key=***')
+    expect(renderSteps(steps.slice(1, 3))).toBe('[2] turn 1 · skill loaded: release-notes (by the model)\n[3] turn 1 · tool bash (command=git log --oneline token=***) FAILED: fatal: not a git repository')
+    expect(redact('Bearer abc.def and sk-1234567890abcdef')).toBe('Bearer *** and sk-1234***')
+  })
+
+  it('lists the skills each turn used: a / command, and the skill loads that succeeded, each once', () => {
+    const events: HostSessionEvent[] = []
+    turn(events, 1, 'Write the release notes', [
+      { name: 'skill', args: { name: 'release-notes' } },
+      { name: 'skill', args: { name: 'release-notes' } },
+      { name: 'skill', args: { name: 'pdf' }, error: 'unknown skill' },
+    ])
+    const push = (type: string, data: Record<string, unknown>) => events.push({ type, seq: events.length, data })
+    push('turn/start', { turn: 2 })
+    push('user/message', { id: 'u2', role: 'user', content: [{ type: 'text', text: 'weekly' }], source: { kind: 'skill-invocation', name: 'weekly-report' } })
+    push('turn/end', { turn: 2, reason: { kind: 'completed' } })
+    turn(events, 3, 'Thanks')
+    expect(turnSkillUses(events)).toEqual([
+      { turn: 1, skills: [{ name: 'release-notes', by: 'model' }] },
+      { turn: 2, skills: [{ name: 'weekly-report', by: 'user' }] },
+    ])
+  })
+})
+
+describe('skill model answers', () => {
+  it('parses a review leniently and drops what cannot be used', () => {
+    expect(parseSkillReview({
+      outcome: 'suggest', summary: ' Grouping was corrected. ',
+      annotations: [{ step: 4, signal: 'correction', note: 'x' }, { step: 'x', signal: 'correction', note: 'bad' }, { step: 2, signal: 'nope', note: 'bad' }],
+      suggestions: [{ skillName: 'release-notes', action: 'update', summary: 'Group', confidence: '0.8', signals: ['correction', 'bogus'], steps: [4, 'x'] }, { skillName: '', summary: 'x' }],
+      cases: [{ skillName: 'release-notes', title: 'T', prompt: 'P', checks: [{ text: 'grouped', must: true }, { text: '' }], steps: [4] }, { title: 'no checks', prompt: 'p', checks: [] }],
+    })).toEqual({
+      outcome: 'suggest', summary: 'Grouping was corrected.',
+      annotations: [{ step: 4, signal: 'correction', note: 'x' }],
+      suggestions: [{ skillName: 'release-notes', action: 'update', summary: 'Group', confidence: 0.8, signals: ['correction'], steps: [4] }],
+      cases: [{ skillName: 'release-notes', title: 'T', prompt: 'P', checks: [{ text: 'grouped', must: true }], steps: [4] }],
+    })
+    expect(parseSkillDraft({ content: '```markdown\n---\nname: a\n---\nbody\n```', notes: 'n', changes: ['c'] })).toEqual({ content: '---\nname: a\n---\nbody\n', notes: 'n', changes: ['c'] })
+    expect(() => parseSkillDraft({ content: '  ' })).toThrow('no SKILL.md')
+  })
+
+  it('passes a case only when every must check passes, weighing must checks twice', () => {
+    const entry = { id: 'c', skillName: 's', title: 't', prompt: 'p', checks: [{ id: 'a', text: 'A', must: true }, { id: 'b', text: 'B', must: false }], origin: { kind: 'manual' as const }, enabled: true, createdAt: '', updatedAt: '' }
+    expect(gradeCase(entry, { checks: [{ index: 1, pass: true, note: 'ok' }, { index: 2, pass: false, note: 'no' }], summary: 's' })).toMatchObject({ verdict: 'pass', score: 2 / 3 })
+    expect(gradeCase(entry, { checks: [{ index: 2, pass: true, note: 'ok' }] })).toMatchObject({ verdict: 'fail', score: 1 / 3, checks: [{ checkId: 'a', pass: false, note: 'not graded' }, { checkId: 'b', pass: true }] })
+  })
+})
+
+describe('skill evolution in the Host', () => {
+  let directory: string
+  let runner: MemoryCompositionRunner
+  let source: SkillsSourcePort
+  let events: HostSessionEvent[]
+  let agent: HostAgent
+  let listeners: Map<string, Listener>
+  let config: ResolvedSkillsConfig
+
+  beforeEach(async () => {
+    vi.useFakeTimers()
+    config = { ...DEFAULT_SKILLS_CONFIG }
+    directory = mkdtempSync(join(tmpdir(), 'mnemon-skill-evolution-'))
+    mkdirSync(join(directory, 'dsh', 'skills', 'release-notes'), { recursive: true })
+    mkdirSync(join(directory, 'workspace'))
+    writeFileSync(join(directory, 'dsh', 'skills', 'release-notes', 'SKILL.md'), '---\nname: release-notes\ndescription: Write release notes from a changelog.\n---\n\n1. Read CHANGELOG.md\n')
+    runner = new MemoryCompositionRunner()
+    await runner.mount(generalStrategy, { instanceId: 'general' })
+    await runner.mount(skillsPlugin, { instanceId: 'skills', config: { dataDir: join(directory, 'data'), dshHome: join(directory, 'dsh'), agentsHome: join(directory, 'agents') } })
+    const scope = { storage: 'custom' as const, workspaceId: join(directory, 'workspace') }
+    const base = { sourceInstanceKey: 'source:skills', scope }
+    source = {
+      scope,
+      read: async (operation, input = null) => (await runner.executeManagement({ ...base, mode: 'read', operation, input: input as never, confirmed: false })).value as never,
+      mutate: async (operation, input) => {
+        const { revision } = await runner.executeManagement({ ...base, mode: 'read', operation: 'revision', input: null, confirmed: false })
+        return (await runner.executeManagement({ ...base, mode: 'mutate', operation, input: JSON.parse(JSON.stringify(input)), confirmed: true, expectedRevision: revision })).value as never
+      },
+    }
+    events = []
+    listeners = new Map()
+    const ctx = {
+      on: (name: string, listener: Listener) => { listeners.set(name, listener); return () => listeners.delete(name) },
+      effect: () => () => undefined,
+    } as unknown as HostAgentContext
+    agent = { id: 'session-1', status: 'idle', session: { header: { cwd: join(directory, 'workspace') }, ...sessionLog(events) }, ctx, followup: vi.fn(), steer: vi.fn(), inject: vi.fn() }
+  })
+
+  afterEach(async () => {
+    vi.useRealTimers()
+    await runner.dispose()
+    rmSync(directory, { recursive: true, force: true })
+  })
+
+  function evolution(answers: Array<(label: string, prompt: string) => unknown>) {
+    const skillTask = vi.fn(async (_parent: HostAgent, label: string, prompt: string) => {
+      const next = answers.shift()
+      if (next === undefined) throw new Error('unexpected model call: ' + label)
+      const value = next(label, prompt)
+      if (value instanceof Error) throw value
+      return { structured: value }
+    })
+    const runTask = vi.fn(async (_root: string | undefined, _signal: AbortSignal, operation: (task: HostAgent) => Promise<unknown>) => operation(agent))
+    const host = { settings: () => config, source: () => source, runTask: runTask as never, skillTask, warn: vi.fn() }
+    return { skills: new SkillEvolution(host), skillTask, runTask, host }
+  }
+
+  async function endTurn(number: number, text: string, tools: Parameters<typeof turn>[3] = []): Promise<void> {
+    turn(events, number, text, tools)
+    listeners.get('session/event')!(agent.session as never, events.at(-1) as never)
+    await vi.advanceTimersByTimeAsync(0)
+  }
+
+  function mixedReview() {
+    return {
+      outcome: 'suggest', summary: 'Two reusable workflows.',
+      suggestions: [
+        { skillName: 'incident-triage', action: 'create', summary: 'Capture incident logs.', confidence: 0.9, steps: [1] },
+        { skillName: 'release-notes', action: 'update', summary: 'Group by component.', confidence: 0.9, steps: [1] },
+      ],
+      cases: ['incident-triage', 'release-notes'].map(skillName => ({ skillName, title: 'Workflow', prompt: 'Follow the workflow', checks: [{ text: 'Follows the workflow', must: true }], steps: [1] })),
+    }
+  }
+
+  it.each([
+    [undefined, 'workspaces', 'user-dsh'],
+    ['user', 'workspaces', 'user-dsh'], ['project', 'global', 'project-dsh'],
+    ['storage', 'global', 'user-dsh'], ['storage', 'custom', 'user-dsh'],
+    ['storage', 'workspace', 'project-dsh'], ['storage', 'workspaces', 'project-dsh'],
+  ] as const)('records and drafts a new skill in %s scope with %s storage', async (targetScope, storage, expectedRoot) => {
+    config = { ...config, ...(targetScope === undefined ? {} : { targetScope }), evolution: true, autoBacktest: false, idleSeconds: 3600 }
+    source = { ...source, scope: { storage } }
+    // The Source catalog, not the model task's cwd, owns the project root.
+    mkdirSync(join(directory, '.git'))
+    const content = '---\nname: incident-triage\ndescription: Capture incident logs.\n---\n\n1. Read the logs.\n'
+    const { skills } = evolution([mixedReview, (_label, prompt) => {
+      expect(prompt).toContain(`It will be written to ${expectedRoot}.`)
+      return { content, notes: '', changes: [] }
+    }])
+    const stop = skills.watch(agent)
+    await endTurn(1, 'Capture incident logs and group release notes.')
+    await skills.reviewNow(agent)
+    const suggestion = (await source.read<SkillSuggestion[]>('suggestions')).find(entry => entry.action === 'create')!
+    expect(suggestion.targetRoot).toBe(expectedRoot)
+    // A stored proposal keeps its destination when the preference later changes.
+    config = { ...config, targetScope: expectedRoot === 'user-dsh' ? 'project' : 'user' }
+    await skills.draft(source, join(directory, 'unrelated-task-cwd'), { suggestionId: suggestion.id })
+    await vi.waitFor(async () => expect(await source.read<SkillDraft[]>('drafts')).toHaveLength(1))
+    const [draft] = await source.read<SkillDraft[]>('drafts')
+    expect(draft).toMatchObject({ action: 'create', targetRoot: expectedRoot })
+    expect(existsSync(join(directory, '.dsh', 'skills', 'incident-triage'))).toBe(false)
+    await source.mutate('draft-adopt', { id: draft!.id })
+    const path = expectedRoot === 'user-dsh' ? join(directory, 'dsh', 'skills') : join(directory, '.dsh', 'skills')
+    expect(readFileSync(join(path, 'incident-triage', 'SKILL.md'), 'utf8')).toBe(content)
+    stop()
+  })
+
+  it('uses the explicit draft root and lets adoption override it for a new skill', async () => {
+    config = { ...config, targetScope: 'project', autoBacktest: false }
+    const content = '---\nname: incident-triage\ndescription: Capture incident logs.\n---\n\n1. Read the logs.\n'
+    const { skills } = evolution([(_label, prompt) => {
+      expect(prompt).toContain('It will be written to user-agents.')
+      return { content, notes: '', changes: [] }
+    }])
+    await skills.draft(source, undefined, { skill: 'incident-triage', targetRoot: 'user-agents' })
+    await vi.waitFor(async () => expect(await source.read<SkillDraft[]>('drafts')).toHaveLength(1))
+    const [draft] = await source.read<SkillDraft[]>('drafts')
+    expect(draft!.targetRoot).toBe('user-agents')
+    await source.mutate('draft-adopt', { id: draft!.id, root: 'project-agents' })
+    expect(readFileSync(join(directory, 'workspace', '.agents', 'skills', 'incident-triage', 'SKILL.md'), 'utf8')).toBe(content)
+    expect(existsSync(join(directory, 'agents', 'skills', 'incident-triage'))).toBe(false)
+  })
+
+  it.each(['suggestion', 'direct'] as const)('keeps the %s draft destination when newer drafts fill its evidence window', async origin => {
+    config = { ...config, targetScope: 'project', evolution: true, autoBacktest: false, idleSeconds: 3600 }
+    const content = '---\nname: incident-triage\ndescription: Capture incident logs.\n---\n\n1. Read the logs.\n'
+    const prompts: string[] = []
+    const answer = (_label: string, prompt: string) => { prompts.push(prompt); return { content, notes: '', changes: [] } }
+    const { skills } = evolution([mixedReview, answer, answer])
+    const stop = skills.watch(agent)
+    await endTurn(1, 'Capture incident logs and group release notes.')
+    await skills.reviewNow(agent)
+    const suggestion = (await source.read<SkillSuggestion[]>('suggestions')).find(entry => entry.action === 'create')!
+    expect(suggestion.targetRoot).toBe('project-dsh')
+    const input = origin === 'suggestion' ? { suggestionId: suggestion.id } : { skill: 'incident-triage' }
+    await skills.draft(source, undefined, { ...input, targetRoot: 'user-agents', guidance: 'Preserve the log order.' })
+    await vi.waitFor(async () => expect(await source.read<SkillDraft[]>('drafts')).toHaveLength(1))
+    const [first] = await source.read<SkillDraft[]>('drafts')
+    for (let index = 0; index < 3; index++) await source.mutate('draft-record', {
+      ...(origin === 'direct' ? { suggestionId: suggestion.id } : {}),
+      skillName: 'incident-triage', content, notes: `Another draft ${index}`, changes: [], guidance: [], targetRoot: 'project-dsh',
+    })
+    const pack = await source.read<EvidencePack>('evidence-pack', input)
+    expect(pack.drafts.some(draft => draft.id === first!.id)).toBe(false)
+    await skills.draft(source, undefined, { ...input, guidance: 'Explain the checks.' })
+    await vi.waitFor(async () => expect(await source.read<SkillDraft[]>('drafts')).toHaveLength(5))
+    const [redraft] = await source.read<SkillDraft[]>('drafts')
+    expect(prompts[1]).toContain('It will be written to user-agents.')
+    expect(redraft).toMatchObject({ targetRoot: 'user-agents', guidance: ['Preserve the log order.', 'Explain the checks.'] })
+    stop()
+  })
+
+  it('rejects an unavailable project before model work instead of falling back to user skills', async () => {
+    config = { ...config, targetScope: 'project', autoBacktest: false }
+    const read = source.read
+    const scoped: SkillsSourcePort = { ...source, read: async <T>(operation: string, input?: unknown): Promise<T> => {
+      const value = await read<T>(operation, input)
+      if (operation !== 'catalog') return value
+      const catalog = value as SkillCatalog
+      return { roots: catalog.roots.filter(root => root.kind.startsWith('user-')), skills: catalog.skills, problems: [] } as T
+    } }
+    const { skills, skillTask } = evolution([])
+    await expect(skills.draft(scoped, directory, { skill: 'incident-triage' })).rejects.toThrow(/project.*selected workspace/i)
+    expect(skillTask).not.toHaveBeenCalled()
+    expect(await source.read<SkillDraft[]>('drafts')).toEqual([])
+  })
+
+  it.skipIf(process.platform === 'win32' || process.getuid?.() === 0)('rejects an unwritable destination before model work without changing scope', async () => {
+    config = { ...config, autoBacktest: false }
+    chmodSync(join(directory, 'dsh', 'skills'), 0o555)
+    try {
+      const { skills, skillTask } = evolution([])
+      await expect(skills.draft(source, directory, { skill: 'incident-triage' })).rejects.toThrow(/user-dsh.*not writable/i)
+      expect(skillTask).not.toHaveBeenCalled()
+      expect(await source.read<SkillDraft[]>('drafts')).toEqual([])
+    } finally { chmodSync(join(directory, 'dsh', 'skills'), 0o755) }
+  })
+
+  it('rejects a removed project rather than recreating it from an unrelated task cwd', async () => {
+    config = { ...config, targetScope: 'project', autoBacktest: false }
+    rmSync(join(directory, 'workspace'), { recursive: true })
+    const { skills, skillTask } = evolution([])
+    await expect(skills.draft(source, directory, { skill: 'incident-triage' })).rejects.toThrow(/selected workspace.*unavailable/i)
+    expect(skillTask).not.toHaveBeenCalled()
+    expect(existsSync(join(directory, 'workspace'))).toBe(false)
+  })
+
+  it('keeps improvements in their original root despite settings and explicit destination overrides', async () => {
+    config = { ...config, targetScope: 'project', autoBacktest: false }
+    const content = '---\nname: release-notes\ndescription: Group release notes.\n---\n\n1. Group by component.\n'
+    const { skills } = evolution([() => ({ content, notes: '', changes: [] })])
+    await skills.draft(source, undefined, { skill: 'release-notes', targetRoot: 'project-agents' })
+    await vi.waitFor(async () => expect(await source.read<SkillDraft[]>('drafts')).toHaveLength(1))
+    const [draft] = await source.read<SkillDraft[]>('drafts')
+    expect(draft).toMatchObject({ action: 'update', baseKey: 'user-dsh:release-notes' })
+    expect(draft!.targetRoot).toBeUndefined()
+    await source.mutate('draft-adopt', { id: draft!.id, root: 'project-agents' })
+    expect(readFileSync(join(directory, 'dsh', 'skills', 'release-notes', 'SKILL.md'), 'utf8')).toBe(content)
+    expect(existsSync(join(directory, 'workspace', '.agents', 'skills', 'release-notes'))).toBe(false)
+  })
+
+  it('stays out of the way until evolution is turned on', async () => {
+    const { skills, skillTask } = evolution([])
+    const stop = skills.watch(agent)
+    await endTurn(1, 'x'.repeat(400), [{ name: 'bash', args: {} }])
+    await vi.advanceTimersByTimeAsync(60_000)
+    expect(skillTask).not.toHaveBeenCalled()
+    expect(skills.pending('session-1')).toBeUndefined()
+    stop()
+  })
+
+  it.each([
+    { allowCreate: true, allowUpdate: true },
+    { allowCreate: true, allowUpdate: false },
+    { allowCreate: false, allowUpdate: true },
+    { allowCreate: false, allowUpdate: false },
+  ])('applies independent suggestion switches end to end: %j', async switches => {
+    config = { ...config, evolution: true, idleSeconds: 3600, ...switches }
+    const { skills, skillTask, runTask } = evolution([mixedReview])
+    const stop = skills.watch(agent)
+    await endTurn(1, 'Capture incident logs and group release notes by component.')
+    const count = Number(switches.allowCreate) + Number(switches.allowUpdate)
+    if (count === 0) {
+      await expect(skills.reviewNow(agent)).rejects.toThrow('Enable new-skill or skill-improvement suggestions')
+      expect(skills.pending(agent.id)).toBeUndefined()
+      expect(runTask).not.toHaveBeenCalled()
+    } else {
+      expect(await skills.reviewNow(agent)).toMatchObject({ inserted: count, casesAdded: count })
+      expect(skillTask.mock.calls[0]![2]).toContain(`Allowed suggestion types: create=${switches.allowCreate}, update=${switches.allowUpdate}`)
+    }
+    const suggestions = await source.read<SkillSuggestion[]>('suggestions')
+    expect(suggestions.map(entry => entry.action).sort()).toEqual([
+      ...(switches.allowCreate ? ['create'] : []), ...(switches.allowUpdate ? ['update'] : []),
+    ])
+    expect(await source.read('cases', { skill: 'incident-triage' })).toHaveLength(Number(switches.allowCreate))
+    expect(await source.read('cases', { skill: 'release-notes' })).toHaveLength(Number(switches.allowUpdate))
+    stop()
+  })
+
+  it('skips a scheduled review when both types are disabled and resumes on a later turn', async () => {
+    config = { ...config, evolution: true, reviewThreshold: 1, idleSeconds: 20 }
+    const { skills, skillTask } = evolution([mixedReview])
+    const stop = skills.watch(agent)
+    await endTurn(1, 'Capture incident logs before changing the system.')
+    config = { ...config, allowCreate: false, allowUpdate: false }
+    await vi.advanceTimersByTimeAsync(20_000)
+    expect(skillTask).not.toHaveBeenCalled()
+    config = { ...config, allowUpdate: true }
+    await endTurn(2, 'Group release notes by component.')
+    await vi.advanceTimersByTimeAsync(20_000)
+    await vi.waitFor(async () => expect(await source.read('suggestions')).toMatchObject([{ action: 'update' }]))
+    expect(skillTask).toHaveBeenCalledTimes(1)
+    stop()
+  })
+
+  it.each(['allowCreate', 'allowUpdate'] as const)('honors %s being disabled while a review is running', async key => {
+    config = { ...config, evolution: true, idleSeconds: 3600 }
+    const { skills, host } = evolution([])
+    let markStarted!: () => void
+    const started = new Promise<void>(resolve => { markStarted = resolve })
+    let complete!: (value: { structured: unknown }) => void
+    host.skillTask.mockImplementation(() => { markStarted(); return new Promise(resolve => { complete = resolve }) })
+    const stop = skills.watch(agent)
+    await endTurn(1, 'Keep incident and release workflows consistent.')
+    const pending = skills.reviewNow(agent)
+    await started
+    config = { ...config, [key]: false }
+    complete({ structured: mixedReview() })
+    expect(await pending).toMatchObject({ inserted: 1, casesAdded: 1 })
+    expect(await source.read('suggestions')).toMatchObject([{ action: key === 'allowCreate' ? 'update' : 'create' }])
+    stop()
+  })
+
+  it('does not start the model if both types are disabled while its task is being prepared', async () => {
+    const { skills, runTask, skillTask } = evolution([])
+    runTask.mockImplementation(async (_root, _signal, operation) => {
+      config = { ...config, allowCreate: false, allowUpdate: false }
+      return operation(agent)
+    })
+    const stop = skills.watch(agent)
+    await endTurn(1, 'Capture incident logs before changing the system.')
+    expect(await skills.reviewNow(agent)).toMatchObject({ inserted: 0, updated: 0, casesAdded: 0 })
+    expect(skillTask).not.toHaveBeenCalled()
+    stop()
+  })
+
+  it('reviews an idle window that reached the score, records evidence and starts a new window', async () => {
+    config = { ...config, evolution: true, idleSeconds: 20 }
+    let prompt = ''
+    const { skills, skillTask } = evolution([(_label, text) => {
+      prompt = text
+      return {
+        outcome: 'suggest', summary: 'The user corrected the grouping.',
+        annotations: [{ step: 6, signal: 'correction', note: 'Wanted grouping by component' }],
+        suggestions: [{ skillName: 'release-notes', action: 'update', summary: 'Group entries by component', rationale: 'Corrected twice', confidence: 0.85, signals: ['correction'], steps: [3, 6] }],
+        cases: [{ skillName: 'release-notes', title: 'Grouped notes', prompt: 'Write v2 release notes', checks: [{ text: 'Grouped by component', must: true }], steps: [1, 6] }],
+      }
+    }])
+    skills.watch(agent)
+    await endTurn(1, 'Write the release notes for v2 from the changelog in this repository, please.', [
+      { name: 'skill', args: { name: 'release-notes' } }, { name: 'bash', args: { command: 'git log' }, error: 'not a git repository' }, { name: 'read', args: { path: 'CHANGELOG.md' } },
+    ])
+    expect(skills.pending('session-1')).toEqual({ turns: 1, score: 3 })
+    await endTurn(2, 'No, group them by component from now on, and put breaking changes first in every section.')
+    expect(skills.pending('session-1')!.score).toBeGreaterThanOrEqual(5)
+    // A new turn before the pause postpones the review.
+    await listeners.get('agent/pre-step')!({ step: 1, signal: new AbortController().signal } as never, (async () => ({ kind: 'enter', messages: [] })) as never)
+    await vi.advanceTimersByTimeAsync(30_000)
+    expect(skillTask).not.toHaveBeenCalled()
+    await endTurn(3, 'Thanks, that is right.')
+    await vi.advanceTimersByTimeAsync(20_000)
+    expect(skillTask).toHaveBeenCalledTimes(1)
+    expect(prompt).toContain('[2] turn 1 · skill loaded: release-notes (by the model)')
+    expect(prompt).toContain('=== release-notes (user-dsh:')
+    const [suggestion] = await source.read<SkillSuggestion[]>('suggestions')
+    expect(suggestion).toMatchObject({ skillName: 'release-notes', action: 'update', status: 'pending', sourceSessionId: 'session-1', signals: ['correction'] })
+    const trajectory = await source.read<Trajectory>('trajectory', { id: suggestion!.evidence[0]!.trajectoryId })
+    expect(trajectory).toMatchObject({ outcome: 'suggested', stats: { turns: 3, toolFailures: 1, skills: ['release-notes'] }, reviewSummary: 'The user corrected the grouping.' })
+    expect(trajectory.annotations).toEqual([{ step: 6, signal: 'correction', note: 'Wanted grouping by component', suggestionIds: [suggestion!.id] }])
+    expect(await source.read('cases', { skill: 'release-notes' })).toMatchObject([{ title: 'Grouped notes', origin: { kind: 'review' } }])
+    expect(skills.pending('session-1')).toEqual({ turns: 0, score: 0 })
+  })
+
+  it('tells the conversation which skills each turn used and how its review went', async () => {
+    config = { ...config, evolution: true, idleSeconds: 20 }
+    const { skills } = evolution([() => ({
+      outcome: 'suggest', summary: 'The user corrected the grouping.',
+      suggestions: [{ skillName: 'release-notes', action: 'update', summary: 'Group entries by component', confidence: 0.85, signals: ['correction'], steps: [3, 6] }],
+    })])
+    skills.watch(agent)
+    await endTurn(1, 'Write the release notes for v2 from the changelog in this repository, please.', [
+      { name: 'skill', args: { name: 'release-notes' } }, { name: 'bash', args: { command: 'git log' }, error: 'not a git repository' }, { name: 'read', args: { path: 'CHANGELOG.md' } },
+    ])
+    await endTurn(2, 'No, group them by component from now on, and put breaking changes first in every section.')
+    expect(await skills.activity(agent)).toEqual({
+      available: true,
+      turns: [{ turn: 1, skills: [{ name: 'release-notes', by: 'model' }] }],
+      reviews: [{ turn: 2, state: 'scheduled', suggestions: [] }],
+    })
+    await vi.advanceTimersByTimeAsync(20_000)
+    const [suggestion] = await source.read<SkillSuggestion[]>('suggestions')
+    expect((await skills.activity(agent)).reviews).toEqual([{ turn: 2, state: 'suggested', suggestions: [{ id: suggestion!.id, skillName: 'release-notes', action: 'update', status: 'pending' }] }])
+    // A handled suggestion leaves the line; the review stays.
+    await source.mutate('suggestion-dismiss', { id: suggestion!.id })
+    expect((await skills.activity(agent)).reviews).toEqual([{ turn: 2, state: 'suggested', suggestions: [] }])
+    // Turning self-evolution off stops what is scheduled next.
+    config = { ...config, evolution: false }
+    await endTurn(3, 'Now do the same for the v3 changelog, grouped by component with breaking changes first.', [{ name: 'skill', args: { name: 'release-notes' } }])
+    expect((await skills.activity(agent)).reviews.map(review => review.state)).toEqual(['suggested'])
+  })
+
+  it('logs a failed review, keeps its window and pauses the session after three failures', async () => {
+    config = { ...config, evolution: true, idleSeconds: 1, cooldownSeconds: 0, reviewThreshold: 1 }
+    const { skills, skillTask, host } = evolution([() => new Error('model unavailable'), () => new Error('model unavailable'), () => new Error('model unavailable')])
+    skills.watch(agent)
+    for (let index = 1; index <= 4; index++) {
+      await endTurn(index, `Turn ${index}`)
+      await vi.advanceTimersByTimeAsync(2_000)
+    }
+    expect(skillTask).toHaveBeenCalledTimes(3)
+    expect(host.warn).toHaveBeenCalledWith('skill review failed', expect.any(Error))
+    const reviews = await source.read<Array<{ outcome: string; error?: string }>>('reviews')
+    expect(reviews.map(review => review.outcome)).toEqual(['error', 'error', 'error'])
+    expect(reviews[0]!.error).toBe('model unavailable')
+    expect(skills.pending('session-1')!.turns).toBe(3)
+  })
+
+  it('drafts in the background, backtests draft and baseline, and adopts through the Source', async () => {
+    config = { ...config, allowCreate: false, allowUpdate: false }
+    config = { ...config, evolution: true }
+    await source.mutate('case-save', { case: { skillName: 'release-notes', title: 'Grouped notes', prompt: 'Write v2 notes', checks: [{ text: 'Grouped by component', must: true }] } })
+    const next = '---\nname: release-notes\ndescription: Write release notes grouped by component.\n---\n\n1. Read CHANGELOG.md\n2. Group by component\n'
+    // Two runs share the model at once, so answer by what each call asks rather than by order.
+    const drafts = [
+      () => ({ content: '# missing frontmatter', notes: 'x', changes: [] }),
+      (prompt: string) => { expect(prompt).toContain('Your previous SKILL.md was rejected'); return { content: next, notes: '按组件分组。', changes: ['Group by component'] } },
+    ]
+    const { skills, host } = evolution([])
+    host.skillTask.mockImplementation(async (_parent: HostAgent, label: string, prompt: string) => {
+      if (label === 'Mnemon skill draft') return { structured: drafts.shift()!(prompt) }
+      if (label.startsWith('Mnemon skill eval')) return { structured: prompt.includes('Group by component') ? { steps: ['read changelog', 'group'], answer: '## API\n- x' } : { steps: ['read changelog'], answer: '- x' } }
+      const pass = prompt.includes('## API')
+      return { structured: { checks: [{ index: 1, pass, note: pass ? 'grouped' : 'flat list' }], summary: pass ? 'good' : 'flat' } }
+    })
+    const started = await skills.draft(source, join(directory, 'workspace'), { skill: 'release-notes', guidance: 'Group by component' })
+    expect(started).toEqual({ started: true })
+    await vi.runAllTimersAsync()
+    await vi.waitFor(async () => {
+      const runs = await source.read<BacktestRun[]>('runs', { skill: 'release-notes' })
+      expect(runs.map(run => run.status)).toEqual(["completed", "completed"])
+    })
+    const [draft] = await source.read<SkillDraft[]>('drafts', { skill: 'release-notes' })
+    expect(draft).toMatchObject({ status: 'ready', action: 'update', notes: '按组件分组。', guidance: ['Group by component'] })
+    const view = await source.read<{ runs: BacktestRun[] }>('draft', { id: draft!.id })
+    expect(view.runs.map(run => [run.target.kind, run.passRate])).toEqual([['draft', 1], ['current', 0]])
+    await source.mutate('draft-adopt', { id: draft!.id })
+    expect(readFileSync(join(directory, 'dsh', 'skills', 'release-notes', 'SKILL.md'), 'utf8')).toBe(next)
+  })
+
+  it.each([false, true])('uses a fresh comparison baseline when a draft picks a model (picked=%s)', async picked => {
+    await source.mutate('case-save', { case: { skillName: 'release-notes', title: 'Grouped notes', prompt: 'Write v2 notes', checks: [{ text: 'Grouped by component', must: true }] } })
+    const { skills, host } = evolution([])
+    host.skillTask.mockImplementation(async (_parent: HostAgent, label: string) => {
+      if (label === 'Mnemon skill draft') return { structured: {
+        content: '---\nname: release-notes\ndescription: Group release notes.\n---\n\n1. Group by component\n', notes: '', changes: [],
+      } }
+      if (label.startsWith('Mnemon skill eval')) return { structured: { steps: ['read'], answer: 'notes' } }
+      return { structured: { checks: [{ index: 1, pass: true, note: 'ok' }], summary: 'ok' } }
+    })
+    const baseline = await skills.backtest(source, undefined, { skillName: 'release-notes', target: { kind: 'current' } })
+    await vi.runAllTimersAsync()
+    await vi.waitFor(async () => expect((await source.read<BacktestRun>('run', { id: baseline.runId })).status).toBe('completed'))
+    host.skillTask.mockClear()
+
+    await skills.draft(source, undefined, { skill: 'release-notes', ...(picked ? { route: { provider: 'other-provider', model: 'other-model' } } : {}) })
+    await vi.runAllTimersAsync()
+    await vi.waitFor(async () => {
+      const runs = await source.read<BacktestRun[]>('runs', { skill: 'release-notes' })
+      expect(runs).toHaveLength(picked ? 3 : 2)
+      expect(runs.every(run => run.status === 'completed')).toBe(true)
+    })
+    const [draft] = await source.read<SkillDraft[]>('drafts', { skill: 'release-notes' })
+    expect(draft!.runIds.includes(baseline.runId)).toBe(!picked)
+    expect(host.skillTask.mock.calls.filter(([, label]) => label.startsWith('Mnemon skill eval'))).toHaveLength(picked ? 2 : 1)
+    skills.dispose()
+  })
+
+  it('retries a case whose run fails and leaves a case that never runs out of the score', async () => {
+    await source.mutate('case-save', { case: { skillName: 'release-notes', title: 'Flaky', prompt: 'Write notes A', checks: [{ text: 'Has notes', must: true }] } })
+    await source.mutate('case-save', { case: { skillName: 'release-notes', title: 'Broken', prompt: 'Write notes B', checks: [{ text: 'Has notes', must: true }] } })
+    const { skills, host } = evolution([])
+    const failures = new Map([['Write notes A', 1], ['Write notes B', 2]])
+    host.skillTask.mockImplementation(async (_parent: HostAgent, label: string, prompt: string) => {
+      if (label.startsWith('Mnemon skill eval')) {
+        const key = prompt.includes('Write notes A') ? 'Write notes A' : 'Write notes B'
+        const left = failures.get(key)!
+        if (left > 0) { failures.set(key, left - 1); throw new Error('memory subagent stopped with max-tokens') }
+        return { structured: { steps: ['read'], answer: 'notes' } }
+      }
+      return { structured: { checks: [{ index: 1, pass: true, note: 'ok' }], summary: 'ok' } }
+    })
+    const { runId } = await skills.backtest(source, join(directory, 'workspace'), { skillName: 'release-notes', target: { kind: 'current' } })
+    await vi.runAllTimersAsync()
+    await vi.waitFor(async () => expect((await source.read<BacktestRun>('run', { id: runId })).status).toBe('completed'))
+    const run = await source.read<BacktestRun>('run', { id: runId })
+    expect(Object.fromEntries(run.results.map(result => [result.title, result.verdict]))).toEqual({ Flaky: 'pass', Broken: 'error' })
+    expect(run.results.find(result => result.title === 'Broken')?.error).toContain('max-tokens')
+    expect(run).toMatchObject({ passRate: 1, score: 1, errors: 1 })
+  })
+
+  it('records image-only cases as unmeasured without creating a task Agent or calling a model', async () => {
+    const entry = await source.mutate<EvalCase>('case-save', { case: { skillName: 'release-notes', title: 'Read a screenshot', prompt: 'Read the attached screenshot', requiresVision: true, checks: [{ text: 'The number is 7', must: true }] } })
+    const { skills, skillTask, runTask } = evolution([])
+    for (const kind of ['current', 'none'] as const) {
+      const { runId } = await skills.backtest(source, undefined, { skillName: 'release-notes', target: { kind } })
+      await vi.runAllTimersAsync()
+      await vi.waitFor(async () => expect((await source.read<BacktestRun>('run', { id: runId })).status).toBe('completed'))
+      const run = await source.read<BacktestRun>('run', { id: runId })
+      expect(run.results).toMatchObject([{ caseId: entry.id, verdict: 'error', unmeasuredReason: 'requires-vision', checks: [], steps: [], answer: '' }])
+      expect(run.progress).toEqual({ done: 1, total: 1 })
+      expect(run.score).toBeUndefined()
+      expect(run.passRate).toBeUndefined()
+    }
+    expect(runTask).not.toHaveBeenCalled()
+    expect(skillTask).not.toHaveBeenCalled()
+    expect((await source.read<EvalCase[]>('cases'))[0]?.requiresVision).toBe(true)
+    skills.dispose()
+  })
+
+  it('grades only text cases in a mixed run and allows a vision flag to be cleared', async () => {
+    const vision = await source.mutate<EvalCase>('case-save', { case: { skillName: 'release-notes', title: 'Image', prompt: 'Read an image', requiresVision: true, checks: [{ text: 'Has number', must: true }] } })
+    await source.mutate('case-save', { case: { skillName: 'release-notes', title: 'Text', prompt: 'Write notes', checks: [{ text: 'Has notes', must: true }] } })
+    const { skills, host } = evolution([])
+    host.skillTask.mockImplementation(async (_parent, label, prompt) => {
+      expect(prompt).not.toContain('Read an image')
+      return { structured: label.startsWith('Mnemon skill eval') ? { steps: ['read'], answer: 'notes' } : { checks: [{ index: 1, pass: true, note: 'ok' }], summary: 'ok' } }
+    })
+    const { runId } = await skills.backtest(source, undefined, { skillName: 'release-notes', target: { kind: 'current' } })
+    await vi.runAllTimersAsync()
+    await vi.waitFor(async () => expect((await source.read<BacktestRun>('run', { id: runId })).status).toBe('completed'))
+    expect(await source.read('run', { id: runId })).toMatchObject({ score: 1, passRate: 1, progress: { done: 2, total: 2 } })
+    expect(host.skillTask).toHaveBeenCalledTimes(2)
+    // Edits from an older client preserve the marker when the field is omitted.
+    const { requiresVision: _flag, ...legacyEdit } = vision
+    expect(await source.mutate('case-save', { case: legacyEdit })).toMatchObject({ requiresVision: true })
+    await expect(source.mutate('case-save', { case: { ...vision, requiresVision: 'false' } })).rejects.toThrow('requiresVision must be a boolean')
+    const cleared = await source.mutate<EvalCase>('case-save', { case: { ...vision, requiresVision: false, prompt: 'The image has been transcribed: 7' } })
+    expect(cleared.requiresVision ?? false).toBe(false)
+    skills.dispose()
+  })
+
+  it('does not use a historical image failure as evidence of a skill failure when drafting', async () => {
+    const entry = await source.mutate<EvalCase>('case-save', { case: { skillName: 'release-notes', title: 'Image', prompt: 'Read an image', requiresVision: true, checks: [{ text: 'The number is 7', must: true }] } })
+    const run = await source.mutate<BacktestRun>('run-start', { skillName: 'release-notes', target: { kind: 'current' }, caseIds: [entry.id] })
+    const result = { caseId: entry.id, title: entry.title, verdict: 'fail', score: 0, checks: [{ checkId: entry.checks[0]!.id, pass: false, note: 'Fabricated wrong number' }], steps: [], answer: '' }
+    await source.mutate('run-progress', { id: run.id, result })
+    await source.mutate('run-finish', { id: run.id, status: 'completed' })
+    const pack = await source.read<EvidencePack>('evidence-pack', { skill: 'release-notes' })
+    const prompt = skillDraftPrompt(pack, [], 'user-dsh')
+    expect(prompt).toContain('Not measured: requires image input')
+    expect(prompt).not.toContain('Fabricated wrong number')
+    expect(prompt).not.toContain('last result: fail')
+    await expect(source.mutate('run-progress', { id: run.id, result: { ...result, unmeasuredReason: 'requires-vision' } })).rejects.toThrow('unmeasuredReason')
+    await expect(source.mutate('run-progress', { id: run.id, result: { ...result, verdict: 'error', unmeasuredReason: 'other' } })).rejects.toThrow('unmeasuredReason')
+  })
+
+  it('derives cases from a trajectory and reviews a session on request', async () => {
+    const { skills } = evolution([
+      () => ({ outcome: 'nothing', summary: 'Nothing to keep.', suggestions: [] }),
+      () => ({ cases: [{ title: 'Breaking first', prompt: 'Notes with a breaking change', checks: [{ text: 'Breaking change listed first', must: true }] }] }),
+    ])
+    turn(events, 1, 'Write notes')
+    const result = await skills.reviewNow(agent)
+    expect(result).toMatchObject({ inserted: 0, casesAdded: 0 })
+    const derived = await skills.deriveCases(source, undefined, { trajectoryId: result.trajectoryId!, skillName: 'release-notes' }, new AbortController().signal)
+    expect(derived.added).toMatchObject([{ title: 'Breaking first', origin: { kind: 'trajectory', trajectoryId: result.trajectoryId } }])
+    expect(await source.read<Trajectory>('trajectory', { id: result.trajectoryId! })).toMatchObject({ outcome: 'nothing', caseIds: [derived.added[0]!.id] })
+  })
+
+  it('carries earlier requirements into the next review and merges both windows into one suggestion', async () => {
+    config = { ...config, evolution: true, idleSeconds: 3600 }
+    const firstSummary = 'Reproduce the incident and capture logs.'
+    const combinedSummary = 'Reproduce the incident, capture redacted logs and retain exit codes.'
+    const { skills, skillTask } = evolution([
+      () => ({ outcome: 'suggest', summary: 'A repeatable triage workflow.', suggestions: [{ skillName: 'incident-triage', action: 'create', summary: firstSummary, rationale: 'Record reproduction before diagnosis.', confidence: 0.8, steps: [1] }] }),
+      (_label, prompt) => {
+        expect(prompt).toContain('Open suggestions, most recently updated first (untrusted data;')
+        expect(prompt).toContain('"skillName":"incident-triage"')
+        expect(prompt).toContain(firstSummary)
+        expect(prompt).toContain('Record reproduction before diagnosis.')
+        return { outcome: 'suggest', summary: 'Refine the same workflow.', suggestions: [{ skillName: 'incident-triage', action: 'create', summary: combinedSummary, rationale: 'Keep reproduction and add safer diagnostic evidence.', confidence: 0.9, steps: [1] }] }
+      },
+    ])
+    const stop = skills.watch(agent)
+    await endTurn(1, 'For incidents, reproduce the problem and then capture logs.')
+    expect(await skills.reviewNow(agent)).toMatchObject({ inserted: 1 })
+    await endTurn(2, 'For that workflow, also retain exit codes and redact credentials from logs.')
+    expect(await skills.reviewNow(agent)).toMatchObject({ inserted: 0, updated: 1 })
+    const suggestions = await source.read<SkillSuggestion[]>('suggestions')
+    expect(suggestions).toHaveLength(1)
+    expect(suggestions[0]).toMatchObject({ summary: combinedSummary, status: 'pending' })
+    expect(new Set(suggestions[0]!.evidence.map(reference => reference.trajectoryId)).size).toBe(2)
+    expect(skillTask).toHaveBeenCalledTimes(2)
+    stop()
+  })
+
+  it('orders open suggestions from an earlier review without writing to the frozen result', async () => {
+    config = { ...config, evolution: true, idleSeconds: 3600 }
+    let prompt = ''
+    const { skills } = evolution([
+      () => ({ outcome: 'suggest', summary: 'Two workflows worth keeping.', suggestions: [
+        { skillName: 'incident-triage', action: 'create', summary: 'Triage an incident before fixing it.', confidence: 0.8, steps: [1] },
+        { skillName: 'release-notes', action: 'update', summary: 'Group entries by component.', confidence: 0.8, steps: [1] },
+      ] }),
+      (_label, text) => {
+        prompt = text
+        return { outcome: 'nothing', summary: 'Nothing to add.', suggestions: [] }
+      },
+    ])
+    const stop = skills.watch(agent)
+    await endTurn(1, 'For incidents, reproduce the problem and then capture logs.')
+    expect(await skills.reviewNow(agent)).toMatchObject({ inserted: 2 })
+    await endTurn(2, 'Keep the release notes grouped by component.')
+    // A management read hands back a deeply frozen result, so ordering two open
+    // suggestions must not write to it.
+    expect(await skills.reviewNow(agent)).toMatchObject({ inserted: 0, updated: 0 })
+    expect(prompt).toContain('"skillName":"incident-triage"')
+    expect(prompt).toContain('"skillName":"release-notes"')
+    stop()
+  })
+
+  it('offers an existing unloaded skill for update and omits dismissed suggestions', async () => {
+    const { skills } = evolution([
+      () => ({ outcome: 'suggest', summary: 'Triage.', suggestions: [{ skillName: 'incident-triage', action: 'create', summary: 'Dismissed workflow', confidence: 0.8, steps: [1] }] }),
+      (_label, prompt) => {
+        expect(prompt).toContain('skills loaded: none')
+        expect(prompt).toContain('- release-notes: Write release notes from a changelog.')
+        expect(prompt).not.toContain('Dismissed workflow')
+        expect(SKILL_REVIEW_PERSONA).toContain('even if it was not loaded in this window')
+        expect(SKILL_REVIEW_PERSONA).not.toContain('If any answer is yes, suggest action="create"')
+        return { outcome: 'suggest', summary: 'Improve notes.', suggestions: [{ skillName: 'release-notes', action: 'update', summary: 'Group notes by component.', confidence: 0.9, steps: [1] }] }
+      },
+    ])
+    turn(events, 1, 'Capture an incident workflow.')
+    await skills.reviewNow(agent)
+    const [first] = await source.read<SkillSuggestion[]>('suggestions')
+    await source.mutate('suggestion-dismiss', { id: first!.id })
+    turn(events, 2, 'Write release notes, grouped by component.')
+    await skills.reviewNow(agent)
+    expect(await source.read('suggestions', { status: ['pending'] })).toMatchObject([{ skillName: 'release-notes', action: 'update' }])
+  })
+})
+
+describe('bounded skill review context', () => {
+  it('limits open suggestions and their wording without exposing evidence or draft payloads', () => {
+    const prompt = skillReviewPrompt({
+      steps: [], stats: { turns: 0, toolCalls: 0, toolFailures: 0, skills: [] }, score: 0, threshold: 1,
+      loaded: [], catalog: [], caseTitles: {},
+      openSuggestions: Array.from({ length: 30 }, (_, index) => ({
+        skillName: `workflow-${index}`, action: 'create', status: 'pending', confidence: 0.8,
+        summary: 's'.repeat(2000), rationale: 'r'.repeat(2000), updatedAt: '2026-10-26T00:00:00.000Z',
+        evidence: 'private trajectory payload', draft: 'private draft payload',
+      })),
+    })
+    const rows = prompt.split('\n').filter(line => line.startsWith('{')).map(line => JSON.parse(line))
+    expect(rows).toHaveLength(20)
+    expect(rows[0].summary).toHaveLength(600)
+    expect(rows[0].rationale).toHaveLength(400)
+    expect(prompt).not.toContain('private trajectory payload')
+    expect(prompt).not.toContain('private draft payload')
+    expect(prompt.length).toBeLessThan(26_000)
+  })
+})

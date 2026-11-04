@@ -1,0 +1,205 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify-windows-workspace:
+    name: Verify Windows workspace paths (Node ${{ matrix.node }})
+    runs-on: windows-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22.19.0', '24']
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node }}
+          package-manager-cache: false
+
+      - name: Install pnpm
+        run: npm install --global pnpm@10.13.1
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Test workspace identities, platform paths and ByteRover CLI
+        run: pnpm exec vitest run tests/workspace-storage.spec.ts tests/client-platform-boundary.spec.ts tests/async-subagent-memory.spec.ts plugins/dsh-tingfeng-provider-byterover/tests/windows-cli.spec.ts
+
+      - name: Test desktop CLI process ownership and hidden native launches
+        run: >-
+          pnpm exec vitest run tests/host-process.spec.ts tests/version-updates.spec.ts
+          plugins/dsh-tingfeng-source-memory-spaces/tests/npm-native-cli.spec.ts
+          plugins/dsh-tingfeng-source-memory-spaces/tests/runner.spec.ts
+          plugins/dsh-tingfeng-source-memory-spaces/tests/process.spec.ts
+
+  verify-source:
+    name: Verify source (Node 22.19)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          # A PR's recorded base can precede the current synthetic merge parent.
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22.19.0
+          package-manager-cache: false
+
+      - name: Install pnpm
+        run: npm install --global pnpm@10.13.1
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate release intent
+        if: github.event_name == 'pull_request'
+        env:
+          CHANGESET_BASE_REVISION: ${{ github.event.pull_request.base.sha }}
+          CHANGESET_REVISION: ${{ github.sha }}
+        run: pnpm run release:intent
+
+      - name: Type-check integrated source
+        run: pnpm run typecheck
+
+      - name: Check documentation links and public plugin catalog
+        run: pnpm run verify:docs
+
+      - name: Verify deterministic root build
+        run: pnpm run verify:build
+
+      - name: Build public plugin SDK entries
+        run: >-
+          pnpm --workspace-concurrency=2
+          --filter dsh-tingfeng-source-memory-spaces
+          --filter dsh-tingfeng-source-documents
+          --filter dsh-tingfeng-source-runtime
+          --filter dsh-tingfeng-strategy-default-three-tier
+          --parallel run build
+
+      - name: Test integrated source
+        run: pnpm run test
+
+      - name: Verify root package
+        run: pnpm run verify:package
+
+      - name: Set up Node.js 20 for runtime compatibility
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          package-manager-cache: false
+
+      - name: Import every public entry on Node.js 20
+        run: node scripts/verify-public-entries.mjs
+
+  # Keep the pinned development baseline and older supported DSH releases,
+  # and exercise the published 0.2.2 RC from npm. Alpha releases are not support targets.
+  verify-installed-dsh:
+    name: Verify on installed DSH ${{ matrix.dsh }} (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { dsh: '0.2.0-rc.2', node: '22.19.0' }
+          - { dsh: '0.2.1-rc.3', node: '22.19.0' }
+          - { dsh: '0.2.1-rc.5', node: '22.19.0' }
+          # DSH 0.2.2 requires >=24.9.0; keep Node 22 coverage for earlier Hosts.
+          - { dsh: '0.2.2-rc.1', node: '24.22.2' }
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node }}
+          package-manager-cache: false
+
+      - name: Install pnpm
+        run: npm install --global pnpm@10.13.1
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install DSH ${{ matrix.dsh }}
+        env:
+          DSH_RELEASE: ${{ matrix.dsh }}
+        run: npm install --global --prefix "$RUNNER_TEMP/dsh" "@deepseek-ai/dsh@$DSH_RELEASE" --no-fund --no-audit
+
+      - name: Build root and public plugin SDK entries
+        run: >-
+          pnpm run build &&
+          pnpm --workspace-concurrency=2
+          --filter dsh-tingfeng-source-memory-spaces
+          --filter dsh-tingfeng-source-documents
+          --filter dsh-tingfeng-source-runtime
+          --filter dsh-tingfeng-strategy-default-three-tier
+          --parallel run build
+
+      - name: Test root against the installed DSH
+        env:
+          DSH_HOST_ROOT: ${{ runner.temp }}/dsh/lib/node_modules/@deepseek-ai/dsh
+        run: pnpm run test:installed-dsh
+
+      - name: Verify delayed first-party model discovery
+        if: matrix.dsh != '0.2.0-rc.2'
+        run: node --experimental-transform-types scripts/verify-task-model-directory.mjs "$RUNNER_TEMP/dsh/lib/node_modules/@deepseek-ai/dsh/package.json"
+
+  verify-artifacts:
+    name: Verify packed plugins on DSH ${{ matrix.dsh }} (Node 24)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        dsh: ['baseline', '0.2.2-rc.1']
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Install pnpm
+        run: npm install --global pnpm@10.13.1
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install published RC for packed Starter acceptance
+        id: installed_dsh
+        if: matrix.dsh != 'baseline'
+        env:
+          DSH_RELEASE: ${{ matrix.dsh }}
+        run: |
+          npm install --global --prefix "$RUNNER_TEMP/dsh" "@deepseek-ai/dsh@$DSH_RELEASE" --no-fund --no-audit
+          echo "binary=$RUNNER_TEMP/dsh/lib/node_modules/@deepseek-ai/dsh/lib/bin.js" >> "$GITHUB_OUTPUT"
+
+      - name: Verify packed and independently installed plugins
+        env:
+          MNEMON_PLUGIN_VERIFY_CONCURRENCY: '4'
+          MNEMON_E2E_DSH: ${{ steps.installed_dsh.outputs.binary }}
+        run: pnpm run verify:plugins

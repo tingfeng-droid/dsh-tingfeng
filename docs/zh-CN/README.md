@@ -1,0 +1,46 @@
+# 文档中心
+
+**简体中文** | [English](../en/README.md) | [项目首页](../../README.zh-CN.md)
+
+dsh-mnemon 为 DeepSeek Harness 提供三类记忆：每一轮都会用到的**运行时记忆**、问题需要时才检索的**项目档案**，以及存放在你所选 Provider 上的长期证据**记忆空间**。主策略决定它们如何参与每一轮对话，主策略与增强都在插件页中选择。从默认的分层策略开始即可，日常使用无需管理插件。
+
+[![可组合记忆插件页中的记忆组合面板](../assets/webui-v0.5.32/zh-CN/plugin-composition.jpg)](./guides/ui-guide.md#在插件页中)
+
+## 使用记忆系统
+
+| 要完成的事 | 指南 |
+|---|---|
+| 从零安装并启动：网页、桌面版或命令行，到第一条记忆 | [安装与启动](./guides/installation.md) |
+| 保存并用上第一批记忆 | [入门指南](./guides/getting-started.md) |
+| 熟悉对话、记忆系统与插件页 | [界面指南](./guides/ui-guide.md) |
+| 了解每个组件与策略能做什么 | [能力地图](./guides/capabilities.md) |
+| 选择并接入长期记忆后端 | [Provider 指南](./guides/memory-providers.md) |
+| 管理技能，让它们从对话中改进，测试它们并安装更多技能 | [技能管理](./guides/skills.md) |
+| 备份、迁移存储或排查故障 | [运维指南](./guides/operations.md) |
+| 升级已有安装 | [兼容性与升级](./reference/compatibility.md) |
+
+## 查阅具体约定
+
+| 问题 | 参考 |
+|---|---|
+| 有哪些设置，在哪里编辑、保存在哪里？ | [配置参考](./reference/configuration.md) |
+| 数据保存在哪，怎样共享和归档？ | [存储模型](./reference/storage-model.md) |
+| 读取、写入和整理何时发生？ | [生命周期与流程](./reference/workflows.md) |
+| 提供哪些工具、命令、RPC 通道与界面区域？ | [接口参考](./reference/interfaces.md) |
+
+## 制作扩展
+
+| 要完成的事 | 开发文档 |
+|---|---|
+| 理解 Source、Strategy、View、归属与界面区域 | [架构设计](./development/architecture.md) |
+| 开发 Source、Strategy、增强或 Provider | [插件开发](./development/extensions.md) |
+| 让皮肤适配 Mnemon 背景与透明度 | [皮肤开发](./development/skin-integration.md) |
+| 构建、测试与真实 WebUI 截图 | [开发与验证](./development/README.md) |
+| 为独立包管理版本和发布 | [发布流程](./development/releasing.md) |
+| 参与贡献：规则、脚本与设计计划 | [贡献指南](../../CONTRIBUTING.zh-CN.md) · [脚本](../../scripts/README.md)（英文） · [设计计划](../plans/README.md)（英文） |
+
+## 最新变化
+
+[v0.5.40](./releases/v0.5.40.md) 支持同轮更新新建档案，说明策略维护停用原因与工作区归属，修复技能页面滚动，并验证官方 DSH 0.2.2-rc.1。[v0.5.39](./releases/v0.5.39.md) 修复已接受回合的记忆访问、PTC 历史、Unicode 活动摘要与 Git 作者，增加技能草案目标选择，并适配新版 DSH RC 与 alpha 契约。[v0.5.38](./releases/v0.5.38.md) 减少会话切换冗余读取，让空闲审查遵循工具守卫，可选地跨重启保留审查配额，并改进小屏控件和 ByteRover 启动。[v0.5.37](./releases/v0.5.37.md) 增加技能任务模型选择与运行时容量设置，改进演进页面滚动，并验证 embedding 模型可用性。[v0.5.36](./releases/v0.5.36.md) 修复冻结建议导致的技能复盘失败，增加独立建议开关与可选目录选择器，适配 rc.3 模型目录，并明确 OpenViking 文本写入范围。[v0.5.35](./releases/v0.5.35.md) 改进技能回收站与纯文本评测，保留运行时重要性与同步溢出记录，修复 Provider 写入和分数处理，并公开工作区身份辅助函数。[v0.5.34](./releases/v0.5.34.md) 新增实验性组件技能管理：管理工作区加载的 DSH 技能，从你的对话中改进技能（草案先回测、再由你采纳），为每个技能保存测试用例，并能从 skills.sh、GitHub 和 Agent Skills 网站安装更多技能。[v0.5.33](./releases/v0.5.33.md) 让 Git 同步无论 Git 怎样配置都能找到令牌，为 gitee.com 使用它接受的用户名，让记忆任务不再在 DSH 的会话列表中留下空会话，并写明在 DSH 0.2.1 的桌面版中从 0.5.30 及更早版本更新的方法。[全部版本](./releases/README.md) · [路线图](./roadmap.md) · [历史验收证据](../pr-assets/README.md)
+
+指南描述当前版本。截图与录屏来自 [v0.5.32 图集](../assets/webui-v0.5.32/README.md)，技能管理的截图来自 [v0.5.34 技能管理图集](../assets/skills-v0.5.34/README.md)，安装步骤来自[安装图集](../assets/install-v0.5.19/README.md)；带日期的 PR 记录只证明其标注的代码修订与环境。内部 Host RPC 不属于对外插件 SDK。

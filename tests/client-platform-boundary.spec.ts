@@ -1,0 +1,67 @@
+import { readFileSync, readdirSync } from 'node:fs'
+import { dirname, join, resolve, sep } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { describe, expect, it } from 'vitest'
+import ts from 'typescript'
+
+describe('browser bundle platform boundary', () => {
+  const root = fileURLToPath(new URL('../', import.meta.url))
+  const directories = ['src/client', ...['runtime', 'documents', 'memory-spaces'].map(group => `plugins/dsh-tingfeng-source-${group}/src/client`)]
+  const clientSources = () => directories.flatMap(directory => {
+    const directoryPath = join(root, directory)
+    return readdirSync(directoryPath, { recursive: true })
+      .filter(path => /\.[jt]sx?$/.test(String(path)))
+      .map(path => ({ path: join(directory, String(path)), source: readFileSync(join(directoryPath, String(path)), 'utf8') }))
+  })
+
+  it('keeps all default and independent Client imports inside browser code or data-only contracts', () => {
+    const violations: string[] = []
+    for (const { path, source } of clientSources()) {
+      const ast = ts.createSourceFile(path, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
+      for (const node of ast.statements) {
+        if ((!ts.isImportDeclaration(node) && !ts.isExportDeclaration(node)) || node.moduleSpecifier === undefined || !ts.isStringLiteral(node.moduleSpecifier)) continue
+        const specifier = node.moduleSpecifier.text
+        if (/^(?:node:|@tingfeng\/dsh-tingfeng\/(?:core|kernel|extension-sdk)|dsh-tingfeng-source-[^/]+$)/u.test(specifier)) violations.push(`${path}: ${specifier}`)
+        if (!specifier.startsWith('.')) continue
+        const target = resolve(root, dirname(path), specifier)
+        const browserFile = directories.some(directory => target.startsWith(join(root, directory) + sep))
+        const normalized = target.split(sep).join('/')
+        const contract = normalized.endsWith('/contracts.ts') || normalized.endsWith('/host/protocol.ts')
+        const presentation = /\/presentation\/[^/]+\.(?:json|module\.css)$/.test(normalized)
+        if (ts.isExportDeclaration(node) && node.isTypeOnly || ts.isImportDeclaration(node) && node.importClause?.isTypeOnly) continue
+        if (!browserFile && !contract && !presentation) violations.push(`${path}: ${specifier}`)
+        if (contract && /(?:from|import)\s*['"]node:/u.test(readFileSync(target, 'utf8'))) violations.push(`${path}: Node contract ${specifier}`)
+      }
+    }
+    expect(violations).toEqual([])
+  })
+
+  it('keeps the shared browser contract free of Node runtime imports', () => {
+    // protocol.ts and every module it takes values from or re-exports, as the browser bundle loads them.
+    const pending = [join(root, 'src/host/protocol.ts')]
+    const visited = new Set<string>()
+    while (pending.length > 0) {
+      const file = pending.pop()!
+      if (visited.has(file)) continue
+      visited.add(file)
+      const source = readFileSync(file, 'utf8')
+      expect(source, file).not.toMatch(/from\s*['"]node:/u)
+      for (const node of ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true).statements) {
+        if ((!ts.isImportDeclaration(node) && !ts.isExportDeclaration(node)) || node.moduleSpecifier === undefined || !ts.isStringLiteral(node.moduleSpecifier)) continue
+        const typeOnly = ts.isImportDeclaration(node) ? node.importClause?.isTypeOnly === true : node.isTypeOnly
+        if (!typeOnly && node.moduleSpecifier.text.startsWith('.')) pending.push(resolve(dirname(file), node.moduleSpecifier.text))
+      }
+    }
+    expect([...visited].map(file => file.slice(root.length).split(sep).join('/')).sort()).toEqual([
+      'src/host/display-mode.ts', 'src/host/memory-tools.ts', 'src/host/protocol.ts', 'src/host/starter-components.ts', 'src/host/sync-rules.ts', 'src/host/view-protocol.ts',
+    ])
+  })
+
+  it('delegates deployment URLs and transport to the host connection', () => {
+    const forbidden = /\bfetch\s*\(|\bXMLHttpRequest\b|\bWebSocket\b|\bEventSource\b|['"]\/(?:api|m\/api|plugins|assets)(?:\/|['"])/gu
+    const violations = clientSources().flatMap(({ path, source }) => {
+      return [...source.matchAll(forbidden)].map(match => `${path}: ${match[0]}`)
+    })
+    expect(violations).toEqual([])
+  })
+})

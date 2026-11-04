@@ -1,0 +1,143 @@
+{
+  "compilerOptions": {
+    "target": "ES2024",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": [
+      "ES2024",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "allowImportingTsExtensions": true,
+    "skipLibCheck": true,
+    "types": [
+      "node"
+    ],
+    "paths": {
+      "@tingfeng/dsh-tingfeng/contracts": [
+        "./src/core/contracts/index.ts"
+      ],
+      "@tingfeng/dsh-tingfeng/extension-sdk": [
+        "./src/sdk/index.ts"
+      ],
+      "@tingfeng/dsh-tingfeng/testing": [
+        "./src/sdk/testing.ts"
+      ],
+      "dsh-tingfeng-source-memory-spaces/provider-sdk": [
+        "./plugins/dsh-tingfeng-source-memory-spaces/src/provider-sdk.ts"
+      ],
+      "dsh-tingfeng-source-memory-spaces/testing": [
+        "./plugins/dsh-tingfeng-source-memory-spaces/src/testing.ts"
+      ],
+      "@tingfeng/dsh-tingfeng/client": [
+        "./src/client/extension-sdk.ts"
+      ],
+      "dsh-tingfeng-source-runtime/client": [
+        "./plugins/dsh-tingfeng-source-runtime/src/client.ts"
+      ],
+      "dsh-tingfeng-source-documents/client": [
+        "./plugins/dsh-tingfeng-source-documents/src/client.ts"
+      ],
+      "dsh-tingfeng-source-memory-spaces/client": [
+        "./plugins/dsh-tingfeng-source-memory-spaces/src/client.ts"
+      ],
+      "dsh-tingfeng-source-runtime/contracts": [
+        "./plugins/dsh-tingfeng-source-runtime/src/contracts.ts"
+      ],
+      "dsh-tingfeng-source-documents/contracts": [
+        "./plugins/dsh-tingfeng-source-documents/src/contracts.ts"
+      ],
+      "dsh-tingfeng-source-memory-spaces/contracts": [
+        "./plugins/dsh-tingfeng-source-memory-spaces/src/contracts.ts"
+      ],
+      "dsh-tingfeng-source-runtime": [
+        "./plugins/dsh-tingfeng-source-runtime/src/index.ts"
+      ],
+      "dsh-tingfeng-source-documents": [
+        "./plugins/dsh-tingfeng-source-documents/src/index.ts"
+      ],
+      "dsh-tingfeng-source-skills/client": [
+        "./plugins/dsh-tingfeng-source-skills/src/client.ts"
+      ],
+      "dsh-tingfeng-source-skills/contracts": [
+        "./plugins/dsh-tingfeng-source-skills/src/contracts.ts"
+      ],
+      "dsh-tingfeng-source-skills": [
+        "./plugins/dsh-tingfeng-source-skills/src/index.ts"
+      ],
+      "dsh-tingfeng-source-memory-spaces": [
+        "./plugins/dsh-tingfeng-source-memory-spaces/src/index.ts"
+      ],
+      "dsh-tingfeng-strategy-default-three-tier/extension-sdk": [
+        "./plugins/dsh-tingfeng-strategy-default-three-tier/src/extension-sdk.ts"
+      ],
+      "dsh-tingfeng-strategy-scoped": [
+        "./plugins/dsh-tingfeng-strategy-scoped/src/index.ts"
+      ],
+      "dsh-tingfeng-strategy-light-context": [
+        "./plugins/dsh-tingfeng-strategy-light-context/src/index.ts"
+      ],
+      "dsh-tingfeng-strategy-auto-capture": [
+        "./plugins/dsh-tingfeng-strategy-auto-capture/src/index.ts"
+      ],
+      "dsh-tingfeng-strategy-default-three-tier": [
+        "./plugins/dsh-tingfeng-strategy-default-three-tier/src/index.ts"
+      ],
+      "dsh-tingfeng-strategy-general": [
+        "./plugins/dsh-tingfeng-strategy-general/src/index.ts"
+      ],
+      "dsh-tingfeng-provider-mnemon-native": [
+        "./plugins/dsh-tingfeng-provider-mnemon-native/src/index.ts"
+      ],
+      "dsh-tingfeng-provider-openviking": [
+        "./plugins/dsh-tingfeng-provider-openviking/src/index.ts"
+      ],
+      "dsh-tingfeng-provider-honcho": [
+        "./plugins/dsh-tingfeng-provider-honcho/src/index.ts"
+      ],
+      "dsh-tingfeng-provider-mem0": [
+        "./plugins/dsh-tingfeng-provider-mem0/src/index.ts"
+      ],
+      "dsh-tingfeng-provider-hindsight": [
+        "./plugins/dsh-tingfeng-provider-hindsight/src/index.ts"
+      ],
+      "dsh-tingfeng-provider-holographic": [
+        "./plugins/dsh-tingfeng-provider-holographic/src/index.ts"
+      ],
+      "dsh-tingfeng-provider-retaindb": [
+        "./plugins/dsh-tingfeng-provider-retaindb/src/index.ts"
+      ],
+      "dsh-tingfeng-provider-byterover": [
+        "./plugins/dsh-tingfeng-provider-byterover/src/index.ts"
+      ],
+      "dsh-tingfeng-provider-supermemory": [
+        "./plugins/dsh-tingfeng-provider-supermemory/src/index.ts"
+      ],
+      "dsh-tingfeng-source-memory-spaces/native-cli": [
+        "./plugins/dsh-tingfeng-source-memory-spaces/src/native-cli.ts"
+      ],
+      "dsh-tingfeng-source-memory-spaces/space-identity": [
+        "./plugins/dsh-tingfeng-source-memory-spaces/src/space-identity.ts"
+      ]
+    },
+    "resolveJsonModule": true
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "plugins/*/src/**/*.ts",
+    "plugins/*/tests/**/*.ts",
+    "tests/**/*.ts",
+    "tests/**/*.tsx",
+    "vitest.config.ts",
+    "tsdown.config.ts",
+    "plugins/*/src/**/*.tsx",
+    "plugins/*/tests/**/*.tsx"
+  ]
+}
