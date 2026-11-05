@@ -244,6 +244,62 @@ async function assertNoPendingReleaseIntents(directory = root) {
   assert.equal(pending.length, 0, `Apply pending changesets in a release pull request first: ${pending.join(', ')}`)
 }
 
+/**
+ * Nested workspace manifests ship byte-for-byte inside the Starter tarball. Their
+ * `devDependencies` still carry pnpm-only `workspace:` ranges, which npm refuses to
+ * parse once the Starter is installed outside the workspace (EUNSUPPORTEDPROTOCOL).
+ * The ranges are development-only links, so drop them for the duration of a pack and
+ * restore the exact original bytes afterwards.
+ */
+export async function withoutWorkspaceDevLinks(directories, callback) {
+  const restored = []
+  try {
+    for (const directory of directories) {
+      const manifestPath = join(directory, 'package.json')
+      let raw
+      try {
+        raw = await readFile(manifestPath, 'utf8')
+      } catch (error) {
+        if (error.code === 'ENOENT') continue
+        throw error
+      }
+      const manifest = JSON.parse(raw)
+      const development = manifest.devDependencies ?? {}
+      const unpublished = Object.keys(development).filter(name => String(development[name]).startsWith('workspace:'))
+      if (unpublished.length === 0) continue
+      const stripped = { ...manifest, devDependencies: Object.fromEntries(Object.entries(development).filter(([name]) => !unpublished.includes(name))) }
+      if (stripped.devDependencies && Object.keys(stripped.devDependencies).length === 0) delete stripped.devDependencies
+      restored.push({ manifestPath, raw })
+      await writeFile(manifestPath, JSON.stringify(stripped, null, 2) + '\n')
+    }
+    return await callback()
+  } finally {
+    for (const { manifestPath, raw } of restored.reverse()) await writeFile(manifestPath, raw)
+  }
+}
+
+/** Every nested package the Starter embeds, discovered from its packed composition. */
+async function nestedPackageDirectories(starter) {
+  const manifest = starter.manifest
+  const names = Object.keys(manifest.dependencies ?? {}).filter(name => (manifest.dependencies[name] ?? '').startsWith('file:'))
+  const directories = []
+  for (const name of names) {
+    const relativePath = manifest.dependencies[name].slice('file:'.length)
+    directories.push(join(starter.directory, relativePath))
+  }
+  return directories
+}
+
+/**
+ * `npm pack --json` answers with an array up to npm 11 and with a name-keyed object
+ * from npm 12 on. Normalize both so packing keeps working across npm versions.
+ */
+export function packedArtifacts(output) {
+  const parsed = JSON.parse(output)
+  if (Array.isArray(parsed)) return parsed
+  return Object.values(parsed)
+}
+
 export async function packRelease(plan, destination, run = npm) {
   assert(plan.selectionComputed, 'Packing requires a release selection computed from a base revision')
   assert(plan.releasePackages.length > 0, 'No package version advanced since the base release')
@@ -252,8 +308,12 @@ export async function packRelease(plan, destination, run = npm) {
   assert.equal(existing.length, 0, `Release artifact directory must be empty: ${destination}`)
   const artifacts = []
   for (const item of plan.releasePackages) {
-    const output = await run(['pack', '--ignore-scripts', '--json', '--pack-destination', destination], item.directory)
-    const [artifact] = JSON.parse(output)
+    // The Starter embeds its nested packages verbatim, so their manifests must be
+    // free of pnpm-only workspace ranges before npm reads them for packing.
+    const nested = item.manifest.name === starterName ? await nestedPackageDirectories(item) : []
+    const output = await withoutWorkspaceDevLinks(nested, () =>
+      run(['pack', '--ignore-scripts', '--json', '--pack-destination', destination], item.directory))
+    const [artifact] = packedArtifacts(output)
     assert.equal(artifact.name, item.manifest.name, 'Unexpected packed package')
     assert.equal(artifact.version, item.manifest.version, `${artifact.name}: unexpected packed version`)
     assert.equal(artifact.filename, basename(artifact.filename), 'Artifact filename must not escape the destination')
