@@ -5,7 +5,16 @@ import type { UserConfig, TsdownPlugin } from 'tsdown'
 import { transform } from 'lightningcss'
 import ts from 'typescript'
 
+/** Build label used for tsdown/rollup naming only. */
 const PLUGIN_ID = 'dsh-tingfeng'
+/**
+ * Browser registration id. The host's client module graph keys every row by
+ * PACKAGE NAME (`@tingfeng/dsh-tingfeng`), and `__ModuleLoader__.load({ id })`
+ * must match it exactly or the host reports "loaded without registering".
+ * This is NOT the same string as PLUGIN_ID: the package was renamed to the
+ * @tingfeng scope while the build label stayed the short name.
+ */
+const CLIENT_MODULE_ID = '@tingfeng/dsh-tingfeng'
 const PROJECT_ROOT = dirname(fileURLToPath(import.meta.url))
 const CLIENT_EXTERNALS = [
   /^react(?:\/.*)?$/,
@@ -57,7 +66,7 @@ const client: UserConfig = {
   },
   plugins: [clientCssPlugin()],
   outputOptions: {
-    banner: `window.__ModuleLoader__.load({ id: ${JSON.stringify(PLUGIN_ID)}, factory: (require) => {`,
+    banner: `window.__ModuleLoader__.load({ id: ${JSON.stringify(CLIENT_MODULE_ID)}, factory: (require) => {`,
     footer: 'return module.exports; } });',
     intro: 'var module = { exports: {} }; var exports = module.exports;',
   },
