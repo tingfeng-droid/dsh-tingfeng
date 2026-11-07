@@ -1,6 +1,6 @@
 # dsh-tingfeng-strategy-general
 
-A role-agnostic main Strategy for `@tingfeng/dsh-tingfeng`. It admits every available
+A role-agnostic main Strategy for `dsh-tingfeng`. It admits every available
 Source, whatever its role, shares one projection budget between them and offers
 their Routes and Actions round-robin, so each admitted Source is reachable
 before any Source receives a second operation. The model then decides whether
@@ -15,7 +15,7 @@ Compared with `dsh-tingfeng-strategy-default-three-tier`:
 | Reads | recall, search, inspect and related Routes with per-turn deduplication | every offered Route, bounded by Core's call and result budgets |
 | Automatic maintenance | idle review and Runtime capacity archiving | none; the model writes through offered Actions |
 
-Exactly one main Strategy composes a View. Select it on the `@tingfeng/dsh-tingfeng` page
+Exactly one main Strategy composes a View. Select it on the `dsh-tingfeng` page
 under **Plugins**; the Starter installs it disabled. The optional enhancements (scoped composition, light context and
 active capture) use Core's standard `selection`, `projection` and `capture`
 slots, so they work with either main Strategy.

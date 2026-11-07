@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createStorageRoot } from '../src/host/storage-root.ts'
-import { canonicalWorkspacePath, workspaceStorageId } from '@tingfeng/dsh-tingfeng/extension-sdk'
+import { canonicalWorkspacePath, workspaceStorageId } from 'dsh-tingfeng/extension-sdk'
 
 const roots: string[] = []
 function fixture() {

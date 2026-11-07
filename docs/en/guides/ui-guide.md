@@ -269,7 +269,7 @@ Expand the Mnemon Native card. **Manage embedding settings in DSH** makes the sa
 
 ![DSH's component list: each component named as it declares itself](../../assets/webui-v0.5.32/en/plugin-rows.jpg)
 
-Below the configuration, DSH lists the components the Starter includes under the names and descriptions they declare. DSH 0.2.1, pictured, lists no row for the Starter's group entry; DSH 0.2.0 adds it as `mnemon-bundle`, shown as `@tingfeng/dsh-tingfeng/bundle`, and its "Off" state does not affect anything. A component's name opens DSH's page for it, which carries the same component page as the board.
+Below the configuration, DSH lists the components the Starter includes under the names and descriptions they declare. DSH 0.2.1, pictured, lists no row for the Starter's group entry; DSH 0.2.0 adds it as `mnemon-bundle`, shown as `dsh-tingfeng/bundle`, and its "Off" state does not affect anything. A component's name opens DSH's page for it, which carries the same component page as the board.
 
 ![DSH's own page for the Layered strategy](../../assets/webui-v0.5.32/en/plugin-row-page.jpg)
 

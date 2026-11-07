@@ -134,13 +134,13 @@ Everything Mnemon shows inside DSH is registered into DSH's own UI regions. The 
 
 | DSH region | Registration | Behavior |
 |---|---|---|
-| `conversation.chat.turnTail` | list, `id=@tingfeng/dsh-tingfeng/turn-tail` | `turn-activity` summarizes `mnemon_*` calls from completed turns, with the items each call read or wrote from the tools' activity metadata; open turns and turns without activity render nothing |
-| `conversation.chat.turnTail` | list, `id=@tingfeng/dsh-tingfeng/skill-tail` | While `skills.hints` is on: `skill-activity` names the skills each completed turn used and the state of the review that followed, with its waiting suggestions; a turn with nothing to say renders nothing |
+| `conversation.chat.turnTail` | list, `id=dsh-tingfeng/turn-tail` | `turn-activity` summarizes `mnemon_*` calls from completed turns, with the items each call read or wrote from the tools' activity metadata; open turns and turns without activity render nothing |
+| `conversation.chat.turnTail` | list, `id=dsh-tingfeng/skill-tail` | While `skills.hints` is on: `skill-activity` names the skills each completed turn used and the state of the review that followed, with its waiting suggestions; a turn with nothing to say renders nothing |
 | `conversation.chat.assistant-actions` | list, `id=mnemon-save` | `assistant-message` reads finalized text; `supervise` runs only after confirmation |
 | `conversation.session.header.lineage` | lower-priority copy of DSH's own entry | A task Agent's session header counts that Agent's own tokens, not the log it was forked from |
 | `plugins.bundle.config` | keyed, `dsh-mnemon` | The whole configuration on dsh-mnemon's page under Plugins |
 | `plugins.row.config` | keyed, `dsh-mnemon#<row>` | The page each shipped component's row opens, with the settings that component contributed |
-| `plugins.detail.actions` | list, `id=@tingfeng/dsh-tingfeng/open-workspace` | Opens the Memory System from the plugin's detail page |
+| `plugins.detail.actions` | list, `id=dsh-tingfeng/open-workspace` | Opens the Memory System from the plugin's detail page |
 | `sidebar.panellist` and `main` | `id=mnemon-skills` | While `skills.sidebar` is on: Skills' own sidebar entry and page, after the Memory System, which then leaves the Skills page out |
 
 Mnemon declares two keyed regions of its own, both keyed by a component's package name: `mnemon.component.settings`, rendered on that component's page, and `mnemon.component.status`, its card on the Status page. Official and third-party components contribute through the same regions; see [Plugin development](../development/extensions.md).
@@ -160,7 +160,7 @@ Profiles without a Web workspace registry, including Headless, have no arbitrary
 
 ## RPC channels
 
-RPC is an internal Host-to-client bridge, not a stable external HTTP API. Pages and component plugins should use the scoped clients from `@tingfeng/dsh-tingfeng/client`; see [Plugin development](../development/extensions.md).
+RPC is an internal Host-to-client bridge, not a stable external HTTP API. Pages and component plugins should use the scoped clients from `dsh-tingfeng/client`; see [Plugin development](../development/extensions.md).
 
 | Channel | Carries | Remote pages |
 |---|---|---|
@@ -258,7 +258,7 @@ The sync payload is always a full Mnemon Pack: a pack manifest's `scope` is eith
 
 Credentials and the network:
 
-- Tokens never appear in a response or an error message. The channel resolves one credential per network operation, in this order: `MNEMON_SYNC_GIT_TOKEN`, the token stored in `state/sync-git.json` (mode `0600`), then the grant GitHub sign-in wrote into DSH's credentials store under the key `@tingfeng/dsh-tingfeng/github`.
+- Tokens never appear in a response or an error message. The channel resolves one credential per network operation, in this order: `MNEMON_SYNC_GIT_TOKEN`, the token stored in `state/sync-git.json` (mode `0600`), then the grant GitHub sign-in wrote into DSH's credentials store under the key `dsh-tingfeng/github`.
 - `credentialSource` names the winner — `environment`, `token`, `github` or `none` — and `hasToken` is `true` for the first three, so a signed-in account needs no token field at all. A failure carries its kind as `details.reason`, so the page states it in its own language; `remote-auth` while a credential is available means the host rejected it.
 - Git gets the token from a credential store that exists for one command, under the user name the repository address names, else `oauth2` for `gitee.com` and `x-access-token` for any other host. Git 2.26 and later are given that name on the command line, where it wins over every `credential.username` the machine configures, with `credential.useHttpPath` off and the address without a user name. An earlier Git gets the command it always got, unless `git config --get-urlmatch credential <address>`, read in the command's own environment, names a user for the address other than the store's, which then carries the store's name, or turns `credential.useHttpPath` on, which the command turns off.
 - GitHub calls go through the ambient `fetch` first, the same seam the version check uses, so a launcher's proxy policy applies to them. When that request cannot connect at all, the channel retries it once through a proxy discovered from `HTTPS_PROXY`, `http_proxy` or `all_proxy` and, on Windows, from the system proxy settings, over a CONNECT tunnel built from Node's own modules; the proxy that answered is reused and a proxy that stops answering is dropped, so a machine that changes networks recovers without a restart.
@@ -302,11 +302,11 @@ Core publishes `ctx.mnemonMemory: MnemonMemoryService`; the actual service expos
 | Entry | Responsibility |
 |---|---|
 | `dsh-mnemon` | DSH Host and default Starter |
-| `@tingfeng/dsh-tingfeng/core` | Source-neutral `ctx.mnemonMemory` service, without Host/UI |
-| `@tingfeng/dsh-tingfeng/contracts` | JSON-safe manifests, facts, ViewSpec, View, Evidence and Receipt |
-| `@tingfeng/dsh-tingfeng/extension-sdk` | Source/Strategy definitions, lifecycle installation and validators |
-| `@tingfeng/dsh-tingfeng/testing` | Real Cordis composition fixture and built Client artifact loader |
-| `@tingfeng/dsh-tingfeng/client` | DSH workspace and Source-page SDK |
+| `dsh-tingfeng/core` | Source-neutral `ctx.mnemonMemory` service, without Host/UI |
+| `dsh-tingfeng/contracts` | JSON-safe manifests, facts, ViewSpec, View, Evidence and Receipt |
+| `dsh-tingfeng/extension-sdk` | Source/Strategy definitions, lifecycle installation and validators |
+| `dsh-tingfeng/testing` | Real Cordis composition fixture and built Client artifact loader |
+| `dsh-tingfeng/client` | DSH workspace and Source-page SDK |
 | `dsh-tingfeng-source-memory-spaces/provider-sdk` | Memory Spaces' own Provider child-module contract |
 | `dsh-tingfeng-source-memory-spaces/testing` | Provider driver fixture |
 

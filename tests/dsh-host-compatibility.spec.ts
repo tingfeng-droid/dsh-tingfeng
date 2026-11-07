@@ -30,7 +30,7 @@ describe('DSH host compatibility', () => {
   // The components install with the Starter, so the Starter alone states which DSH it runs on.
   it('refuses the Starter on hosts it no longer supports', () => {
     for (const runtime of UNSUPPORTED_DSH_RUNTIMES) {
-      expect(evaluatePluginCompatibility(starter, {}, runtime), `@tingfeng/dsh-tingfeng on DSH ${runtime}`).toMatchObject({ name: '@tingfeng/dsh-tingfeng', runtimeVersion: runtime })
+      expect(evaluatePluginCompatibility(starter, {}, runtime), `dsh-tingfeng on DSH ${runtime}`).toMatchObject({ name: 'dsh-tingfeng', runtimeVersion: runtime })
     }
   })
 })

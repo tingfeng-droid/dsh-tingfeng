@@ -151,7 +151,7 @@ export class RetainDbProvider extends HttpMemoryProvider implements MemoryProvid
     const token = String(connection.apiKey ?? '').replace(/^Bearer\s+/iu, '')
     return {
       Authorization: `Bearer ${token}`,
-      'x-sdk-runtime': '@tingfeng/dsh-tingfeng',
+      'x-sdk-runtime': 'dsh-tingfeng',
       ...(path.startsWith('/v1/memory') || path.startsWith('/v1/context') ? { 'X-API-Key': token } : {}),
     }
   }

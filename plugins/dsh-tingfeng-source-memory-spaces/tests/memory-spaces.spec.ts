@@ -271,7 +271,7 @@ describe('MemorySpaceRegistry', () => {
     await expect(registry.create({
       name: '团队记忆', description: '团队共享内容。', providerId: 'openviking',
       connection: { targetUri: 'viking://user/team/memories', user: 'alice' },
-    })).rejects.toThrow('enable it on the @tingfeng/dsh-tingfeng page under Plugins first')
+    })).rejects.toThrow('enable it on the dsh-tingfeng page under Plugins first')
 
     const service = registry.updateProviderService('openviking', { endpoint: 'http://127.0.0.1:1933', apiKey: 'service-secret', account: 'team' })
     expect(service).toEqual({ providerId: 'openviking', enabled: true, configured: true, settings: { endpoint: 'http://127.0.0.1:1933', account: 'team' }, configuredSecrets: ['apiKey'] })

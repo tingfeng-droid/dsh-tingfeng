@@ -1,4 +1,4 @@
-<h1 align="center">dsh-mnemon</h1>
+<h1 align="center">dsh-tingfeng</h1>
 
 ## 上游与许可
 
@@ -12,8 +12,8 @@
 <p align="center"><a href="https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/README.md">English</a> · <strong>简体中文</strong></p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/dsh-mnemon"><img alt="npm 版本" src="https://img.shields.io/npm/v/dsh-mnemon?label=npm" /></a>
-  <a href="https://www.npmjs.com/package/dsh-mnemon"><img alt="npm 累计下载量" src="https://img.shields.io/npm/dt/dsh-mnemon?label=%E7%B4%AF%E8%AE%A1%E4%B8%8B%E8%BD%BD" /></a>
+  <a href="https://www.npmjs.com/package/dsh-tingfeng"><img alt="npm 版本" src="https://img.shields.io/npm/v/dsh-tingfeng?label=npm" /></a>
+  <a href="https://www.npmjs.com/package/dsh-tingfeng"><img alt="npm 累计下载量" src="https://img.shields.io/npm/dt/dsh-tingfeng?label=%E7%B4%AF%E8%AE%A1%E4%B8%8B%E8%BD%BD" /></a>
   <a href="https://github.com/tingfeng-droid/dsh-tingfeng/releases/latest"><img alt="GitHub 发布版本" src="https://img.shields.io/github/v/release/tingfeng-droid/dsh-tingfeng" /></a>
   <a href="https://github.com/tingfeng-droid/dsh-tingfeng"><img alt="GitHub 收藏数" src="https://img.shields.io/github/stars/tingfeng-droid/dsh-tingfeng?label=stars" /></a>
   <a href="https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/LICENSE"><img alt="MIT 许可证" src="https://img.shields.io/badge/License-MIT-yellow.svg" /></a>
@@ -38,9 +38,9 @@
   <a href="https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/zh-CN/development/extensions.md">制作插件</a>
 </p>
 
-## 为什么需要 dsh-mnemon
+## 为什么需要 dsh-tingfeng
 
-每次会话都从零开始的 Agent，会反复询问你早已说过的事情；把所有内容塞进同一个记忆库也不行，要么每轮都被淹没，要么漏掉真正要紧的信息。dsh-mnemon 为 DeepSeek Harness 提供分层、可见、可组合的记忆，以及越用越好的技能。
+每次会话都从零开始的 Agent，会反复询问你早已说过的事情；把所有内容塞进同一个记忆库也不行，要么每轮都被淹没，要么漏掉真正要紧的信息。dsh-tingfeng 为 DeepSeek Harness 提供分层、可见、可组合的记忆，以及越用越好的技能。
 
 - **每一轮都拿到合适的记忆。** 偏好和工作中的事实常驻上下文；项目档案与长期证据只在问题需要时才检索。
 - **看得见这一轮用了什么。** 每条回复下方的回合记忆栏列出这一轮读到和写入的档案与记忆，点一下就在记忆系统中打开它；记忆系统展示全部已保存的内容，并可直接编辑。
@@ -112,16 +112,16 @@ npx @deepseek-ai/dsh web
 ```
 
 <p align="center">
-  <a href="https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/zh-CN/guides/installation.md"><img src="https://raw.githubusercontent.com/tingfeng-droid/dsh-tingfeng/main/docs/assets/install-v0.5.19/zh-CN/install.gif" alt="在插件页点击添加插件，输入 dsh-mnemon，安装后立即启用，侧栏出现记忆系统" width="880" /></a>
+  <a href="https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/zh-CN/guides/installation.md"><img src="https://raw.githubusercontent.com/tingfeng-droid/dsh-tingfeng/main/docs/assets/install-v0.5.19/zh-CN/install.gif" alt="在插件页点击添加插件，输入 dsh-tingfeng，安装后立即启用，侧栏出现记忆系统" width="880" /></a>
 </p>
 
-1. 在打开的页面中点击**插件 → 添加插件**，输入 `dsh-mnemon`，点击**安装**，再点击**立即启用**。
+1. 在打开的页面中点击**插件 → 添加插件**，输入 `dsh-tingfeng`，点击**安装**，再点击**立即启用**。
 2. 在侧栏打开**记忆系统**，“状态”页列出每个记忆组件和 Provider。
 3. 在对话中说一句需要记住的话。回复下方的回合记忆栏列出这一轮读到和写入的记忆，脑形图标可以把回复存入记忆。
 4. 使用记忆空间时，可用 `npm install --global @mnemon-dev/mnemon` 安装 Mnemon Native 所需的 CLI，或在记忆空间页面启用其他 Provider。
 5. 在**插件 → 可组合记忆**中选择主策略与增强。
 
-dsh-mnemon 支持已发布的 DSH `0.2.2-rc.1`，同时保留对 `0.2.1` RC 系列和 `0.2.0-rc.2` 的支持。RC1 要求 Node.js >=24.9.0；旧版宿主遵循其各自的 Node.js 要求。同一个包也用于桌面版的插件页、命令行 `dsh plugin --profile web add dsh-mnemon`，以及 Headless：`dsh plugin --profile headless add dsh-mnemon`；更早的宿主请继续使用[兼容性与升级](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/zh-CN/reference/compatibility.md)为其列出的版本。接下来可以看[入门指南](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/zh-CN/guides/getting-started.md)，已有安装的升级见[兼容性与升级](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/zh-CN/reference/compatibility.md)。
+dsh-tingfeng 支持已发布的 DSH `0.2.2-rc.1`，同时保留对 `0.2.1` RC 系列和 `0.2.0-rc.2` 的支持。RC1 要求 Node.js >=24.9.0；旧版宿主遵循其各自的 Node.js 要求。同一个包也用于桌面版的插件页、命令行 `dsh plugin --profile web add dsh-tingfeng`，以及 Headless：`dsh plugin --profile headless add dsh-tingfeng`；更早的宿主请继续使用[兼容性与升级](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/zh-CN/reference/compatibility.md)为其列出的版本。接下来可以看[入门指南](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/zh-CN/guides/getting-started.md)，已有安装的升级见[兼容性与升级](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/zh-CN/reference/compatibility.md)。
 
 ## 工作原理
 
@@ -153,7 +153,7 @@ Starter 固定一组经过测试、各自独立版本的包。同一时间只运
 
 ## 自己动手扩展
 
-用 `@tingfeng/dsh-tingfeng/extension-sdk` 定义 Source 或 Strategy，通过标准插槽编写增强，或用 `dsh-tingfeng-source-memory-spaces/provider-sdk` 编写记忆空间驱动。组件还可以把自己的设置和状态卡片加入 dsh-mnemon 的页面。你的仓库自己负责清单、依赖、测试与构建；DSH 负责安装和挂载，是否把它选为主策略是另一个独立决定。
+用 `dsh-tingfeng/extension-sdk` 定义 Source 或 Strategy，通过标准插槽编写增强，或用 `dsh-tingfeng-source-memory-spaces/provider-sdk` 编写记忆空间驱动。组件还可以把自己的设置和状态卡片加入 dsh-tingfeng 的页面。你的仓库自己负责清单、依赖、测试与构建；DSH 负责安装和挂载，是否把它选为主策略是另一个独立决定。
 
 从[插件开发指南](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/zh-CN/development/extensions.md)开始。新能力与新 Provider 请先在 Issue 中讨论，再提交 PR，详见 [CONTRIBUTING](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/CONTRIBUTING.zh-CN.md)。
 

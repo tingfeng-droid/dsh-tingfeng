@@ -49,7 +49,7 @@ class PageBoundary extends Component<{ children: ReactNode }, { failed: boolean 
   override state = { failed: false }
   static getDerivedStateFromError(): { failed: boolean } { return { failed: true } }
   override componentDidCatch(error: unknown, info: ErrorInfo): void {
-    console.error('@tingfeng/dsh-tingfeng: the Skills page failed', error, info.componentStack)
+    console.error('dsh-tingfeng: the Skills page failed', error, info.componentStack)
   }
   override render(): ReactNode { return this.state.failed ? null : this.props.children }
 }
@@ -84,7 +84,7 @@ export interface SkillsPanelServices {
 }
 
 function SkillsSidebarIcon({ size }: Pick<PropsRuntime<'sidebar.panellist'>, 'size'>): JSX.Element {
-  return <span data-dsh-plugin="@tingfeng/dsh-tingfeng" data-dsh-part="skills-sidebar-icon" style={{ display: 'inline-flex' }}><IconSkillOutlineRegular size={size} /></span>
+  return <span data-dsh-plugin="dsh-tingfeng" data-dsh-part="skills-sidebar-icon" style={{ display: 'inline-flex' }}><IconSkillOutlineRegular size={size} /></span>
 }
 
 /** The panel: the Memory System workbench focused on 技能管理, its title the window's top edge. */

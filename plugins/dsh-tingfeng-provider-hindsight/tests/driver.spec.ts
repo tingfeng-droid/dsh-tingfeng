@@ -84,7 +84,7 @@ describe('standalone hindsight data plane', () => {
       items: [{ content: 'Alice ships TypeScript.', context: 'decision', tags: ['dsh'], entities: [{ text: 'Alice' }] }],
       async: true,
     })
-    expect(JSON.parse(String(requests[7]?.init?.body))).toEqual({ state: 'invalidated', reason: 'Forgotten from @tingfeng/dsh-tingfeng' })
+    expect(JSON.parse(String(requests[7]?.init?.body))).toEqual({ state: 'invalidated', reason: 'Forgotten from dsh-tingfeng' })
   })
   it('reads entity names without their notes, and a name of many "(" at once', async () => {
     const notes = 'x' + '('.repeat(120_000)

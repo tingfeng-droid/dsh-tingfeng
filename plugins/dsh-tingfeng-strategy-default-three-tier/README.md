@@ -1,6 +1,6 @@
 # dsh-tingfeng-strategy-default-three-tier
 
-The **Layered strategy** (分层策略 in the Chinese interface), @tingfeng/dsh-tingfeng's default
+The **Layered strategy** (分层策略 in the Chinese interface), dsh-tingfeng's default
 main strategy: runtime memory stays resident, while Project Documents and Memory
 Spaces are read on demand. It is one ordinary Cordis Strategy plugin that consumes
 public Source facts and proposes that View; it imports no Source implementation
@@ -24,7 +24,7 @@ this plugin's instructions. DSH-assisted write/archival workflows remain Host
 adapters over Source operations; Core does not schedule autonomous maintenance.
 
 Its manifest declares `workflows: ['idle-review', 'runtime-capacity']`, the
-background work the @tingfeng/dsh-tingfeng Host runs for the turns it composes: idle review,
+background work the dsh-tingfeng Host runs for the turns it composes: idle review,
 and Runtime capacity maintenance, which the Host applies to named tools, generic
 View Actions, child writes and browser management. A Strategy built by spreading
 this manifest copies the declaration; `workflows: []` keeps it out of both.
@@ -84,7 +84,7 @@ the Host's own diagnostic instead.
 
 Its own directory is a standalone project: install its declared dependencies,
 then run `pnpm verify`. When developing against an unreleased Mnemon, install a
-packed `@tingfeng/dsh-tingfeng` artifact as the peer instead of linking its source tree.
+packed `dsh-tingfeng` artifact as the peer instead of linking its source tree.
 
 The Starter or a user's Profile explicitly mounts its Entry. This package has
 no auto-activation patch; installing it does not override a configured Strategy.

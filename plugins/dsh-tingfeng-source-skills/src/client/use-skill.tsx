@@ -5,7 +5,7 @@ import { useEffect, useRef } from 'react'
  * loads the skill when the message is sent. The page and the composer meet
  * through one window event; the composer side answers by marking it handled.
  */
-export const SKILL_USE_EVENT = '@tingfeng/dsh-tingfeng:skill-use'
+export const SKILL_USE_EVENT = 'dsh-tingfeng:skill-use'
 
 interface SkillUseDetail {
   name: string

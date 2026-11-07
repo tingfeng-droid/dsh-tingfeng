@@ -65,7 +65,7 @@ export function checkDocuments(root, files) {
     const body = readFileSync(join(root, file), 'utf8')
     for (const { url, line } of documentLinks(body)) {
       // README links also work on npm; verify current-repository URLs locally.
-      const repositoryPath = url.match(/^https:\/\/github\.com\/omdsh-dev\/@tingfeng\/dsh-tingfeng\/(?:blob|tree)\/main\/(.+)$/u)?.[1]
+      const repositoryPath = url.match(/^https:\/\/github\.com\/tingfeng-droid\/dsh-tingfeng\/(?:blob|tree)\/main\/(.+)$/u)?.[1]
       if (!repositoryPath && /^(?:[a-z][a-z\d+.-]*:|\/\/)/iu.test(url)) continue
       const [pathAndQuery, rawAnchor] = (repositoryPath ?? url).split('#')
       const rawPath = pathAndQuery.split('?')[0]

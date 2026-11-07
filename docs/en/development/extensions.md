@@ -17,11 +17,11 @@ A Source need not implement a Provider. A Provider need not know View compositio
 | Entry | Responsibility |
 |---|---|
 | `dsh-mnemon` | DSH Host and default Starter |
-| `@tingfeng/dsh-tingfeng/core` | Cordis plugin installing the Source-neutral service; no engine exports or Host/UI |
-| `@tingfeng/dsh-tingfeng/contracts` | Source/Strategy callback contracts and JSON-safe manifests, facts, ViewSpec, View, Evidence and Receipt |
-| `@tingfeng/dsh-tingfeng/extension-sdk` | Source/Strategy definitions, lifecycle installation and validators |
-| `@tingfeng/dsh-tingfeng/testing` | Scoped composition, route/action and management testing; JSON diagnostics; built Client artifact loader |
-| `@tingfeng/dsh-tingfeng/client` | DSH workspace and Source-page SDK |
+| `dsh-tingfeng/core` | Cordis plugin installing the Source-neutral service; no engine exports or Host/UI |
+| `dsh-tingfeng/contracts` | Source/Strategy callback contracts and JSON-safe manifests, facts, ViewSpec, View, Evidence and Receipt |
+| `dsh-tingfeng/extension-sdk` | Source/Strategy definitions, lifecycle installation and validators |
+| `dsh-tingfeng/testing` | Scoped composition, route/action and management testing; JSON diagnostics; built Client artifact loader |
+| `dsh-tingfeng/client` | DSH workspace and Source-page SDK |
 | `dsh-tingfeng-source-memory-spaces/provider-sdk` | Memory Spaces' own Provider child-module contract |
 | `dsh-tingfeng-source-memory-spaces/testing` | Private-child module fixture and driver authority/connection fixture |
 
@@ -33,11 +33,11 @@ The engine, installed records, registry, generations and leases stay internal. N
 
 ## Workspace identity helpers
 
-Host-side tools can import `canonicalWorkspacePath` and `workspaceStorageId` from `@tingfeng/dsh-tingfeng/extension-sdk`. These are the same synchronous functions used by the built-in Host, not browser APIs:
+Host-side tools can import `canonicalWorkspacePath` and `workspaceStorageId` from `dsh-tingfeng/extension-sdk`. These are the same synchronous functions used by the built-in Host, not browser APIs:
 
 ```ts
 import { resolve } from 'node:path'
-import { canonicalWorkspacePath, workspaceStorageId } from '@tingfeng/dsh-tingfeng/extension-sdk'
+import { canonicalWorkspacePath, workspaceStorageId } from 'dsh-tingfeng/extension-sdk'
 
 const workspace = resolve(process.argv[2] ?? '.')
 const canonical = canonicalWorkspacePath(workspace)
@@ -65,7 +65,7 @@ The complete `ComposableMemoryView` stays in the Host and composition tests, nev
 
 ```ts
 import type { Context } from '@deepseek-ai/cordis'
-import type { MemoryPluginDescriptor } from '@tingfeng/dsh-tingfeng/contracts'
+import type { MemoryPluginDescriptor } from 'dsh-tingfeng/contracts'
 
 export const name = 'dsh-tingfeng-source-notes'
 export const inject = ['mnemonMemory']
@@ -77,7 +77,7 @@ export const memoryPlugin = {
   provides: [{ id: 'source' }, { id: 'source.durable-evidence' }],
 } satisfies Omit<MemoryPluginDescriptor, 'apiVersion'>
 export async function apply(ctx: Context): Promise<void> {
-  const { defineMemoryPlugin, installMemory } = await import('@tingfeng/dsh-tingfeng/extension-sdk')
+  const { defineMemoryPlugin, installMemory } = await import('dsh-tingfeng/extension-sdk')
   const { notesSource } = await import('./source.js')
   installMemory(ctx, { plugin: defineMemoryPlugin(memoryPlugin), sources: [notesSource] })
 }
@@ -127,7 +127,7 @@ DSH's own plugin list names a package from its `locale/en.json` and `locale/zh.j
 When declared options are not enough, a component adds its own settings to its page from its `./client` entry, the way Memory Spaces brings its Providers and embedding. dsh-mnemon draws the other shipped components' settings through the same region: Runtime Memory's user profile scope and the Layered strategy's background tasks. A Source can also say what its card on the Memory System's Status page shows while it runs.
 
 ```tsx
-import { installMemoryComponentUI } from '@tingfeng/dsh-tingfeng/client'
+import { installMemoryComponentUI } from 'dsh-tingfeng/client'
 
 export function apply(ctx) {
   ctx.effect(() => installMemoryComponentUI(ctx, {
@@ -140,25 +140,25 @@ export function apply(ctx) {
 
 The settings render in the `mnemon.component.settings` region, keyed by the package name the plugin's declaration names, after the page's state, relations and declared options; the component's row gets a gear that opens them. They receive only what the page knows: `component` (`packageName`, `label`, `enabled`), `writable`, `language`, and the conversation's `sessionId` and `workspace` when there is one; bring your own services through your own registration. Registration waits until dsh-mnemon's configuration exists and ends with the returned function. Follow the page's interaction rules: switches and selectors apply when they change, typed values wait for your own **Apply**, and your settings never join another group's save.
 
-`@tingfeng/dsh-tingfeng/client` also exports what Memory Spaces' own settings are drawn with, the controls and styles dsh-mnemon drew them with: `ToggleRow`, `useLive` and `useStaged` with `PanelActions` and `WriteFailure` (the two ways a group saves), `Callout`, `Reveal`, `GlobalLocationSetting`, and `memorySettingsStyles`, the configuration's class map. Its keys are a fixed set of class names, and they are API: an installed component older or newer than the Starter looks them up by name, so no release renames one. The configuration page sets no translation around a component's settings, so `PanelActions` and `WriteFailure` take your `t`. A component that imports them declares a `dsh-mnemon` peer floor of the first Starter that exports them, the one that also exports `MNEMON_COMPONENT_FALLBACK_PRIORITY`.
+`dsh-tingfeng/client` also exports what Memory Spaces' own settings are drawn with, the controls and styles dsh-mnemon drew them with: `ToggleRow`, `useLive` and `useStaged` with `PanelActions` and `WriteFailure` (the two ways a group saves), `Callout`, `Reveal`, `GlobalLocationSetting`, and `memorySettingsStyles`, the configuration's class map. Its keys are a fixed set of class names, and they are API: an installed component older or newer than the Starter looks them up by name, so no release renames one. The configuration page sets no translation around a component's settings, so `PanelActions` and `WriteFailure` take your `t`. A component that imports them declares a `dsh-mnemon` peer floor of the first Starter that exports them, the one that also exports `MNEMON_COMPONENT_FALLBACK_PRIORITY`.
 
 dsh-mnemon keeps the settings of Memory Spaces, a shipped component whose settings it used to draw, and lends Memory Spaces' own settings what only it holds:
 
 - **Fallback.** dsh-mnemon registers Memory Spaces' settings itself, taken from the Memory Spaces version it pins, at `MNEMON_COMPONENT_FALLBACK_PRIORITY`, as it would a Status card it kept for a shipped component. DSH renders the lowest priority for each key, so Memory Spaces' own registration, at the default priority, replaces it while it stays registered. The fallback therefore draws the page whenever Memory Spaces' own client registers nothing: while Memory Spaces is off, while its client loads after it is turned on, if that client fails to load or its entry fails, and beside a Memory Spaces of 0.5.21 or earlier, which has no settings of its own. Turning Memory Spaces on swaps one for the other under the open page; what the first kept in `host.retained` lets the second start where it was.
-- **Registering only where dsh-mnemon yields.** dsh-mnemon 0.5.31 and earlier draw Memory Spaces' settings themselves, at the default priority, and DSH refuses a second registration of a package at the same priority. Exporting `MNEMON_COMPONENT_FALLBACK_PRIORITY` is dsh-mnemon's promise that it keeps those settings at that priority and lends them `host`, so Memory Spaces registers its own only when `@tingfeng/dsh-tingfeng/client` exports it. A client bundle reads an export the loaded dsh-mnemon lacks as `undefined`, so Memory Spaces reads every newer export where it draws, never when it loads.
+- **Registering only where dsh-mnemon yields.** dsh-mnemon 0.5.31 and earlier draw Memory Spaces' settings themselves, at the default priority, and DSH refuses a second registration of a package at the same priority. Exporting `MNEMON_COMPONENT_FALLBACK_PRIORITY` is dsh-mnemon's promise that it keeps those settings at that priority and lends them `host`, so Memory Spaces registers its own only when `dsh-tingfeng/client` exports it. A client bundle reads an export the loaded dsh-mnemon lacks as `undefined`, so Memory Spaces reads every newer export where it draws, never when it loads.
 - **`host`.** Settings registered under Memory Spaces' key receive `host`. `host.configuration` reads the configuration keys lent to Memory Spaces and `set`s the one it owns through the page's revision-fenced settings write. `host.operations.read`/`write` call the Host operations dsh-mnemon serves Memory Spaces, always in the page's own conversation and workspace: an input that names a `sessionId` or `workspaceId` is refused. A read Memory Spaces' settings make on their own (`provider-services`, `status-summary`) joins the same read while it is under way, but only one started at the configuration's current revision; an embedding test always asks the Host. `host.retained` keeps what the settings need across a remount for as long as the page's client runs, and `host.changed()` has the Memory System read its pages again. Like a Source page's `management` client, `host` never hands over the settings service or the transport. It goes with the key, not with who registered: settings under any other key receive none, and another package could get it only by registering under Memory Spaces' key ahead of it, which lends it nothing beyond the connection DSH already shares with every client plugin.
 
 The Status card renders in the `mnemon.component.status` region, keyed the same way, as a headline in `<strong>` and one line in `<p>` under the component's declared name. It receives `component`, `language`, and the Memory System's `sessionId` and `workspace` when there is one, and reads its own Source. Every Source component has a card whether or not it contributes one: a component that is off, or whose Source is not running, shows the page's own note instead, and one that contributed nothing shows that it runs. Tabs, the card and the header use the name the component declares.
 
 Third-party packages continue to use DSH's native Profile/Loader workflow. Install an exact package with `dsh plugin --profile <Profile> add <name>@<version> --save-exact`, verify its `peerDependencies` and `dsh.bundle.patch`, then activate it explicitly in Profile composition after restarting. Downloading an npm package is not activation, and Mnemon does not hot-load it into the current process. External standalone repositories following this guide are welcome; generic graphical management may be revisited after the contracts and community cases settle, but is not a v0.5 promise.
 
-A bundle row can remain installed after dsh-mnemon is removed. Its entry must therefore load without the Mnemon package: keep `name`, `inject` and `memoryPlugin` as plain data, use type-only imports at module scope, and defer runtime imports from `@tingfeng/dsh-tingfeng/*` to `apply()`. Defer local modules that import the SDK too, as `source.js` above does. With `inject: ['mnemonMemory']`, Cordis waits for the service before calling `apply`, disposes the Source registration when the service disappears, and reapplies when it returns. Keep these imports external in the build so bundling cannot hoist a runtime dependency into the entry. Do not catch activation errors and pretend registration succeeded; a missing or incompatible SDK while the service is present still needs a diagnostic. Verify the emitted entry in an isolated directory with no Mnemon dependency as well as normal activation and cleanup; the external consumer's `absent-host.spec.ts` covers both paths.
+A bundle row can remain installed after dsh-mnemon is removed. Its entry must therefore load without the Mnemon package: keep `name`, `inject` and `memoryPlugin` as plain data, use type-only imports at module scope, and defer runtime imports from `dsh-tingfeng/*` to `apply()`. Defer local modules that import the SDK too, as `source.js` above does. With `inject: ['mnemonMemory']`, Cordis waits for the service before calling `apply`, disposes the Source registration when the service disappears, and reapplies when it returns. Keep these imports external in the build so bundling cannot hoist a runtime dependency into the entry. Do not catch activation errors and pretend registration succeeded; a missing or incompatible SDK while the service is present still needs a diagnostic. Verify the emitted entry in an isolated directory with no Mnemon dependency as well as normal activation and cleanup; the external consumer's `absent-host.spec.ts` covers both paths.
 
 <a id="default-three-tier-extensions"></a>
 
 ### Standard View extensions
 
-`defineMemoryViewExtension` from `@tingfeng/dsh-tingfeng/extension-sdk` targets `ANY_MEMORY_STRATEGY` (`'*'`): the extension follows whichever selected Strategy declares its slot, and stays inactive with a diagnostic otherwise. A slot has one owner: registering a second extension for it is rejected when both target the same Strategy or either targets `'*'`, because the pair would meet after a main Strategy switch. `validateMemoryViewExtension` and `memoryViewExtensionValues` give a Strategy the same validated values. `dsh-tingfeng-strategy-default-three-tier/extension-sdk` keeps `defineThreeTierExtension` for an extension that should apply only to that Strategy. The shipped enhancements use the standard slots:
+`defineMemoryViewExtension` from `dsh-tingfeng/extension-sdk` targets `ANY_MEMORY_STRATEGY` (`'*'`): the extension follows whichever selected Strategy declares its slot, and stays inactive with a diagnostic otherwise. A slot has one owner: registering a second extension for it is rejected when both target the same Strategy or either targets `'*'`, because the pair would meet after a main Strategy switch. `validateMemoryViewExtension` and `memoryViewExtensionValues` give a Strategy the same validated values. `dsh-tingfeng-strategy-default-three-tier/extension-sdk` keeps `defineThreeTierExtension` for an extension that should apply only to that Strategy. The shipped enhancements use the standard slots:
 
 | Optional plugin | Slot | Contribution |
 |---|---|---|
@@ -174,7 +174,7 @@ Source keys in `scoped` must retain any Loader include prefix. Omitting its conf
 
 ```ts
 import type { Context } from '@deepseek-ai/cordis'
-import { defineMemoryViewExtension, installMemory } from '@tingfeng/dsh-tingfeng/extension-sdk'
+import { defineMemoryViewExtension, installMemory } from 'dsh-tingfeng/extension-sdk'
 
 export const inject = ['mnemonMemory']
 export function apply(ctx: Context): void {
@@ -233,7 +233,7 @@ Declare calibrated 0–1 relevance as `normalized-relevance` in both the manifes
 
 A Provider can also implement the optional `get(body, id, signal)`: the memory the space holds under that exact id, or `undefined` when it holds none, read without side effects. Forget, link and related-memory traversal then accept an id that the current View did not return, such as a memory the Agent wrote a moment ago or one named in a delegated request: the Source looks the id up in the spaces the View can read and acts only when exactly one holds it. Without `get`, such an id stays unusable until the View returns it as evidence, even with its space named: the Provider's own forget or link might not be bound to that space.
 
-An optional `./client` entry calls `installMemorySourceUI` from `@tingfeng/dsh-tingfeng/client`; DSH loads it as an ordinary Client plugin. It receives `MemorySourcePageProps` with selected instance, locale, writability and scoped `management.read/mutate`. Use `MemorySourcePageFrame` for shared locale/appearance. No Host Context, driver, token, LLM grant or transport is passed to React. Missing pages use generic management; duplicate page ownership and rendering failure have local diagnostics.
+An optional `./client` entry calls `installMemorySourceUI` from `dsh-tingfeng/client`; DSH loads it as an ordinary Client plugin. It receives `MemorySourcePageProps` with selected instance, locale, writability and scoped `management.read/mutate`. Use `MemorySourcePageFrame` for shared locale/appearance. No Host Context, driver, token, LLM grant or transport is passed to React. Missing pages use generic management; duplicate page ownership and rendering failure have local diagnostics.
 
 `active` is false while a retained panel or its browser document is hidden. Pause automatic reads and polling then, and reload on becoming active; already started user workflows retain their bound context until it changes or unmounts. Unchanged catalog revisions and descriptors preserve the management client identity. Automatic inspections may opt into `management.read(operation, input, { coalesce: true })`, also accepted by `createMemorySourcePageClient().read`: equal pending requests share work only in that binding and read epoch. Explicit refresh, visibility changes and writes separate epochs; writes clear pending reads before and after completion. Results are copied for each caller and never retained after settlement, including failures. Reads without the option stay independent, so searches and repeated user actions retain their ordering. Older management clients may ignore this optional hint; it grants no authority and changes no Host validation.
 
@@ -245,7 +245,7 @@ When an action on the page continues in the conversation (putting a skill into t
 
 `refreshKey` changes each time the user presses **Refresh** in the workspace header, and when the configuration page changes what the page shows: a component switched, a Provider saved, a sync, a merge, a ZIP import or an applied plan. It can change while the page is hidden. Reload the page's data when it changes instead of adding a refresh or sync button. `navigationInput` is `{ seed, nonce }` only when a conversation anchor, such as an item in the turn memory bar, opens the page; a tab opens it without one. The default Sources read the seed as a document id (Project Documents selects it), a recall query (Memory Spaces runs it on arrival) or an entry's text (Runtime memory highlights and reveals it). A new `nonce` means a new request for the same seed.
 
-`@tingfeng/dsh-tingfeng/client` also exports the controls the default Sources use, so an installed Source looks and behaves like them: `SearchField` (DSH's input with a search icon), `SelectField` (a labelled DSH selector menu, with `inline`, `size: 'sm'`, `hideLabel` and `ariaLabel`), `WriteReceipt` (a write's outcome, summary and optional view action) and `TaskAgentTag` (whether a task Agent can take the request). They follow the [interaction conventions](../guides/ui-guide.md#interaction-conventions). A Source that imports them, or reads `refreshKey`, declares a `dsh-mnemon` peer floor of 0.5.19, the first Starter to export them. With `unembedded`, `WriteReceipt` adds a line that the memory has no vector, and `embeddingManaged` words it: `false`, where DSH does not manage the Mnemon Native embedding settings, gives a neutral note, and `true` or nothing the caution that embedding did not succeed. dsh-mnemon 0.5.31 and earlier ignore `embeddingManaged`.
+`dsh-tingfeng/client` also exports the controls the default Sources use, so an installed Source looks and behaves like them: `SearchField` (DSH's input with a search icon), `SelectField` (a labelled DSH selector menu, with `inline`, `size: 'sm'`, `hideLabel` and `ariaLabel`), `WriteReceipt` (a write's outcome, summary and optional view action) and `TaskAgentTag` (whether a task Agent can take the request). They follow the [interaction conventions](../guides/ui-guide.md#interaction-conventions). A Source that imports them, or reads `refreshKey`, declares a `dsh-mnemon` peer floor of 0.5.19, the first Starter to export them. With `unembedded`, `WriteReceipt` adds a line that the memory has no vector, and `embeddingManaged` words it: `false`, where DSH does not manage the Mnemon Native embedding settings, gives a neutral note, and `true` or nothing the caution that embedding did not succeed. dsh-mnemon 0.5.31 and earlier ignore `embeddingManaged`.
 
 ## Independent repository checklist
 
@@ -258,7 +258,7 @@ Named built-in tool families follow committed global Source registrations by `ma
 The default Starter alone mounts defaults. Source/Strategy packages do not ship self-activating default patches. A user's profile, bundle or explicit parent composition controls activation and replacement.
 
 ```ts
-import { MemoryCompositionRunner } from '@tingfeng/dsh-tingfeng/testing'
+import { MemoryCompositionRunner } from 'dsh-tingfeng/testing'
 import * as notes from './index.js'
 import * as focus from './strategy.js'
 

@@ -1,5 +1,5 @@
 /** Declarative identity and graph relations shared by every Mnemon plugin. */
-export const MEMORY_PLUGIN_API_VERSION = '@tingfeng/dsh-tingfeng/plugin/v1' as const
+export const MEMORY_PLUGIN_API_VERSION = 'dsh-tingfeng/plugin/v1' as const
 
 export type MemoryPluginRole = 'source' | 'strategy' | 'strategy-extension'
 

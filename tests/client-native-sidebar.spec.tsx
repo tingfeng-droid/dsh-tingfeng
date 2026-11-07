@@ -159,7 +159,7 @@ describe('native Sidebar panel integration', () => {
     releases.push(f.registerPeer())
     const view = render(<><f.NativeFrame /><f.Host /></>)
     const entry = screen.getByRole('button', { name: 'Memory System' })
-    expect(document.querySelector('[data-dsh-tingfeng-entry]')).toBeNull()
+    expect(document.querySelector('[data-dsh-mnemon-entry]')).toBeNull()
     expect(entry.querySelector('svg')?.getAttribute('width')).toBe('16')
     expect(entry.querySelector('svg')?.getAttribute('height')).toBe('16')
     expect(f.core.entriesOfSlot('main').map(item => item.options.key)).toEqual([MNEMON_MAIN_PANEL_ID, 'plugins'])
@@ -222,14 +222,14 @@ describe('native Sidebar panel integration', () => {
   it('replaces only its fallback when native seats arrive, and restores it when a replacement layout removes them', () => {
     document.body.innerHTML = '<aside data-pane="sidebar"><div><button class="newSession">New</button></div></aside>'
     const f = fixture(false)
-    expect(document.querySelectorAll('[data-dsh-tingfeng-entry]')).toHaveLength(1)
+    expect(document.querySelectorAll('[data-dsh-mnemon-entry]')).toHaveLength(1)
     act(() => f.declare())
-    expect(document.querySelector('[data-dsh-tingfeng-entry]')).toBeNull()
+    expect(document.querySelector('[data-dsh-mnemon-entry]')).toBeNull()
     expect(f.core.entriesOfSlot('sidebar.panellist')).toHaveLength(1)
     act(() => f.removeOwner())
-    expect(document.querySelectorAll('[data-dsh-tingfeng-entry]')).toHaveLength(1)
+    expect(document.querySelectorAll('[data-dsh-mnemon-entry]')).toHaveLength(1)
     f.navigation.dispose()
-    expect(document.querySelector('[data-dsh-tingfeng-entry]')).toBeNull()
+    expect(document.querySelector('[data-dsh-mnemon-entry]')).toBeNull()
   })
 
   it('rejects an occupied native panel id without replacing the peer or leaking a launcher', () => {
@@ -238,6 +238,6 @@ describe('native Sidebar panel integration', () => {
     expect(() => f.mount()).toThrow()
     expect(f.core.entriesOfSlot('main')).toEqual(peers)
     expect(f.core.entriesOfSlot('sidebar.panellist')).toHaveLength(1)
-    expect(document.querySelector('[data-dsh-tingfeng-entry]')).toBeNull()
+    expect(document.querySelector('[data-dsh-mnemon-entry]')).toBeNull()
   })
 })

@@ -1,4 +1,4 @@
-import { truncateMemoryText } from '@tingfeng/dsh-tingfeng/extension-sdk'
+import { truncateMemoryText } from 'dsh-tingfeng/extension-sdk'
 
 /** Preserve query-local evidence under the Source's per-document budget. */
 export function documentEvidence(content: string, query: string, maximum: number): string {

@@ -1,6 +1,6 @@
 import type { Context } from '@deepseek-ai/cordis'
-import { COMPOSABLE_MEMORY_API_VERSION } from '@tingfeng/dsh-tingfeng/contracts'
-import { defineMemoryPlugin, defineMemoryStrategy, installMemory } from '@tingfeng/dsh-tingfeng/extension-sdk'
+import { COMPOSABLE_MEMORY_API_VERSION } from 'dsh-tingfeng/contracts'
+import { defineMemoryPlugin, defineMemoryStrategy, installMemory } from 'dsh-tingfeng/extension-sdk'
 
 export const name = 'dsh-tingfeng-strategy-external-focus'
 export const inject = ['mnemonMemory']

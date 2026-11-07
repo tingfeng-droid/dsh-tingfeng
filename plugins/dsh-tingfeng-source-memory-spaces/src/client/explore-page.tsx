@@ -3,7 +3,7 @@ import type { JSX } from 'react'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { CATEGORIES, type Category, type Insight, type MemoryReadSource } from '../contracts.ts'
 import type { MemorySpacesPageClient } from './api.ts'
-import { useRequestVersion, message, short, PageHeader, SectionSpinner, ProgressiveFooter, EmptyState, SearchField, SelectField } from '@tingfeng/dsh-tingfeng/client'
+import { useRequestVersion, message, short, PageHeader, SectionSpinner, ProgressiveFooter, EmptyState, SearchField, SelectField } from 'dsh-tingfeng/client'
 import { InsightCard, ReadSourcePanel, categoryLabel, insightKey } from './widgets.tsx'
 
 export interface MemorySpacesPageStatus { defaultRecallLimit?: number }

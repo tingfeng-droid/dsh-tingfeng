@@ -64,7 +64,7 @@ const NO_CHANGE_SIGNAL: Pick<MnemonChangeSignal, 'subscribe' | 'getSnapshot' | '
 const NO_COMPONENT_LIST: Pick<MnemonComponentListSeat, 'subscribe' | 'getSnapshot'> = { subscribe: () => () => {}, getSnapshot: () => undefined }
 
 /**
- * The @tingfeng/dsh-tingfeng configuration, shown on its bundle page under DSH Plugins:
+ * The dsh-tingfeng configuration, shown on its bundle page under DSH Plugins:
  * the memory composition, then only what belongs to no component — where
  * memory lives and how the interface shows it. Each component's own settings
  * live on its page, which a component's name opens anywhere on this page.

@@ -9,12 +9,12 @@ import ts from 'typescript'
 const PLUGIN_ID = 'dsh-tingfeng'
 /**
  * Browser registration id. The host's client module graph keys every row by
- * PACKAGE NAME (`@tingfeng/dsh-tingfeng`), and `__ModuleLoader__.load({ id })`
+ * PACKAGE NAME (`dsh-tingfeng`), and `__ModuleLoader__.load({ id })`
  * must match it exactly or the host reports "loaded without registering".
  * This is NOT the same string as PLUGIN_ID: the package was renamed to the
  * @tingfeng scope while the build label stayed the short name.
  */
-const CLIENT_MODULE_ID = '@tingfeng/dsh-tingfeng'
+const CLIENT_MODULE_ID = 'dsh-tingfeng'
 const PROJECT_ROOT = dirname(fileURLToPath(import.meta.url))
 const CLIENT_EXTERNALS = [
   /^react(?:\/.*)?$/,
@@ -76,7 +76,7 @@ export function clientCssPlugin(injectStyles = true): TsdownPlugin {
   return {
     name: 'dsh-tingfeng-css-modules-inline',
     resolveId(source: string, importer: string | undefined) {
-      if (source === '@tingfeng/dsh-tingfeng/client') return resolvePath(PROJECT_ROOT, 'src/client/extension-sdk.ts')
+      if (source === 'dsh-tingfeng/client') return resolvePath(PROJECT_ROOT, 'src/client/extension-sdk.ts')
       if (!source.endsWith('.module.css')) return null
       const absolute = source.startsWith('dsh-tingfeng-source-')
         ? fileURLToPath(import.meta.resolve(source))

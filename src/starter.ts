@@ -6,7 +6,7 @@ export const provide = ['mnemonStarterReady']
 
 /**
  * The separate readiness Entry of 0.5.18 and 0.5.19, kept for compositions that
- * still insert it; the Starter's own group (`@tingfeng/dsh-tingfeng/bundle`) now prepares itself.
+ * still insert it; the Starter's own group (`dsh-tingfeng/bundle`) now prepares itself.
  */
 export async function apply(ctx: Context): Promise<void> {
   await prepareStarterResolution(ctx)

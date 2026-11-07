@@ -9,7 +9,7 @@ export const DOCUMENTS_PACKAGE = 'dsh-tingfeng-source-documents'
 
 /**
  * The status the Memory System read for the conversation and workspace it
- * shows. Only @tingfeng/dsh-tingfeng's own cards read it; a card an installed component
+ * shows. Only dsh-tingfeng's own cards read it; a card an installed component
  * contributes reads its own Source.
  */
 export const WorkbenchStatusContext = createContext<StatusView | null>(null)

@@ -4,7 +4,7 @@ Owns managed Markdown, search, revisions and local archiving. It requires a work
 
 ## Use
 
-The `@tingfeng/dsh-tingfeng` Starter installs and mounts this Source by default. The package alone does not activate an instance or select a Strategy.
+The `dsh-tingfeng` Starter installs and mounts this Source by default. The package alone does not activate an instance or select a Strategy.
 
 For a custom Profile, mount an explicit Entry after the Host's `ctx.mnemonMemory` service is available:
 
@@ -41,18 +41,18 @@ The `create` Action accepts `title`, `content`, and optional `description`, `sou
 
 ## Storage files
 
-The `./contracts` entry names this Source's directory, index and lock under a storage root (`documents/`, `index.json`, `.index.lock`; each document lies in `active/` or `archived/` by its status) and exports `parseDocumentIndex`, which reads an index as a backup or sync carries it, and `summarizeDocumentIndex`, which counts one for an inventory. They are pure and browser-safe. The `@tingfeng/dsh-tingfeng` Starter's backup, sync and storage inventory use them instead of keeping copies.
+The `./contracts` entry names this Source's directory, index and lock under a storage root (`documents/`, `index.json`, `.index.lock`; each document lies in `active/` or `archived/` by its status) and exports `parseDocumentIndex`, which reads an index as a backup or sync carries it, and `summarizeDocumentIndex`, which counts one for an inventory. They are pure and browser-safe. The `dsh-tingfeng` Starter's backup, sync and storage inventory use them instead of keeping copies.
 
 ## Source-owned UI and tests
 
-The optional `./client` entry is an ordinary DSH Client plugin. This package owns its pages and `presentation/` resources and uses `@tingfeng/dsh-tingfeng/client` for the shared frame and scoped management client. It never receives a Host Context, credentials or another Source's controller.
+The optional `./client` entry is an ordinary DSH Client plugin. This package owns its pages and `presentation/` resources and uses `dsh-tingfeng/client` for the shared frame and scoped management client. It never receives a Host Context, credentials or another Source's controller.
 
-From a source checkout, install the declared dependencies and run `pnpm verify` to check Host behavior, Source-backed page interactions and Host/browser artifacts. Unreleased SDK work consumes a packed `@tingfeng/dsh-tingfeng` peer, not repository aliases or copied root tests.
+From a source checkout, install the declared dependencies and run `pnpm verify` to check Host behavior, Source-backed page interactions and Host/browser artifacts. Unreleased SDK work consumes a packed `dsh-tingfeng` peer, not repository aliases or copied root tests.
 
 [Plugin development](https://github.com/omdsh-dev/dsh-tingfeng/blob/main/docs/en/development/extensions.md) · [中文指南](https://github.com/omdsh-dev/dsh-tingfeng/blob/main/docs/zh-CN/development/extensions.md)
 
 ## Editing a document created in the same execution
 
-With @tingfeng/dsh-tingfeng 0.5.40 or later, an authorized `manage` Action can immediately update a document successfully created by `create` or `manage` in that same execution. The create-only Action itself still cannot update. This does not expand the pinned search/read grant or admit documents created by management, another workspace or another delegated execution, even when executions share the same View. Saved documents and indexes need no migration.
+With dsh-tingfeng 0.5.40 or later, an authorized `manage` Action can immediately update a document successfully created by `create` or `manage` in that same execution. The create-only Action itself still cannot update. This does not expand the pinned search/read grant or admit documents created by management, another workspace or another delegated execution, even when executions share the same View. Saved documents and indexes need no migration.
 
-使用 @tingfeng/dsh-tingfeng 0.5.40 及以后版本时，获准的 `manage` Action 可立即更新同一次执行中由 `create` 或 `manage` 成功新建的档案；仅创建 Action 本身仍不能更新。读取与检索范围保持固定，不接纳管理页面、其他工作区或其他委派执行新建的档案，即使执行共享同一个 View。已有档案与索引无需迁移。
+使用 dsh-tingfeng 0.5.40 及以后版本时，获准的 `manage` Action 可立即更新同一次执行中由 `create` 或 `manage` 成功新建的档案；仅创建 Action 本身仍不能更新。读取与检索范围保持固定，不接纳管理页面、其他工作区或其他委派执行新建的档案，即使执行共享同一个 View。已有档案与索引无需迁移。

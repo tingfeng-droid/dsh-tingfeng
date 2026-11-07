@@ -7,7 +7,7 @@ import { resolveMemorySpacesConfig } from "../src/config.ts"
 import { adapterRegistry, createRegistry, descriptors, installedCliStub } from './providers.ts'
 import { MemoryProviderCatalog } from '../src/providers/catalog.ts'
 import { ProcessError, type ProcessRunner } from '../src/providers/process.ts'
-import { withMemoryStorageLock } from '@tingfeng/dsh-tingfeng/extension-sdk'
+import { withMemoryStorageLock } from 'dsh-tingfeng/extension-sdk'
 import { createRunner } from '../src/runner.ts'
 import { mutationResultCompletion, mutationResultCommitted, type MemorySpacesService } from '../src/service.ts'
 import type { RecallQualityConfig } from '../src/contracts.ts'

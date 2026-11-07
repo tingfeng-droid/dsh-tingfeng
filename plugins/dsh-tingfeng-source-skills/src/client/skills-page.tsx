@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type JSX } from 'react'
 import { Button, DiffBlock, Switch, Tag } from '@deepseek-ai/dsh-client-ui-primitives'
-import { SearchField, SelectField, SidebarModal } from '@tingfeng/dsh-tingfeng/client'
+import { SearchField, SelectField, SidebarModal } from 'dsh-tingfeng/client'
 import { SKILL_ROOT_KINDS, type CatalogView, type SkillDocument, type SkillInvocation, type SkillRootKind, type SkillSummary, type SkillVersion } from '../contracts.ts'
 import { css, errorText, points, stamp, useT } from './presentation.ts'
 import { Busy, Confirm, diffLabels, Empty, Field, Fold, FoldLink, MoreMenu, SkillIcon, SkillMarkdown, useLink } from './shared.tsx'

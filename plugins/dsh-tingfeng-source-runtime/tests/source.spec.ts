@@ -5,8 +5,8 @@ import { join } from 'node:path'
 
 import { describe, expect, it, vi } from 'vitest'
 
-import { DEFAULT_MEMORY_VIEW_BUDGET } from '@tingfeng/dsh-tingfeng/contracts'
-import { MemoryCompositionRunner } from '@tingfeng/dsh-tingfeng/testing'
+import { DEFAULT_MEMORY_VIEW_BUDGET } from 'dsh-tingfeng/contracts'
+import { MemoryCompositionRunner } from 'dsh-tingfeng/testing'
 import * as plugin from '../src/index.ts'
 import { RuntimeMemoryController } from '../src/controller.ts'
 

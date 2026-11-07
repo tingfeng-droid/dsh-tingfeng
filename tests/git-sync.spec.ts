@@ -141,7 +141,7 @@ function textOf(root: string, id: string): string {
   return readFileSync(join(root, documentsOf(root).find(document => document.id === id)!.relativePath), 'utf8')
 }
 
-/** What a storage root last agreed on with its branch, as an older @tingfeng/dsh-tingfeng never records. */
+/** What a storage root last agreed on with its branch, as an older dsh-tingfeng never records. */
 function agreementOf(root: string): string {
   return join(root, 'state', 'sync', 'base.json')
 }
@@ -296,7 +296,7 @@ describe.skipIf(!available)('Mnemon Git sync', { timeout: 90_000 }, () => {
         // v0.5.38 wrote this pair even when the user only supplied a repository.
         const path = machineA.sync.settings().path()
         const saved = JSON.parse(readFileSync(path, 'utf8'))
-        writeFileSync(path, JSON.stringify({ ...saved, authorName: '@tingfeng/dsh-tingfeng sync', authorEmail: 'mnemon@localhost' }))
+        writeFileSync(path, JSON.stringify({ ...saved, authorName: 'dsh-tingfeng sync', authorEmail: 'mnemon@localhost' }))
       }
       const pushed = await machineA.sync.push({ message: 'Approved identity' })
       expect(pushed, pushed.reason).toMatchObject({ committed: true, pushed: true })
@@ -342,10 +342,10 @@ describe.skipIf(!available)('Mnemon Git sync', { timeout: 90_000 }, () => {
         const origin = await repository('sync-author-explicit-remote')
         const machineA = await machine('sync-author-explicit', origin)
         // One field matching the old default is still part of an explicit custom pair.
-        await machineA.sync.configure({ authorName: '@tingfeng/dsh-tingfeng sync', authorEmail: 'approved@example.com' })
+        await machineA.sync.configure({ authorName: 'dsh-tingfeng sync', authorEmail: 'approved@example.com' })
         expect(await machineA.sync.push({ message: 'Explicit identity' })).toMatchObject({ pushed: true })
-        expect(await git(['log', '-1', '--format=%an <%ae>', 'mnemon-sync'], origin)).toBe('@tingfeng/dsh-tingfeng sync <approved@example.com>\n')
-        expect(machineA.sync.settings().read()).toMatchObject({ authorName: '@tingfeng/dsh-tingfeng sync', authorEmail: 'approved@example.com' })
+        expect(await git(['log', '-1', '--format=%an <%ae>', 'mnemon-sync'], origin)).toBe('dsh-tingfeng sync <approved@example.com>\n')
+        expect(machineA.sync.settings().read()).toMatchObject({ authorName: 'dsh-tingfeng sync', authorEmail: 'approved@example.com' })
       })
     })
   })
@@ -358,13 +358,13 @@ describe.skipIf(!available)('Mnemon Git sync', { timeout: 90_000 }, () => {
       if (published) {
         await machineA.sync.configure({ authorName: 'Corporate User', authorEmail: 'employee@company.example' })
         original = (await machineA.sync.push({ message: 'Published history' })).commit
-        await machineA.sync.configure({ authorName: '@tingfeng/dsh-tingfeng sync', authorEmail: 'mnemon@localhost' })
+        await machineA.sync.configure({ authorName: 'dsh-tingfeng sync', authorEmail: 'mnemon@localhost' })
       }
       requireCorporateAuthor(origin)
       await machineA.sources.runtime.mutate('mutate', { action: 'add', target: 'user', content: 'Keep this pending memory', importance: 'normal' }, { confirmed: true })
       const rejected = await machineA.sync.push({ message: 'Pending memory' })
       expect(rejected).toMatchObject({ committed: true, pushed: false })
-      expect(rejected.reason).toContain('Commit author rejected by policy: @tingfeng/dsh-tingfeng sync <mnemon@localhost>')
+      expect(rejected.reason).toContain('Commit author rejected by policy: dsh-tingfeng sync <mnemon@localhost>')
       expect(rejected.reason).not.toContain('no token')
       expect(rejected.reason).toContain('Sync > Advanced')
       await git(['config', '--file', global, 'user.name', 'Corporate User'])
@@ -965,7 +965,7 @@ describe.skipIf(!available)('Mnemon Git sync', { timeout: 90_000 }, () => {
       expect(documentsOf(machineA.root)).toHaveLength(2)
     })
 
-    it('keeps the newer version when the other machine runs a @tingfeng/dsh-tingfeng that records no agreement', async () => {
+    it('keeps the newer version when the other machine runs a dsh-tingfeng that records no agreement', async () => {
       const origin = await repository('sync-document-older-remote')
       const machineA = await machine('sync-document-older-a', origin)
       await create(machineA)
@@ -993,7 +993,7 @@ describe.skipIf(!available)('Mnemon Git sync', { timeout: 90_000 }, () => {
       const machineA = await machine('sync-document-upgrade', origin)
       await create(machineA)
       await machineA.sync.push({ message: 'Version 1' })
-      // @tingfeng/dsh-tingfeng 0.5.28 remembered the commit of its last sync, but no agreement.
+      // dsh-tingfeng 0.5.28 remembered the commit of its last sync, but no agreement.
       rmSync(agreementOf(machineA.root), { force: true })
       expect(existsSync(join(machineA.root, 'state', 'sync', 'last-run.json'))).toBe(true)
       const id = documentsOf(machineA.root)[0]!.id
@@ -1582,7 +1582,7 @@ describe.skipIf(!available)('Mnemon Git sync', { timeout: 90_000 }, () => {
       await machineA.sync.configure({ authorName: '', authorEmail: '' })
       const pushed = await machineA.sync.push({ message: 'No identity here' })
       expect(pushed).toMatchObject({ committed: true, pushed: true })
-      expect(await git(['log', '-1', '--format=%an <%ae>', 'mnemon-sync'], origin)).toBe('@tingfeng/dsh-tingfeng sync <mnemon@localhost>\n')
+      expect(await git(['log', '-1', '--format=%an <%ae>', 'mnemon-sync'], origin)).toBe('dsh-tingfeng sync <mnemon@localhost>\n')
     })
   })
 

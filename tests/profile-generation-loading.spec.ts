@@ -13,7 +13,7 @@ function generation() {
   const directory = mkdtempSync(join(tmpdir(), 'mnemon-generation-import-'))
   const profile = join(directory, 'profiles/web')
   const installed = join(directory, 'profiles/.generations/live/mnemon/node_modules')
-  const packageRoot = join(installed, '@tingfeng/dsh-tingfeng')
+  const packageRoot = join(installed, 'dsh-tingfeng')
   mkdirSync(packageRoot, { recursive: true })
   cpSync(join(root, 'lib'), join(packageRoot, 'lib'), { recursive: true })
   writeFileSync(join(packageRoot, 'package.json'), JSON.stringify(manifest))
@@ -31,7 +31,7 @@ function generation() {
   // parent is not created by `symlinkSync`, and `'junction'` is only special on
   // Windows — on POSIX the target is resolved literally, so a missing
   // `node_modules/@tingfeng` fails with ENOENT instead of a clearer error.
-  const linked = join(profile, 'node_modules/@tingfeng/dsh-tingfeng')
+  const linked = join(profile, 'node_modules/dsh-tingfeng')
   mkdirSync(dirname(linked), { recursive: true })
   symlinkSync(packageRoot, linked, 'junction')
   return { directory, profile }
@@ -44,13 +44,13 @@ describe('profile generation imports against host-owned framework packages', () 
       const entry = join(fixture.profile, 'check.mjs')
       writeFileSync(entry, `
         import assert from 'node:assert/strict'
-        import * as mnemon from '@tingfeng/dsh-tingfeng'
+        import * as mnemon from 'dsh-tingfeng'
         const config = mnemon.Config({ displayMode: 'builtin', remoteAccess: 'read-only' })
         assert.equal(typeof config.displayMode?.get, 'function')
         assert.equal(config.displayMode.get(), 'builtin')
         assert.equal(config.remoteAccess, 'read-only')
         assert.equal(typeof mnemon.apply, 'function')
-        assert.equal(mnemon.name, '@tingfeng/dsh-tingfeng')
+        assert.equal(mnemon.name, 'dsh-tingfeng')
         console.log(JSON.stringify({ loaded: true }))
       `)
       const result = spawnSync(process.execPath, [entry], { encoding: 'utf8', timeout: 20_000 })

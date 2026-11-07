@@ -192,7 +192,7 @@ describe('Mnemon canonical workspace launcher', () => {
     const artworkTargets = sidebar.querySelectorAll(":scope > :first-child > button:not([data-dsh-part='sidebar-entry'])")
     expect([...artworkTargets]).toContain(newSession)
     expect([...artworkTargets]).not.toContain(entry)
-    expect(sidebar.querySelector('[data-dsh-plugin="@tingfeng/dsh-tingfeng"][data-dsh-part="sidebar-entry"]')).toBe(entry)
+    expect(sidebar.querySelector('[data-dsh-plugin="dsh-tingfeng"][data-dsh-part="sidebar-entry"]')).toBe(entry)
     expect(entry.getAttribute('aria-label')).toBe('Memory')
     fireEvent.click(entry)
     expect(entry.dataset.active).toBe('true')

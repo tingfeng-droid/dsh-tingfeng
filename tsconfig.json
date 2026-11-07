@@ -20,13 +20,13 @@
       "node"
     ],
     "paths": {
-      "@tingfeng/dsh-tingfeng/contracts": [
+      "dsh-tingfeng/contracts": [
         "./src/core/contracts/index.ts"
       ],
-      "@tingfeng/dsh-tingfeng/extension-sdk": [
+      "dsh-tingfeng/extension-sdk": [
         "./src/sdk/index.ts"
       ],
-      "@tingfeng/dsh-tingfeng/testing": [
+      "dsh-tingfeng/testing": [
         "./src/sdk/testing.ts"
       ],
       "dsh-tingfeng-source-memory-spaces/provider-sdk": [
@@ -35,7 +35,7 @@
       "dsh-tingfeng-source-memory-spaces/testing": [
         "./plugins/dsh-tingfeng-source-memory-spaces/src/testing.ts"
       ],
-      "@tingfeng/dsh-tingfeng/client": [
+      "dsh-tingfeng/client": [
         "./src/client/extension-sdk.ts"
       ],
       "dsh-tingfeng-source-runtime/client": [

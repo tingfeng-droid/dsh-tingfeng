@@ -106,7 +106,7 @@ export class ProfileMnemonSettings implements HostSettingsService {
         const value = this.resolve(registration)
         for (const listener of this.listeners) {
           try { listener(registration.namespace, value) }
-          catch (error) { console.warn('@tingfeng/dsh-tingfeng: committed settings listener failed', error) }
+          catch (error) { console.warn('dsh-tingfeng: committed settings listener failed', error) }
         }
       }
     }) as never)
@@ -118,7 +118,7 @@ export class ProfileMnemonSettings implements HostSettingsService {
         this.revisions.clear()
         disposePresentation?.()
       }
-    }, '@tingfeng/dsh-tingfeng: profile settings')
+    }, 'dsh-tingfeng: profile settings')
   }
 
   get writable(): boolean {
@@ -240,7 +240,7 @@ export class ProfileMnemonSettings implements HostSettingsService {
     // DSH exposes no completion event for its asynchronous import of the removed settings.yaml.
     // Never race that writer: recover its retained backup on the next startup.
     if (this.nativeImportPending) {
-      console.warn('@tingfeng/dsh-tingfeng: DSH is importing settings.yaml; restart once to recover retained Mnemon UI and plugin preferences')
+      console.warn('dsh-tingfeng: DSH is importing settings.yaml; restart once to recover retained Mnemon UI and plugin preferences')
       return
     }
     if (plainHostConfig(this.owner?.config ?? this.input).legacySettingsImported) return
@@ -273,7 +273,7 @@ export class ProfileMnemonSettings implements HostSettingsService {
     }
     const preview = plan()
     if (Object.keys(preview.patch).length === 0) {
-      if (preview.diagnostics.length > 0) console.warn('@tingfeng/dsh-tingfeng: legacy settings were not imported; retained backup requires review')
+      if (preview.diagnostics.length > 0) console.warn('dsh-tingfeng: legacy settings were not imported; retained backup requires review')
       return
     }
     if (this.closed) return

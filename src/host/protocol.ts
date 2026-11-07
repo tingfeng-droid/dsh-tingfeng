@@ -59,7 +59,7 @@ export const MNEMON_SYNC_TOKEN_ENV = 'MNEMON_SYNC_GIT_TOKEN'
  */
 export const MNEMON_SYNC_DEFAULT_BRANCH = 'mnemon-sync'
 export const MNEMON_SYNC_DEFAULT_SUBDIR = 'mnemon/'
-export const MNEMON_SYNC_DEFAULT_AUTHOR_NAME = '@tingfeng/dsh-tingfeng sync'
+export const MNEMON_SYNC_DEFAULT_AUTHOR_NAME = 'dsh-tingfeng sync'
 export const MNEMON_SYNC_DEFAULT_AUTHOR_EMAIL = 'mnemon@localhost'
 export const MNEMON_SETTINGS_CHANNEL = '/dsh-tingfeng-settings'
 /**
@@ -82,7 +82,7 @@ export const MNEMON_REMOTE_VIEW_WRITE_ENDPOINT = `${MNEMON_REMOTE_NAMESPACE}/vie
 export const MNEMON_REMOTE_REVIEW_ENDPOINT = `${MNEMON_REMOTE_NAMESPACE}/review`
 export const MNEMON_SETTINGS_NAMESPACE = 'mnemon'
 export const MNEMON_UI_SETTINGS_NAMESPACE = 'mnemon-ui'
-/** 技能管理's settings: one live group of the @tingfeng/dsh-tingfeng entry, drawn on that component's page. */
+/** 技能管理's settings: one live group of the dsh-tingfeng entry, drawn on that component's page. */
 export const MNEMON_SKILLS_SETTINGS_NAMESPACE = 'mnemon-skills'
 export * from './view-protocol.ts'
 export * from './memory-tools.ts'
@@ -706,7 +706,7 @@ export interface StatusView {
   healthy: boolean
   error?: string
   version?: string
-  /** The @tingfeng/dsh-tingfeng version this Host runs, which an installed update replaces only when DSH restarts. */
+  /** The dsh-tingfeng version this Host runs, which an installed update replaces only when DSH restarts. */
   dshMnemonVersion?: string
   /** Updates installed while this Host runs; they load when DSH restarts. */
   restartPending?: VersionRestartStatus
@@ -759,7 +759,7 @@ export interface MnemonPackManifest {
   version: 1
   scope: MnemonPackScope
   exportedAt: string
-  source: { plugin: '@tingfeng/dsh-tingfeng'; pluginVersion: string }
+  source: { plugin: 'dsh-tingfeng'; pluginVersion: string }
   components: MnemonPackComponent[]
   summary: MnemonPackComponentSummary[]
 }
@@ -1325,7 +1325,7 @@ export interface MnemonSyncDiff {
 }
 
 export type VersionPackageId = `dsh-tingfeng-${'source' | 'strategy' | 'provider'}-${string}`
-export type VersionComponentId = 'mnemon' | '@tingfeng/dsh-tingfeng' | VersionPackageId
+export type VersionComponentId = 'mnemon' | 'dsh-tingfeng' | VersionPackageId
 export type VersionInstallMode = 'homebrew' | 'go' | 'npm' | 'link' | 'manual' | 'missing'
 
 export interface VersionComponentStatus {
@@ -1369,9 +1369,9 @@ export interface VersionUpdateOutcome {
 }
 
 export interface VersionRestartStatus {
-  /** The @tingfeng/dsh-tingfeng version this Host runs. */
+  /** The dsh-tingfeng version this Host runs. */
   running: string
-  /** The @tingfeng/dsh-tingfeng version now installed, when it differs, however it was installed: Check versions or `dsh plugin`, for example. */
+  /** The dsh-tingfeng version now installed, when it differs, however it was installed: Check versions or `dsh plugin`, for example. */
   installed?: string
   /** Packages Check versions updated on their own. */
   packages?: VersionPackageId[]

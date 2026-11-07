@@ -3,7 +3,7 @@ import type { JSX } from 'react'
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type FormEvent } from 'react'
 import { normalizeEntityKey, type EntityMemoriesView, type EntityRelatedView, type EntityView, type Insight, type MemorySpaceCatalog, type MemoryReadSource } from '../contracts.ts'
 import type { MemorySpacesPageClient } from './api.ts'
-import { useRequestVersion, appearanceClass, message, PageHeader, SectionSpinner, ProgressiveFooter, EmptyState, SearchField } from '@tingfeng/dsh-tingfeng/client'
+import { useRequestVersion, appearanceClass, message, PageHeader, SectionSpinner, ProgressiveFooter, EmptyState, SearchField } from 'dsh-tingfeng/client'
 import { InsightCard, ReadSourcePanel, insightKey } from './widgets.tsx'
 
 /** Show a loading placeholder only when a read outlasts this, so a quick read never flashes one. */
@@ -14,7 +14,7 @@ const ENTITY_CARD_PAGE = 6
 const ENTITY_MEMORY_BATCH = 48
 const ENTITY_RELATED_LIMIT = 20
 /** The choice to find related memories lasts for this browser session; each new session starts collapsed. */
-const RELATED_PREFERENCE_KEY = '@tingfeng/dsh-tingfeng.memory-spaces.entities.related'
+const RELATED_PREFERENCE_KEY = 'dsh-tingfeng.memory-spaces.entities.related'
 
 function readRelatedPreference(): boolean {
   try { return globalThis.sessionStorage?.getItem(RELATED_PREFERENCE_KEY) === 'open' } catch { return false }

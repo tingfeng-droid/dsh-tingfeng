@@ -89,7 +89,7 @@ export function registerTools(ctx: HostContextShape, runtimeSource: MnemonAgentR
         registered.delete(tool.name)
       } else if (!registered.has(tool.name)) {
         const dispose = ctx.tools.register(tool)
-        if (typeof dispose !== 'function') throw new Error('@tingfeng/dsh-tingfeng tool registration did not return a disposer: ' + tool.name)
+        if (typeof dispose !== 'function') throw new Error('dsh-tingfeng tool registration did not return a disposer: ' + tool.name)
         registered.set(tool.name, dispose as () => unknown)
       }
     }
@@ -111,7 +111,7 @@ export function registerTools(ctx: HostContextShape, runtimeSource: MnemonAgentR
     ready = true
     reconcile(contributions.committedContributionSnapshot())
   }).catch(error => {
-    if (active) console.warn('@tingfeng/dsh-tingfeng: could not initialize Source tool families', error)
+    if (active) console.warn('dsh-tingfeng: could not initialize Source tool families', error)
   })
   return dispose
 }
@@ -126,7 +126,7 @@ function toolHelpers(runtimeSource: MnemonAgentRuntimeSource) {
   const requireSource = (exec: ToolExecution, typeId: string, capability: MemoryCapability): MnemonRuntimeGraph => {
     const graph = runtimeFor(exec)
     assertParticipation(graph.config, typeId, capability, 'automatic')
-    if (['write', 'archive', 'link', 'forget', 'import'].includes(capability) && !runtimeSource.config.writeEnabled) throw new Error('@tingfeng/dsh-tingfeng is configured read-only')
+    if (['write', 'archive', 'link', 'forget', 'import'].includes(capability) && !runtimeSource.config.writeEnabled) throw new Error('dsh-tingfeng is configured read-only')
     return graph
   }
   const config = runtimeSource.config
@@ -193,7 +193,7 @@ function registerViewTools(ctx: HostContextShape, { runtimeFor, config, composab
     output: { schema: JSON_OBJECT_OUTPUT, render: (_args: unknown, value: unknown) => text(value),
       presentationMeta: memoryWritePresentation(undefined, 'view-action', 'offerId') },
     execute: (args: { offerId: string; input: MemoryJsonValue }, exec: ToolExecution) => {
-      if (!config.writeEnabled) throw new Error('@tingfeng/dsh-tingfeng is configured read-only (writeEnabled: false)')
+      if (!config.writeEnabled) throw new Error('dsh-tingfeng is configured read-only (writeEnabled: false)')
       const agent = requireAgent(exec)
       const graph = runtimeFor(exec)
       // The turn the coordinator acts in; an id it does not offer names only what the envelope shows (#390).
@@ -363,7 +363,7 @@ function registerDocumentTools(ctx: HostContextShape, { requireSource, config, s
     output: { schema: JSON_OBJECT_OUTPUT, render: (_args: unknown, value: unknown) => text(value),
       presentationMeta: namedToolPresentation('mnemon_document_manage') },
     execute: (args: { action: 'create' | 'update' | 'archive'; id?: string; title?: string; description?: string; content?: string; sourcePaths?: string[] }, exec: ToolExecution) => {
-      if (!config.writeEnabled) throw new Error('@tingfeng/dsh-tingfeng is configured read-only (writeEnabled: false)')
+      if (!config.writeEnabled) throw new Error('dsh-tingfeng is configured read-only (writeEnabled: false)')
       const agent = requireAgent(exec)
       if (args.action === 'archive') {
         // Without a Memory Spaces layer to index into, the coordinator archives locally (#336).
@@ -403,7 +403,7 @@ function registerRuntimeTools(ctx: HostContextShape, { requireSource, config, co
     output: { schema: JSON_OBJECT_OUTPUT, render: (_args: unknown, value: unknown) => text(value),
       presentationMeta: namedToolPresentation('mnemon_runtime_memory') },
     execute: (args: { action: 'add' | 'replace' | 'remove'; target: RuntimeMemoryTarget; content?: string; old_text?: string; importance?: RuntimeMemoryImportance; branches?: string[] }, exec: ToolExecution) => {
-      if (!config.writeEnabled) throw new Error('@tingfeng/dsh-tingfeng is configured read-only (writeEnabled: false)')
+      if (!config.writeEnabled) throw new Error('dsh-tingfeng is configured read-only (writeEnabled: false)')
       requireSource(exec, 'runtime', 'write')
       composableTurn(exec)
       const request = {

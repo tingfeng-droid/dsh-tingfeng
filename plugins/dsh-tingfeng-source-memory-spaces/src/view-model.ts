@@ -47,7 +47,7 @@ export function modelStatus(status: MemorySpacesStatus) {
   const providerReady = status.commandFound === true || (status.providerServices ?? []).some(provider => provider.enabled && provider.configured)
   const notice = status.memoryBodies.length > 0 ? undefined : providerReady
     ? 'No Memory Space exists yet, so durable memory has nowhere to go and a full MEMORY.md archives to a local file. Create and activate a Memory Space to keep durable memory.'
-    : 'No Memory Space exists, and none can be created until a memory Provider is ready, so durable memory has nowhere to go and a full MEMORY.md archives to a local file. Install the Mnemon CLI for Mnemon Native, or connect another Provider on the @tingfeng/dsh-tingfeng page under Plugins, then create and activate a Memory Space.'
+    : 'No Memory Space exists, and none can be created until a memory Provider is ready, so durable memory has nowhere to go and a full MEMORY.md archives to a local file. Install the Mnemon CLI for Mnemon Native, or connect another Provider on the dsh-tingfeng page under Plugins, then create and activate a Memory Space.'
   return {
     healthy: status.healthy && unhealthy.length === 0,
     ...(notice === undefined ? {} : { notice }),

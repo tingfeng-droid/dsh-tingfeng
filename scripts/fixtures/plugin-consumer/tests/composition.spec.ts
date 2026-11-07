@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import type { Context } from '@deepseek-ai/cordis'
 import { describe, expect, it } from 'vitest'
-import { MemoryCompositionRunner, type MemoryTestTurn } from '@tingfeng/dsh-tingfeng/testing'
+import { MemoryCompositionRunner, type MemoryTestTurn } from 'dsh-tingfeng/testing'
 import * as spaces from 'dsh-tingfeng-source-memory-spaces'
 import * as runtime from 'dsh-tingfeng-source-runtime'
 import * as threeTier from 'dsh-tingfeng-strategy-default-three-tier'
@@ -119,13 +119,13 @@ describe('external consumer of packed artifacts', () => {
 
   it('ships Chinese plugin metadata and keeps manifest fallback for English', () => {
     const require = createRequire(import.meta.url)
-    const english = JSON.parse(readFileSync(require.resolve('@tingfeng/dsh-tingfeng/locale/en.json'), 'utf8'))
-    const chinese = JSON.parse(readFileSync(require.resolve('@tingfeng/dsh-tingfeng/locale/zh.json'), 'utf8'))
-    const manifest = JSON.parse(readFileSync(require.resolve('@tingfeng/dsh-tingfeng/package.json'), 'utf8'))
+    const english = JSON.parse(readFileSync(require.resolve('dsh-tingfeng/locale/en.json'), 'utf8'))
+    const chinese = JSON.parse(readFileSync(require.resolve('dsh-tingfeng/locale/zh.json'), 'utf8'))
+    const manifest = JSON.parse(readFileSync(require.resolve('dsh-tingfeng/package.json'), 'utf8'))
     expect(english.meta).toEqual({})
-    expect(manifest.name).toBe('@tingfeng/dsh-tingfeng')
+    expect(manifest.name).toBe('dsh-tingfeng')
     expect(manifest.description).toMatch(/Composable, view-based context/)
-    expect(chinese.meta.title).toBe('可组合记忆 (@tingfeng/dsh-tingfeng)')
+    expect(chinese.meta.title).toBe('可组合记忆 (dsh-tingfeng)')
     expect(chinese.meta.description).toMatch(/可组合视图上下文/)
   })
 

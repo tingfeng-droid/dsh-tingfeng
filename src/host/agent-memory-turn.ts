@@ -104,7 +104,7 @@ export class AgentMemoryTurn {
       if (!isMemoryCompositionUnavailable(error) || this.closed || this.generation !== generation) throw error
       this.unavailable = { turn, reason: error.message }
       this.clearInspection()
-      if (this.warned !== error.message) console.warn(`[@tingfeng/dsh-tingfeng] this turn runs without memory: ${error.message}`)
+      if (this.warned !== error.message) console.warn(`[dsh-tingfeng] this turn runs without memory: ${error.message}`)
       this.warned = error.message
     })
     this.pending = { turn, generation, controller, result }

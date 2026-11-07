@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { DEFAULT_MEMORY_VIEW_BUDGET, type MemoryAvailableSource, type MemoryStrategyContribution, type MemoryViewRequest } from '@tingfeng/dsh-tingfeng/contracts'
+import { DEFAULT_MEMORY_VIEW_BUDGET, type MemoryAvailableSource, type MemoryStrategyContribution, type MemoryViewRequest } from 'dsh-tingfeng/contracts'
 import { DEFAULT_THREE_TIER_VIEW_STRATEGY as strategy } from '../src/index.ts'
 import { threeTierActionWorkflow, validateThreeTierExtension } from '../src/extension-sdk.ts'
 

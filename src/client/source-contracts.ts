@@ -1,4 +1,4 @@
-import type { MemoryJsonValue, MemorySourceManagementInstance, MemorySourceManagementResult, TaskAgentModelCatalog } from '@tingfeng/dsh-tingfeng/contracts'
+import type { MemoryJsonValue, MemorySourceManagementInstance, MemorySourceManagementResult, TaskAgentModelCatalog } from 'dsh-tingfeng/contracts'
 
 /** Instance- and scope-bound capability; never the Host's raw transport. */
 export interface MnemonSourceManagementClient {

@@ -1,5 +1,5 @@
 import type { Context } from '@deepseek-ai/cordis'
-import { defineMemoryPlugin, defineMemoryViewExtension, installMemory, defineMemoryStrategyConfiguration, validateMemoryViewExtension } from '@tingfeng/dsh-tingfeng/extension-sdk'
+import { defineMemoryPlugin, defineMemoryViewExtension, installMemory, defineMemoryStrategyConfiguration, validateMemoryViewExtension } from 'dsh-tingfeng/extension-sdk'
 
 export interface Config { sourceKeys?: string[]; actionIds?: string[]; instruction?: string }
 export const name = 'dsh-tingfeng-strategy-auto-capture'

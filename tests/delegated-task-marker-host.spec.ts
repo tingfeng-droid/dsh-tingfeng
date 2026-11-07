@@ -17,7 +17,7 @@ import { compositionFixture } from './fixtures/composition.ts'
 import { loadTools, loadWorkingDirectory, requireDsh } from './helpers/installed-dsh.ts'
 
 // Issue #393: a plugin that collects a workspace's sessions, such as a work log, read the
-// idle review's checkpoint as work the user asked for. Every task @tingfeng/dsh-tingfeng delegates now
+// idle review's checkpoint as work the user asked for. Every task dsh-tingfeng delegates now
 // starts with a documented first line, and DSH records it as the child's prompt.
 
 const fork = await import(requireDsh.resolve('@deepseek-ai/dsh-subagent-fork-in-process'))

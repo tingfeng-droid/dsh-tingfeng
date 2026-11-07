@@ -1,6 +1,6 @@
-// Historical fixture: the Pack implementation of the released @tingfeng/dsh-tingfeng 0.5.24,
+// Historical fixture: the Pack implementation of the released dsh-tingfeng 0.5.24,
 // lifted verbatim from the npm tarball
-// (https://registry.npmjs.org/@tingfeng/dsh-tingfeng/-/dsh-tingfeng-0.5.24.tgz) at
+// (https://registry.npmjs.org/dsh-tingfeng/-/dsh-tingfeng-0.5.24.tgz) at
 // lib/index.js, region `src/host/pack.ts` (//#region src/host/pack.ts, lines 538-1324).
 // Only the imports below, the vendored constant block and the trailing export were
 // added, plus one documented repair inside `acquireLock` (marked below): the published
@@ -87,7 +87,7 @@ function parseManifest(value) {
 	const expected = componentsForScope(manifest.scope);
 	if (components.length !== expected.length || expected.some((component) => !components.includes(component))) throw new Error("Mnemon Pack scope does not match its components");
 	const source = record$2(manifest.source);
-	if (source?.plugin !== "@tingfeng/dsh-tingfeng" || typeof source.pluginVersion !== "string") throw new Error("Mnemon Pack source is invalid");
+	if (source?.plugin !== "dsh-tingfeng" || typeof source.pluginVersion !== "string") throw new Error("Mnemon Pack source is invalid");
 	if (!Array.isArray(manifest.summary)) throw new Error("Mnemon Pack summary is invalid");
 	const summary = manifest.summary.map((entry) => {
 		const item = record$2(entry);
@@ -106,7 +106,7 @@ function parseManifest(value) {
 		scope: manifest.scope,
 		exportedAt: manifest.exportedAt,
 		source: {
-			plugin: "@tingfeng/dsh-tingfeng",
+			plugin: "dsh-tingfeng",
 			pluginVersion: source.pluginVersion
 		},
 		components,
@@ -737,7 +737,7 @@ var MnemonPackManager = class {
 					scope,
 					exportedAt,
 					source: {
-						plugin: "@tingfeng/dsh-tingfeng",
+						plugin: "dsh-tingfeng",
 						pluginVersion: "0.1.0"
 					},
 					components,

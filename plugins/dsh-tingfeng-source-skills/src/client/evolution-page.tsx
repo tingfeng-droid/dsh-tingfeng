@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type JSX } from 'react'
 import { Button, DiffBlock, IconSparkleRegular, SegmentedControl, Tag } from '@deepseek-ai/dsh-client-ui-primitives'
-import { appearanceClass, SelectField } from '@tingfeng/dsh-tingfeng/client'
+import { appearanceClass, SelectField } from 'dsh-tingfeng/client'
 import type { BacktestRun, DraftView, ModelRoute, SkillDraft, SkillRootKind, SkillSuggestion, SuggestionStatus, SuggestionView, Trajectory } from '../contracts.ts'
 import { modelOptionPick, modelOptionValue, useModelChoice } from './model-choice.tsx'
 import { css, points, relative, stamp, useT } from './presentation.ts'

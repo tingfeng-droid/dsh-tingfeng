@@ -16,7 +16,7 @@ export interface StarterUpdateRecord {
   to?: string
 }
 
-const STORAGE_KEY = '@tingfeng/dsh-tingfeng.starter-update'
+const STORAGE_KEY = 'dsh-tingfeng.starter-update'
 /** An older record belongs to an earlier visit, not to an update this page just ran. */
 const FRESH_MS = 10 * 60_000
 

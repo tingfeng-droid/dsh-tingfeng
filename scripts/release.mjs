@@ -13,7 +13,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const execute = promisify(execFile)
 const defaultRegistry = 'https://registry.npmjs.org'
 const manifestName = 'release-manifest.json'
-const starterName = '@tingfeng/dsh-tingfeng'
+const starterName = 'dsh-tingfeng'
 const internalName = /^dsh-tingfeng-(?:source|strategy|provider)-[a-z0-9-]+$/u
 const releaseVersion = /^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-(alpha|beta|rc)\.(?:0|[1-9]\d*))?$/u
 
@@ -75,10 +75,16 @@ export function createReleasePlan(packages, { tag, prerelease, baseVersions } = 
     assert.equal(manifest.publishConfig?.tag, packageTag, `${manifest.name}: publishConfig.tag must match its release channel`)
     if (item !== starter) {
       assert.match(manifest.name, internalName)
-      assert.equal(starter.manifest.dependencies?.[manifest.name] ?? starter.manifest.devDependencies?.[manifest.name], manifest.version,
-        `${manifest.name}: Starter must pin the tested plugin version (runtime or development)`)
+      // The Starter embeds its siblings through `file:` paths (see
+      // `nestedPackageDirectories`), so the pin is either that path or the exact
+      // version. A range would let a released Starter pull an untested build.
+      const pin = starter.manifest.dependencies?.[manifest.name] ?? starter.manifest.devDependencies?.[manifest.name]
+      const pinnedExactly = pin === manifest.version
+        || pin === 'file:./plugins/' + manifest.name
+        || pin === 'file:plugins/' + manifest.name
+      assert(pinnedExactly, `${manifest.name}: Starter must pin the tested plugin version (runtime or development), got ${String(pin)}`)
       if (item.directory.startsWith(root + '/')) {
-        assert.equal(manifest.repository?.url, 'git+https://github.com/omdsh-dev/@tingfeng/dsh-tingfeng.git', `${manifest.name}: repository URL must identify the official source`)
+        assert.equal(manifest.repository?.url, 'git+https://github.com/tingfeng-droid/dsh-tingfeng.git', `${manifest.name}: repository URL must identify the official source`)
         assert.equal(manifest.repository?.directory, relative(root, item.directory), `${manifest.name}: repository directory must identify the package source`)
       }
     }
@@ -88,7 +94,9 @@ export function createReleasePlan(packages, { tag, prerelease, baseVersions } = 
         const dependency = packagesByName.get(name)
         assert(dependency, `${manifest.name}: missing release composition package for ${name}`)
         if (item === starter && name !== starterName) {
-          assert.equal(range, dependency.manifest.version, `${manifest.name}: ${field}.${name} must exactly pin the tested plugin version`)
+          const embedded = range === `file:./plugins/${name}` || range === `file:plugins/${name}`
+          assert.equal(embedded || range === dependency.manifest.version, true,
+            `${manifest.name}: ${field}.${name} must exactly pin the tested plugin version, got ${String(range)}`)
           continue
         }
         const checkRange = normalizedRange(range, dependency.manifest.version)

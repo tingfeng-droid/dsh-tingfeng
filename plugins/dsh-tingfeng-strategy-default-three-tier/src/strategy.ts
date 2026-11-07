@@ -1,5 +1,5 @@
-import { defineMemoryStrategy, type MemorySourceFacts } from '@tingfeng/dsh-tingfeng/extension-sdk'
-import { COMPOSABLE_MEMORY_API_VERSION, type MemoryAvailableSource, type MemoryCompositionDiagnostic, type MemoryViewRequest, type MemoryViewSpec } from '@tingfeng/dsh-tingfeng/contracts'
+import { defineMemoryStrategy, type MemorySourceFacts } from 'dsh-tingfeng/extension-sdk'
+import { COMPOSABLE_MEMORY_API_VERSION, type MemoryAvailableSource, type MemoryCompositionDiagnostic, type MemoryViewRequest, type MemoryViewSpec } from 'dsh-tingfeng/contracts'
 import { createThreeTierTurn } from './retrieval.ts'
 import { boundedRuntimeMemoryProtocol, ROUTING_GUIDANCE, ROUTING_GUIDANCE_WITHOUT_RECALL, SCOPED_RUNTIME_MEMORY_PROTOCOL, THREE_TIER_REMINDERS, THREE_TIER_REMINDERS_WITHOUT_RECALL } from './guidance.ts'
 import { threeTierContributions, type ThreeTierExtensionValues } from './extension-sdk.ts'

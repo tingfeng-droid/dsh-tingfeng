@@ -1,8 +1,8 @@
 import { useT, type SourceKey } from './presentation.ts'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type FormEvent, type JSX, type ReactNode } from 'react'
 import { Button, IconChevronDownOutlineRegular, Switch } from '@deepseek-ai/dsh-client-ui-primitives'
-import { GlobalLocationSetting, memorySettingsStyles, message, Reveal, useRequestVersion } from '@tingfeng/dsh-tingfeng/client'
-// Each function reads memorySettingsStyles where it draws, never at load: @tingfeng/dsh-tingfeng 0.5.31 lacks it and never draws
+import { GlobalLocationSetting, memorySettingsStyles, message, Reveal, useRequestVersion } from 'dsh-tingfeng/client'
+// Each function reads memorySettingsStyles where it draws, never at load: dsh-tingfeng 0.5.31 lacks it and never draws
 // these settings, and this bundle's pages must still load beside it.
 import type { MemoryProviderConfigField, MemoryProviderConnection, MemoryProviderDescriptor, MemoryProviderServiceCatalog, MemoryProviderServiceView } from '../contracts.ts'
 import { ProviderField } from './provider-field.tsx'
@@ -43,7 +43,7 @@ const EMPTY_PROVIDER_CATALOG: MemoryProviderServiceCatalog = {
 }
 
 // The last catalog read or saved, under a name every Memory Spaces version reads alike: a list mounted again,
-// on a page opened again or in the settings that replace @tingfeng/dsh-tingfeng's, shows it while it is read anew.
+// on a page opened again or in the settings that replace dsh-tingfeng's, shows it while it is read anew.
 const RETAINED_PROVIDERS = 'provider-services'
 const retainedCatalog = (retained: Map<string, unknown>): MemoryProviderServiceCatalog | undefined => retained.get(RETAINED_PROVIDERS) as MemoryProviderServiceCatalog | undefined
 

@@ -2,8 +2,8 @@ import { afterEach, vi } from 'vitest'
 import { resolveConfig } from '../../src/host/config.ts'
 import { createRuntimeGraph, type MnemonRuntimeGraph } from '../../src/host/runtime.ts'
 import { MemoryRuntime } from '../../src/core/runtime.ts'
-import { defineMemorySource, defineMemoryStrategy } from '@tingfeng/dsh-tingfeng/extension-sdk'
-import { COMPOSABLE_MEMORY_API_VERSION } from '@tingfeng/dsh-tingfeng/contracts'
+import { defineMemorySource, defineMemoryStrategy } from 'dsh-tingfeng/extension-sdk'
+import { COMPOSABLE_MEMORY_API_VERSION } from 'dsh-tingfeng/contracts'
 import type { SearchRequest } from 'dsh-tingfeng-source-memory-spaces/contracts'
 import { DEFAULT_THREE_TIER_VIEW_STRATEGY } from 'dsh-tingfeng-strategy-default-three-tier'
 
@@ -51,7 +51,7 @@ export function memoryGraphFixture(initialIds = ['project']) {
             fragments: [{ id: context.sourceInstanceKey + '/cover', sourceInstanceKey: context.sourceInstanceKey,
               mode: request.mode, text: state.wake, revision: state.revision }],
             readGrant: { id: context.sourceInstanceKey + '/grant', sourceInstanceKey: context.sourceInstanceKey,
-              schema: '@tingfeng/dsh-tingfeng.memory-spaces/v1', value: state.state, revision: state.revision, consistency: 'namespace-pinned-live-read' },
+              schema: 'dsh-tingfeng.memory-spaces/v1', value: state.state, revision: state.revision, consistency: 'namespace-pinned-live-read' },
           }
         },
         query: async request => {
@@ -76,7 +76,7 @@ export function memoryGraphFixture(initialIds = ['project']) {
       facts: () => ({ sourceInstanceKey: context.sourceInstanceKey, sourceTypeId: 'documents', role: 'fixture', availability: 'ready', revision: 'empty',
         capabilities: ['project', 'search'], routeIds: ['search'], actionIds: [] }),
       project: () => ({ fragments: [], readGrant: { id: 'documents-grant', sourceInstanceKey: context.sourceInstanceKey,
-        schema: '@tingfeng/dsh-tingfeng.documents/v1', value: {}, revision: 'empty', consistency: 'exact-snapshot' } }),
+        schema: 'dsh-tingfeng.documents/v1', value: {}, revision: 'empty', consistency: 'exact-snapshot' } }),
       query: request => ({ id: 'documents-evidence', viewId: request.view.id, routeId: request.route.id, sourceInstanceKey: context.sourceInstanceKey,
         observedAt: '2026-08-31T00:00:00.000Z', items: [], truncated: false, metadata: { total: 0 } }),
     }),

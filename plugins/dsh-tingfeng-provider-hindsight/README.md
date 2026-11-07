@@ -6,7 +6,7 @@ Requires a Hindsight endpoint and bank scope. Statistics availability depends on
 
 ## Use
 
-The default `@tingfeng/dsh-tingfeng` Starter already installs this package. Enable and configure the service on the `@tingfeng/dsh-tingfeng` page under **Plugins**, then inspect its synchronized Memory Spaces.
+The default `dsh-tingfeng` Starter already installs this package. Enable and configure the service on the `dsh-tingfeng` page under **Plugins**, then inspect its synchronized Memory Spaces.
 
 For a custom composition, install this package alongside `dsh-tingfeng-source-memory-spaces` and include it in that Source's `config.providers`:
 

@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest'
 
 const root = fileURLToPath(new URL('../', import.meta.url))
 const pluginNames = readdirSync(join(root, 'plugins')).filter(name => name.startsWith('dsh-tingfeng-')).sort()
-const coreImports = new Set(['@tingfeng/dsh-tingfeng/contracts', '@tingfeng/dsh-tingfeng/extension-sdk', '@tingfeng/dsh-tingfeng/testing', '@tingfeng/dsh-tingfeng/client'])
+const coreImports = new Set(['dsh-tingfeng/contracts', 'dsh-tingfeng/extension-sdk', 'dsh-tingfeng/testing', 'dsh-tingfeng/client'])
 const providerImports = new Set(['dsh-tingfeng-source-memory-spaces/provider-sdk', 'dsh-tingfeng-source-memory-spaces/testing'])
 // Standard-slot extensions follow any main Strategy, so they do not depend on one.
 const viewExtensions = new Set(['dsh-tingfeng-strategy-auto-capture', 'dsh-tingfeng-strategy-light-context', 'dsh-tingfeng-strategy-scoped'])
@@ -77,14 +77,14 @@ describe('standalone plugin repository boundary', () => {
     // knows how to strip; anything else would ship a protocol npm cannot parse.
     for (const [dependency, version] of Object.entries(manifest.devDependencies ?? {})) {
       if (!String(version).startsWith('workspace:')) continue
-      expect(dependency, `${name} devDependency ${dependency} must be a sibling package`).toMatch(/^(?:@tingfeng\/dsh-tingfeng|dsh-tingfeng-)/u)
+      expect(dependency, `${name} devDependency ${dependency} must be a sibling package`).toMatch(/^(?:dsh-tingfeng|dsh-tingfeng-)/u)
     }
     // Imports may be satisfied by any of the three fields; this set answers
     // "is this specifier declared at all", not "will it be published".
     const dependencies = { ...manifest.dependencies, ...manifest.peerDependencies, ...manifest.devDependencies }
     const provider = name.startsWith('dsh-tingfeng-provider-')
-    expect(manifest.peerDependencies[provider ? 'dsh-tingfeng-source-memory-spaces' : '@tingfeng/dsh-tingfeng']).toBeTruthy()
-    if (provider) expect(manifest.peerDependencies['@tingfeng/dsh-tingfeng']).toBeUndefined()
+    expect(manifest.peerDependencies[provider ? 'dsh-tingfeng-source-memory-spaces' : 'dsh-tingfeng']).toBeTruthy()
+    if (provider) expect(manifest.peerDependencies['dsh-tingfeng']).toBeUndefined()
     if (viewExtensions.has(name)) {
       expect(manifest.peerDependencies[threeTierOwner]).toBeUndefined()
       expect(manifest.dsh?.bundle?.patch).toBe('./cordis.patch.yml')
@@ -107,7 +107,7 @@ describe('standalone plugin repository boundary', () => {
         if (packageName(specifier) === name && Object.hasOwn(manifest.exports, '.' + specifier.slice(name.length))) continue
         if (!Object.hasOwn(dependencies, packageName(specifier))) violations.push(`${relative(root, file)} has undeclared dependency ${specifier}`)
         const testOwner = viewExtensions.has(name) && file.includes(`${sep}tests${sep}`) && specifier === threeTierOwner
-        if (specifier.startsWith('@tingfeng/dsh-tingfeng') && !(provider ? providerImports : coreImports).has(specifier) && !testOwner && !(file.includes(`${sep}tests${sep}`) && /^dsh-tingfeng-provider-[a-z0-9-]+$/u.test(specifier))) {
+        if (specifier.startsWith('dsh-tingfeng') && !(provider ? providerImports : coreImports).has(specifier) && !testOwner && !(file.includes(`${sep}tests${sep}`) && /^dsh-tingfeng-provider-[a-z0-9-]+$/u.test(specifier))) {
           violations.push(`${relative(root, file)} crosses its public contract: ${specifier}`)
         }
       }
@@ -120,7 +120,7 @@ describe('standalone plugin repository boundary', () => {
 
   it('keeps the Strategy-owned SDK independent of its runtime policy and every Source implementation', () => {
     const entry = join(root, 'plugins', threeTierOwner, 'src/extension-sdk.ts')
-    expect(imports(entry).map(item => item.specifier).sort()).toEqual(['@tingfeng/dsh-tingfeng/contracts', '@tingfeng/dsh-tingfeng/extension-sdk'])
+    expect(imports(entry).map(item => item.specifier).sort()).toEqual(['dsh-tingfeng/contracts', 'dsh-tingfeng/extension-sdk'])
   })
 
   it('keeps the pure Core import closure independent of Sources, Providers, clients and the default bundle', () => {
@@ -138,7 +138,7 @@ describe('standalone plugin repository boundary', () => {
       for (const { specifier, typeOnly } of imports(file)) {
         if (typeOnly) continue
         if (specifier.startsWith('.')) pending.push(resolve(dirname(file), specifier))
-        else if (specifier.startsWith('@tingfeng/dsh-tingfeng') || specifier === 'react') violations.push(`${relative(root, file)}: ${specifier}`)
+        else if (specifier.startsWith('dsh-tingfeng') || specifier === 'react') violations.push(`${relative(root, file)}: ${specifier}`)
       }
     }
     expect(visited.size).toBeGreaterThan(3)

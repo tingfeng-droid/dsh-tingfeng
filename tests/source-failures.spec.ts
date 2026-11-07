@@ -3,9 +3,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   COMPOSABLE_MEMORY_API_VERSION, type MemorySourceRuntime, type MemorySourceRuntimeContext,
   type MemoryViewContribution,
-} from '@tingfeng/dsh-tingfeng/contracts'
-import { defineMemorySource, defineMemoryStrategy, installMemory } from '@tingfeng/dsh-tingfeng/extension-sdk'
-import { MemoryCompositionRunner } from '@tingfeng/dsh-tingfeng/testing'
+} from 'dsh-tingfeng/contracts'
+import { defineMemorySource, defineMemoryStrategy, installMemory } from 'dsh-tingfeng/extension-sdk'
+import { MemoryCompositionRunner } from 'dsh-tingfeng/testing'
 
 const runners: MemoryCompositionRunner[] = []
 afterEach(async () => {

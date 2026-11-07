@@ -9,9 +9,9 @@ import type {
   MemorySourceManagementRequest,
   MemorySourceManagementResult,
   MemoryViewRoute,
-} from '@tingfeng/dsh-tingfeng/contracts'
-import { COMPOSABLE_MEMORY_API_VERSION } from '@tingfeng/dsh-tingfeng/contracts'
-import { defineMemorySource, memoryInputInteger as integer, createMemoryMutationReceipt as receipt, memoryInputRecord as record, memoryInputStringArray as stringArray, memoryInputText as text, truncateMemoryText as truncate } from '@tingfeng/dsh-tingfeng/extension-sdk'
+} from 'dsh-tingfeng/contracts'
+import { COMPOSABLE_MEMORY_API_VERSION } from 'dsh-tingfeng/contracts'
+import { defineMemorySource, memoryInputInteger as integer, createMemoryMutationReceipt as receipt, memoryInputRecord as record, memoryInputStringArray as stringArray, memoryInputText as text, truncateMemoryText as truncate } from 'dsh-tingfeng/extension-sdk'
 import { modelSpaceCatalog, modelStatus, modelJson } from './view-model.ts'
 import { MemorySpacesService, mutationResultCompletion } from './service.ts'
 import { createRunner } from './runner.ts'
@@ -143,7 +143,7 @@ function outsideView(service: MemorySpacesService, memoryBodyId: string): string
   if (body === undefined) return `Memory Space ${JSON.stringify(memoryBodyId)} does not exist`
   const space = `Memory Space ${JSON.stringify(memoryBodyId)} (${body.name})`
   if (!body.active) return `${space} is switched off, so this turn's View does not read it and cannot forget from it. Whether it is on is the user's choice, on the Memory Spaces page; once it is on, a forget there works from the next turn`
-  if (body.providerEnabled === false) return `${space} uses ${body.provider.label}, which is turned off on the @tingfeng/dsh-tingfeng page under Plugins`
+  if (body.providerEnabled === false) return `${space} uses ${body.provider.label}, which is turned off on the dsh-tingfeng page under Plugins`
   const provider = catalog.providers.find(candidate => candidate.id === body.provider.id)
   if (provider?.serviceConfigured === false) return `${space} uses ${body.provider.label}, which is not available here${isNativeProvider(provider) ? ': the Mnemon CLI is not installed' : ''}`
   return `${space} was switched on after this turn began, so this turn's View does not read it yet; a forget there works from the next turn`
@@ -400,7 +400,7 @@ export function createMemorySpacesSource(providerSnapshot: MemorySpaceProviderSn
     const admittedByView = new Map<string, Map<string, string>>()
     const createdByView = new Map<string, Set<string>>()
     const writeBodies = (viewId: string, grant: MemoryReadGrant): string[] => {
-      if (grant.sourceInstanceKey !== context.sourceInstanceKey || grant.schema !== '@tingfeng/dsh-tingfeng.memory-spaces/v1') {
+      if (grant.sourceInstanceKey !== context.sourceInstanceKey || grant.schema !== 'dsh-tingfeng.memory-spaces/v1') {
         throw new Error('Memory Spaces write scope grant does not belong to this Source')
       }
       const known = stringArray(record(grant.value, 'Memory Spaces scope').knownMemoryBodyIds, 'knownMemoryBodyIds', 10_000) ?? grantIds(grant)
@@ -537,7 +537,7 @@ export function createMemorySpacesSource(providerSnapshot: MemorySpaceProviderSn
           readGrant: {
             id: `${context.sourceInstanceKey}/grant/${revision}`,
             sourceInstanceKey: context.sourceInstanceKey,
-            schema: '@tingfeng/dsh-tingfeng.memory-spaces/v1',
+            schema: 'dsh-tingfeng.memory-spaces/v1',
             value: { memoryBodyIds: active.map(body => body.id), knownMemoryBodyIds: all.map(body => body.id) },
             revision,
             consistency: 'namespace-pinned-live-read',

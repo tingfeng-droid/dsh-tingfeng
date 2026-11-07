@@ -99,7 +99,7 @@ interface PromptAssemblyContext {
 function isMnemonMessageSource(source: unknown): boolean {
   if (typeof source !== 'object' || source === null) return false
   const { kind, plugin } = source as { kind?: unknown; plugin?: unknown }
-  // V3-to-V4 migrates the legacy plugin wrapper to `plugin:@tingfeng/dsh-tingfeng`.
+  // V3-to-V4 migrates the legacy plugin wrapper to `plugin:dsh-tingfeng`.
   return kind === MNEMON_PLUGIN_SOURCE
     || kind === `plugin:${MNEMON_PLUGIN_SOURCE}`
     || (kind === 'plugin' && plugin === MNEMON_PLUGIN_SOURCE)
@@ -376,7 +376,7 @@ class MnemonAgentLifecycle {
    * The runtime memory snapshot, as this plugin's own message, when it changed.
    *
    * `.context()` used to carry this inside the host's shared runtime-context
-   * projection. Carrying it here instead attributes it to @tingfeng/dsh-tingfeng and keeps
+   * projection. Carrying it here instead attributes it to dsh-tingfeng and keeps
    * a memory write from re-emitting other contributors' sections; supersede
    * stays intact because the block is still a complete state replacing its
    * predecessor, keyed on the rendered text's revision digest.
@@ -832,7 +832,7 @@ class MnemonAgentLifecycle {
     this.lastError = (error instanceof Error ? error.message : String(error))
       .replace(/\bsk-[A-Za-z0-9_-]{8,}\b/gu, '[redacted]')
       .replace(/\s+/gu, ' ').trim().slice(0, 500)
-    console.warn(`[@tingfeng/dsh-tingfeng] idle review failed: ${this.lastError}`)
+    console.warn(`[dsh-tingfeng] idle review failed: ${this.lastError}`)
   }
 
 }
@@ -1195,7 +1195,7 @@ export class MnemonLifecycle {
     signal: AbortSignal,
     withAgent: <T>(operation: (agent: HostAgent) => Promise<T>) => Promise<T>,
   ): Promise<SupervisedWritebackResult> {
-    if (!this.config.writeEnabled) throw new Error('@tingfeng/dsh-tingfeng is configured read-only (writeEnabled: false)')
+    if (!this.config.writeEnabled) throw new Error('dsh-tingfeng is configured read-only (writeEnabled: false)')
     const normalizedContent = content.trim()
     if (normalizedContent === '') throw new Error('memory candidate is required')
     if (normalizedContent.length > 8000) throw new Error('memory candidate is too long (max 8000 characters)')
@@ -1456,7 +1456,7 @@ export class MnemonLifecycle {
           if (this.memoryTurns.get(agent) === memoryTurn) this.memoryTurns.delete(agent)
         }
       }
-    }, '@tingfeng/dsh-tingfeng.lifecycle()')
+    }, 'dsh-tingfeng.lifecycle()')
     this.owners.set(agent, { lifecycle, dispose })
     if (memoryTurn !== undefined) this.memoryTurns.set(agent, memoryTurn)
   }
@@ -1529,7 +1529,7 @@ export class MnemonLifecycle {
         throw error
       }
       return cleanup
-    }, '@tingfeng/dsh-tingfeng.child-memory()')
+    }, 'dsh-tingfeng.child-memory()')
     this.children.set(agent, dispose)
   }
 }

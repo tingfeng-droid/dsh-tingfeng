@@ -3,7 +3,7 @@ import {
   Button, IconChecklistOutlineRegular, IconCodeOutlineRegular, IconDownloadOutlineRegular, IconFolderOpenOutlineRegular, IconGlobeOutlineRegular,
   IconRefreshOutlineRegular, IconSearchOutlineRegular, Input, Switch, Tag,
 } from '@deepseek-ai/dsh-client-ui-primitives'
-import { SearchField, SelectField, SidebarModal, useLocale } from '@tingfeng/dsh-tingfeng/client'
+import { SearchField, SelectField, SidebarModal, useLocale } from 'dsh-tingfeng/client'
 import { SKILL_ROOT_KINDS, type LocalizedText, type MarketAudit, type MarketItem, type MarketPreview, type MarketRegistry, type MarketSearchResult, type MarketView, type SkillRootKind } from '../contracts.ts'
 import { splitFrontmatter } from '../fence.ts'
 import { detectSource, type DetectedSource } from '../source-kind.ts'

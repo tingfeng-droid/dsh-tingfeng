@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, isAbsolute } from 'node:path'
 import type { Context } from '@deepseek-ai/cordis'
-import type { MemoryJsonValue, MemoryPluginDescriptor } from '@tingfeng/dsh-tingfeng/contracts'
+import type { MemoryJsonValue, MemoryPluginDescriptor } from 'dsh-tingfeng/contracts'
 
 export const name = 'dsh-tingfeng-source-external-notes'
 export const inject = ['mnemonMemory']
@@ -19,11 +19,11 @@ export interface Config { path: string }
 export async function apply(ctx: Context, config: Config): Promise<void> {
   // A bundle entry is still imported when Mnemon is uninstalled. Cordis calls
   // apply only once mnemonMemory is present, so its SDK is loaded here too.
-  const { COMPOSABLE_MEMORY_API_VERSION } = await import('@tingfeng/dsh-tingfeng/contracts')
+  const { COMPOSABLE_MEMORY_API_VERSION } = await import('dsh-tingfeng/contracts')
   const {
     defineMemoryPlugin, defineMemorySource, installMemory, memoryConfigurationDigest, createMemoryMutationReceipt,
     memoryInputRecord, memoryInputText, truncateMemoryText,
-  } = await import('@tingfeng/dsh-tingfeng/extension-sdk')
+  } = await import('dsh-tingfeng/extension-sdk')
   if (!isAbsolute(config.path)) throw new Error('notes path must be absolute')
   const path = config.path
   const read = () => existsSync(path) ? readFileSync(path, 'utf8') : ''

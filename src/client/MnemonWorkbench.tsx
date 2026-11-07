@@ -56,7 +56,7 @@ interface MnemonWorkbenchProps {
   t?: MnemonTranslate
   locale?: string
   onClose?: () => void
-  /** Opens the @tingfeng/dsh-tingfeng page under DSH Plugins, where the configuration lives, while that page offers navigation. */
+  /** Opens the dsh-tingfeng page under DSH Plugins, where the configuration lives, while that page offers navigation. */
   configuration?: MnemonActionSeat
   /** Moves when a component is switched through DSH's plugin manager, or memory changes on the configuration page. */
   componentChanges?: MnemonChangeSignal
@@ -509,7 +509,7 @@ function MnemonWorkspace({ connection, settingsScope, sessionId, workspaceId, wo
       : () => { requestComponentPage(focusPackage); openConfiguration() }
   const focused = focusType !== undefined
   return (
-    <main className={appearanceClass(css.shell, sidebarCss.shell)} data-dsh-plugin="@tingfeng/dsh-tingfeng" data-dsh-part="mnemon-view" data-mnemon-surface={surface} data-mnemon-focus={focusType}>
+    <main className={appearanceClass(css.shell, sidebarCss.shell)} data-dsh-plugin="dsh-tingfeng" data-dsh-part="mnemon-view" data-mnemon-surface={surface} data-mnemon-focus={focusType}>
       <header className={appearanceClass(css.masthead, sidebarCss.masthead)} data-window-drag={titleBar || undefined}>
         {onClose !== undefined && <button type="button" className={appearanceClass(css.ghostButton, css.backButton)} onClick={onClose} aria-label={t('header.backToConversation')}><IconChevronLeftOutline14 size={14} /><span>{t('header.backToConversation')}</span></button>}
         <div className={appearanceClass(css.brand, sidebarCss.brand)}>

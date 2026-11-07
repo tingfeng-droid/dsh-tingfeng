@@ -13,7 +13,7 @@ interface MemoryCoreContext {
 export function provideMemoryRuntime(context: MemoryCoreContext): MemoryRuntime {
   const runtime = new MemoryRuntime()
   context.provide('mnemonMemory', runtime.service)
-  context.effect(() => () => runtime.dispose(), '@tingfeng/dsh-tingfeng.core()')
+  context.effect(() => () => runtime.dispose(), 'dsh-tingfeng.core()')
   return runtime
 }
 

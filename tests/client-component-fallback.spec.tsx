@@ -18,7 +18,7 @@ import type { Config } from '../src/host/config.ts'
 import { loadMemoryClientArtifact } from '../src/sdk/testing.ts'
 import { settingsScope } from './helpers/settings-scope.ts'
 
-afterEach(() => { cleanup(); vi.doUnmock('@tingfeng/dsh-tingfeng/client'); vi.resetModules(); vi.restoreAllMocks() })
+afterEach(() => { cleanup(); vi.doUnmock('dsh-tingfeng/client'); vi.resetModules(); vi.restoreAllMocks() })
 
 /** DSH's own Slot core behind the capability the component regions use: same-key entries shadow by priority. */
 class TestSlots {
@@ -40,7 +40,7 @@ class TestSlots {
   subscribe(key: string, listener: () => void): () => void { return this.core.subscribe(key, listener) }
 }
 
-/** The @tingfeng/dsh-tingfeng configuration declares the region, as its bundle page does. */
+/** The dsh-tingfeng configuration declares the region, as its bundle page does. */
 function page(t = translateZh) {
   const slots = new TestSlots()
   const declaration = slots.register({ name: 'root', children: { [MNEMON_COMPONENT_SETTINGS_SLOT]: { kind: 'keyed', scope: 'root' } } }, () => null)
@@ -56,15 +56,15 @@ const owner = (host = true): MemoryComponentSettingsProps => ({
 })
 const services = { scope, t: translateZh }
 
-/** @tingfeng/dsh-tingfeng 0.5.31 drew Memory Spaces' settings itself, registered at the default priority. */
+/** dsh-tingfeng 0.5.31 drew Memory Spaces' settings itself, registered at the default priority. */
 const oldBuiltIn = () => <p>0.5.31 built-in settings</p>
 const installOldStarter = (ctx: ReturnType<typeof page>['ctx']) => installMemoryComponentUI(ctx as never, { packageName: MEMORY_SPACES_PACKAGE, settings: oldBuiltIn })
 
-/** Memory Spaces' client as DSH loads it, with its own module state, against a @tingfeng/dsh-tingfeng/client with or without the fallback contract. */
+/** Memory Spaces' client as DSH loads it, with its own module state, against a dsh-tingfeng/client with or without the fallback contract. */
 async function spacesClient(starterYields: boolean) {
   if (!starterYields) {
-    // The CommonJS bundle reads an export @tingfeng/dsh-tingfeng 0.5.31 lacks as undefined.
-    vi.doMock('@tingfeng/dsh-tingfeng/client', async () => ({ ...await vi.importActual<object>('@tingfeng/dsh-tingfeng/client'), MNEMON_COMPONENT_FALLBACK_PRIORITY: undefined }))
+    // The CommonJS bundle reads an export dsh-tingfeng 0.5.31 lacks as undefined.
+    vi.doMock('dsh-tingfeng/client', async () => ({ ...await vi.importActual<object>('dsh-tingfeng/client'), MNEMON_COMPONENT_FALLBACK_PRIORITY: undefined }))
   }
   vi.resetModules()
   return {
@@ -118,7 +118,7 @@ describe('Memory Spaces\' settings across Starter and Memory Spaces versions', (
     expect(screen.getByText('Mnemon Native')).toBeTruthy()
   })
 
-  it('@tingfeng/dsh-tingfeng 0.5.31 and new Memory Spaces: Memory Spaces registers nothing, so the old built-in shows alone', async () => {
+  it('dsh-tingfeng 0.5.31 and new Memory Spaces: Memory Spaces registers nothing, so the old built-in shows alone', async () => {
     const { ctx, slots, spaces } = page()
     installOldStarter(ctx)
     const client = await spacesClient(false)
@@ -130,7 +130,7 @@ describe('Memory Spaces\' settings across Starter and Memory Spaces versions', (
     expect(screen.queryByRole('heading', { name: '记忆 Provider' })).toBeNull()
   })
 
-  it('@tingfeng/dsh-tingfeng 0.5.31 and Memory Spaces 0.5.21: the old built-in shows, as before', () => {
+  it('dsh-tingfeng 0.5.31 and Memory Spaces 0.5.21: the old built-in shows, as before', () => {
     const { ctx, slots, spaces } = page()
     installOldStarter(ctx)
     expect(spaces()).toHaveLength(1)
@@ -145,7 +145,7 @@ describe('Memory Spaces\' settings across Starter and Memory Spaces versions', (
     expect(() => client.installMemorySpacesSettings(ctx as never)).toThrow(/already has an entry for key "dsh-tingfeng-source-memory-spaces"/u)
   })
 
-  it('shows nothing from Memory Spaces\' own settings without what @tingfeng/dsh-tingfeng lends them', async () => {
+  it('shows nothing from Memory Spaces\' own settings without what dsh-tingfeng lends them', async () => {
     const client = await spacesClient(true)
     const view = render(<>{client.MemorySpacesSettings(owner(false))}</>)
     expect(view.container.textContent).toBe('')
@@ -224,7 +224,7 @@ describe('turning Memory Spaces on from its page', () => {
   })
 })
 
-describe('the built Memory Spaces client beside @tingfeng/dsh-tingfeng 0.5.31', () => {
+describe('the built Memory Spaces client beside dsh-tingfeng 0.5.31', () => {
   const require = createRequire(import.meta.url)
   // The browser bundles as DSH loads them: build the Starter, then Memory Spaces, first.
   const bundle = (entry: string) => {
@@ -237,13 +237,13 @@ describe('the built Memory Spaces client beside @tingfeng/dsh-tingfeng 0.5.31', 
   async function load() {
     const react = { react: await import('react'), 'react/jsx-runtime': await import('react/jsx-runtime'), 'react-dom': await import('react-dom'),
       '@deepseek-ai/dsh-client-ui-primitives': await import('@deepseek-ai/dsh-client-ui-primitives') }
-    const current = loadMemoryClientArtifact<Record<string, unknown>>(bundle('@tingfeng/dsh-tingfeng/client'), react)
-    // A @tingfeng/dsh-tingfeng/client with exactly the names 0.5.31 exports: every newer one reads as undefined, as it would there.
+    const current = loadMemoryClientArtifact<Record<string, unknown>>(bundle('dsh-tingfeng/client'), react)
+    // A dsh-tingfeng/client with exactly the names 0.5.31 exports: every newer one reads as undefined, as it would there.
     // Those names carry this branch's implementations, not 0.5.31's, so this checks which exports the bundle needs,
     // not how 0.5.31's behave.
     const old = Object.fromEntries(names.map(name => [name, current[name]]))
     expect(names.every(name => current[name] !== undefined)).toBe(true)
-    return loadMemoryClientArtifact<Record<string, unknown>>(bundle('dsh-tingfeng-source-memory-spaces/client'), { ...react, '@tingfeng/dsh-tingfeng/client': old })
+    return loadMemoryClientArtifact<Record<string, unknown>>(bundle('dsh-tingfeng-source-memory-spaces/client'), { ...react, 'dsh-tingfeng/client': old })
   }
 
   it('registers its pages and no settings', async () => {

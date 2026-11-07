@@ -139,7 +139,7 @@ export class SkillEvolution {
 
   private warn(text: string, error?: unknown): void {
     if (this.host.warn !== undefined) this.host.warn(text, error)
-    else console.warn(`@tingfeng/dsh-tingfeng: ${text}`, error === undefined ? '' : message(error))
+    else console.warn(`dsh-tingfeng: ${text}`, error === undefined ? '' : message(error))
   }
 
   private state(agent: HostAgent): SessionState {

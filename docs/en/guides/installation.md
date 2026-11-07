@@ -88,7 +88,7 @@ For a profile with that duplicate insertion:
 
    ```yaml
    - id: mnemon-bundle
-     name: @tingfeng/dsh-tingfeng/bundle
+     name: dsh-tingfeng/bundle
      disabled: false
    ```
 
@@ -284,16 +284,16 @@ When DSH is opened from another device (for example through an address set up wi
 If dsh-mnemon was updated while DSH was running (for example on the desktop app's Plugins page), enabling a component can then show:
 
 ```text
-Error [ERR_PACKAGE_PATH_NOT_EXPORTED]: Package subpath './starter' is not defined by "exports" in …/node_modules/@tingfeng/dsh-tingfeng/package.json
+Error [ERR_PACKAGE_PATH_NOT_EXPORTED]: Package subpath './starter' is not defined by "exports" in …/node_modules/dsh-tingfeng/package.json
 ```
 
-The new version is installed, but the running DSH still loads it with the old version's package information, which lacks an entry point the new version added: `./starter` after an update from 0.5.17 or earlier, `./bundle` after an update from 0.5.18 or 0.5.19. After an update from 0.5.18 or 0.5.19 the message can instead read `mnemon-bundle (@tingfeng/dsh-tingfeng/bundle): pending (waiting for service: mnemonStarterReady)`, because the running DSH keeps the old component group. Either way, quit DSH completely and start it again: `Cmd+Q` for the desktop app on macOS, or `Ctrl+C` and then `dsh web` again on the command line.
+The new version is installed, but the running DSH still loads it with the old version's package information, which lacks an entry point the new version added: `./starter` after an update from 0.5.17 or earlier, `./bundle` after an update from 0.5.18 or 0.5.19. After an update from 0.5.18 or 0.5.19 the message can instead read `mnemon-bundle (dsh-tingfeng/bundle): pending (waiting for service: mnemonStarterReady)`, because the running DSH keeps the old component group. Either way, quit DSH completely and start it again: `Cmd+Q` for the desktop app on macOS, or `Ctrl+C` and then `dsh web` again on the command line.
 
-On 0.5.18 or 0.5.19, do not turn off `@tingfeng/dsh-tingfeng/starter` to make the message go away; that leads to the next problem.
+On 0.5.18 or 0.5.19, do not turn off `dsh-tingfeng/starter` to make the message go away; that leads to the next problem.
 
 ### DSH says "waiting for service: mnemonStarterReady"
 
-![The dsh-mnemon page under Plugins: Components 11 total, 11 off, with @tingfeng/dsh-tingfeng/starter first and Off; the sidebar has no Memory System](../../assets/install-v0.5.19/en/trouble-starter-off.jpg)
+![The dsh-mnemon page under Plugins: Components 11 total, 11 off, with dsh-tingfeng/starter first and Off; the sidebar has no Memory System](../../assets/install-v0.5.19/en/trouble-starter-off.jpg)
 
 DSH prints this in the terminal when it starts, or shows it when you enable the plugin:
 
@@ -302,11 +302,11 @@ dsh: warning: 1 entry did not activate
 mnemon-bundle (cordis:group): pending (waiting for service: mnemonStarterReady)
 ```
 
-The sidebar has no **Memory System**, and every dsh-mnemon component on the Plugins page reads Off. `@tingfeng/dsh-tingfeng/starter` has been turned off: in 0.5.18 and 0.5.19 this separate row prepares dependency resolution before the memory components load, and the others wait for it.
+The sidebar has no **Memory System**, and every dsh-mnemon component on the Plugins page reads Off. `dsh-tingfeng/starter` has been turned off: in 0.5.18 and 0.5.19 this separate row prepares dependency resolution before the memory components load, and the others wait for it.
 
-- Open **Plugins → dsh-mnemon** and turn on the `@tingfeng/dsh-tingfeng/starter` row. The Memory System appears right away; if it does not, restart DSH.
+- Open **Plugins → dsh-mnemon** and turn on the `dsh-tingfeng/starter` row. The Memory System appears right away; if it does not, restart DSH.
 - The desktop app treats this as a failed start and shows its plugin recovery page. Click **Remove this plugin and continue** (your memory data stays), and once the app is up, add dsh-mnemon again as in [step 3](#3-install-and-enable-dsh-mnemon). Reinstalling 0.5.18 or 0.5.19 keeps the switch off, because the profile saves it, so then turn it on as above.
-- From 0.5.20 there is no separate switch: the group prepares dependency resolution itself, and a leftover setting for it is ignored. If the message names `@tingfeng/dsh-tingfeng/bundle`, DSH was updated to 0.5.20 without a restart and still runs the old group; quit DSH completely and start it again.
+- From 0.5.20 there is no separate switch: the group prepares dependency resolution itself, and a leftover setting for it is ignored. If the message names `dsh-tingfeng/bundle`, DSH was updated to 0.5.20 without a restart and still runs the old group; quit DSH completely and start it again.
 
 ### Upgrading DSH
 

@@ -1,11 +1,11 @@
 import { css, sidebarCss, useT } from './presentation.ts'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type JSX, type ReactNode } from 'react'
-import type { MemoryJsonValue } from '@tingfeng/dsh-tingfeng/contracts'
-import * as mnemonClient from '@tingfeng/dsh-tingfeng/client'
+import type { MemoryJsonValue } from 'dsh-tingfeng/contracts'
+import * as mnemonClient from 'dsh-tingfeng/client'
 import {
   createMemorySourcePageClient, installMemorySourceUI, MemorySourcePageFrame, translateEn, message, PageHeader,
   appearanceClass, type MemoryComponentUIContext, type MemorySourcePageProps, type MnemonSourceManagementClient, type MnemonTranslate,
-} from '@tingfeng/dsh-tingfeng/client'
+} from 'dsh-tingfeng/client'
 import type { Insight, MemorySpacesStatus } from '../contracts.ts'
 import { OverviewPage, ExplorePage, EntitiesPage, RememberPage, ListPage, PersistenceStrategyDialog, type MemoryPlacementPageConfig } from './pages.tsx'
 import type { MemorySpacesPageClient } from './api.ts'

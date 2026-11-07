@@ -37,7 +37,7 @@
     "client": {
       "platform": "web",
       "external": [
-        "@tingfeng/dsh-tingfeng/client"
+        "dsh-tingfeng/client"
       ]
     }
   },
@@ -53,7 +53,7 @@
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.1",
-    "@tingfeng/dsh-tingfeng": "0.5.41-ours.6",
+    "dsh-tingfeng": "^0.6.0",
     "react": "^18.2.0"
   },
   "devDependencies": {
@@ -62,7 +62,7 @@
     "@types/node": "^22.0.0",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
-    "@tingfeng/dsh-tingfeng": "workspace:*",
+    "dsh-tingfeng": "workspace:*",
     "jsdom": "^26.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -105,11 +105,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/omdsh-dev/dsh-tingfeng.git",
+    "url": "git+https://github.com/tingfeng-droid/dsh-tingfeng.git",
     "directory": "plugins/dsh-tingfeng-source-skills"
   },
-  "homepage": "https://github.com/omdsh-dev/dsh-tingfeng/tree/main/plugins/dsh-tingfeng-source-skills#readme",
+  "homepage": "https://github.com/tingfeng-droid/dsh-tingfeng/tree/main/plugins/dsh-tingfeng-source-skills#readme",
   "bugs": {
-    "url": "https://github.com/omdsh-dev/dsh-tingfeng/issues"
+    "url": "https://github.com/tingfeng-droid/dsh-tingfeng/issues"
   }
 }

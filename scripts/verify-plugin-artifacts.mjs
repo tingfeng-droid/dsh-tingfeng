@@ -204,7 +204,7 @@ try {
     { label: 'real DSH Starter upgrade', priority: 10, action: () => run(process.execPath, [
       join(root, 'scripts/verify-headless-profile.mjs'),
       '--package', 'file:' + artifacts.get(manifest.name), '--registry', registryUrl,
-      '--upgrade-from', `@tingfeng/dsh-tingfeng@${upgradeBase}`, '--upgrade-registry', 'https://registry.npmjs.org',
+      '--upgrade-from', `dsh-tingfeng@${upgradeBase}`, '--upgrade-registry', 'https://registry.npmjs.org',
     ], root, 'real DSH: install only the packed Starter and activate its plugins') },
     { label: 'real DSH Strategy composition', priority: 10, action: () => run(process.execPath, [
       join(root, 'scripts/verify-headless-profile.mjs'),

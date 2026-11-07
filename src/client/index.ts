@@ -67,7 +67,7 @@ const INTERACTION_UNITS: Record<'turnBar' | 'saveAction', InteractionUnit> = {
     register(ctx: MnemonClientContext, namespace: MnemonNamespace, translate: (key: MnemonKey, params?: Record<string, unknown>) => string): () => void {
       return ctx.slots.register({
         name: 'conversation.chat.turnTail',
-        id: '@tingfeng/dsh-tingfeng/turn-tail',
+        id: 'dsh-tingfeng/turn-tail',
         locale: namespace,
         inject: (sessionId: unknown): { sessionId?: string; connection: ClientConnectionHandle; localeRuntime: MnemonClientContext['locale']; t: (key: MnemonKey, params?: Record<string, unknown>) => string } => ({
           ...(typeof sessionId === 'string' && sessionId !== '' ? { sessionId } : {}),
@@ -321,12 +321,12 @@ export function apply(rawContext: unknown): void {
     skills: { scope: skillsSettings, panel: new SkillsPanelSeat() },
   }
   const namespace: MnemonNamespace = 'mnemon'
-  ctx.effect(() => ctx.locale.register(namespace, { zh, en }), '@tingfeng/dsh-tingfeng: locale dictionaries')
+  ctx.effect(() => ctx.locale.register(namespace, { zh, en }), 'dsh-tingfeng: locale dictionaries')
   const translate = ctx.locale.bind(namespace)
   // The Plugins page provides its navigation while it lives; the memory
   // workspace links to its configuration only then.
   ctx.inject(['pluginNavigation'], inner => {
-    inner.effect(() => seats.configuration.provide(() => { inner.pluginNavigation.openBundle(MNEMON_PACKAGE_NAME) }), '@tingfeng/dsh-tingfeng: configuration entry')
+    inner.effect(() => seats.configuration.provide(() => { inner.pluginNavigation.openBundle(MNEMON_PACKAGE_NAME) }), 'dsh-tingfeng: configuration entry')
   })
   // DSH's plugin manager announces every component switch it applies, from its
   // Plugins page or Mnemon's own controls; a reconnect may have missed some.
@@ -336,12 +336,12 @@ export function apply(rawContext: unknown): void {
       const remote = inner.remote as unknown as { $on(event: 'plugin-manager/changed', listener: () => void): () => void }
       const disposers = [remote.$on('plugin-manager/changed', seats.components.bump), inner.on('connection/reset', seats.components.bump)]
       return () => { for (const dispose of disposers) dispose() }
-    }, '@tingfeng/dsh-tingfeng: component changes')
+    }, 'dsh-tingfeng: component changes')
   })
   // DSH mirrors the Host settings document on loopback pages; follow its
   // revision of the `mnemon` entry so edits made elsewhere show up live.
   ctx.inject(['configForms'], inner => {
-    inner.effect(() => followHostSettings(inner.configForms.get(MNEMON_SETTINGS_NAMESPACE), [settings, interactionSettings, skillsSettings]), '@tingfeng/dsh-tingfeng: DSH settings revisions')
+    inner.effect(() => followHostSettings(inner.configForms.get(MNEMON_SETTINGS_NAMESPACE), [settings, interactionSettings, skillsSettings]), 'dsh-tingfeng: DSH settings revisions')
   })
   ctx.slots.inject(
     'conversation.session.header.lineage',
@@ -370,18 +370,18 @@ export function apply(rawContext: unknown): void {
       activeMemoryWorkspace?.dispose()
       activeMemoryWorkspace = undefined
     }
-  }, '@tingfeng/dsh-tingfeng: memory workspace entry')
+  }, 'dsh-tingfeng: memory workspace entry')
   // DSH swaps this client in once a Starter update replaces its files, which
   // closed the Memory System the update ran from; reopen it, and Status
   // reopens the version dialog.
-  ctx.effect(() => reopenAfterStarterUpdate(seats.workspace), '@tingfeng/dsh-tingfeng: reopen after a Starter update')
+  ctx.effect(() => reopenAfterStarterUpdate(seats.workspace), 'dsh-tingfeng: reopen after a Starter update')
   // DSH edits a plugin's configuration on its own page under Plugins;
   // Settings keeps only the read-only plugin inventory. The whole Mnemon
-  // configuration is the @tingfeng/dsh-tingfeng bundle's page, between its description
+  // configuration is the dsh-tingfeng bundle's page, between its description
   // and its components.
   // Components contribute their own settings to their pages there, keyed by package name.
   const componentSettingsDirectory = createComponentSettingsDirectory(ctx)
-  // A shipped component whose settings @tingfeng/dsh-tingfeng used to draw reads its configuration and Host operations through these.
+  // A shipped component whose settings dsh-tingfeng used to draw reads its configuration and Host operations through these.
   const componentHost = createComponentHosts({ scope: settings, connection: ctx.connection, componentChanges: seats.components })
   const configurationServices = () => ({
     componentSettingsDirectory,
@@ -424,11 +424,11 @@ export function apply(rawContext: unknown): void {
     }, MnemonComponentRowHost))
   }
   // The shipped components' own settings and Status cards arrive the way an installed component's do.
-  ctx.effect(() => installShippedComponentSettings(ctx, { scope: settings, skillsScope: skillsSettings, connection: ctx.connection, t: translate }), '@tingfeng/dsh-tingfeng: shipped component settings')
-  ctx.effect(() => installShippedComponentStatus(ctx), '@tingfeng/dsh-tingfeng: shipped component status')
+  ctx.effect(() => installShippedComponentSettings(ctx, { scope: settings, skillsScope: skillsSettings, connection: ctx.connection, t: translate }), 'dsh-tingfeng: shipped component settings')
+  ctx.effect(() => installShippedComponentStatus(ctx), 'dsh-tingfeng: shipped component status')
   ctx.slots.inject('plugins.detail.actions', () => ctx.slots.register({
     name: 'plugins.detail.actions',
-    id: '@tingfeng/dsh-tingfeng/open-workspace',
+    id: 'dsh-tingfeng/open-workspace',
     locale: namespace,
     inject: () => ({ workspace: seats.workspace, componentList: seats.componentList, t: translate }),
   }, MnemonPluginActions))
@@ -458,7 +458,7 @@ export function apply(rawContext: unknown): void {
       for (const dispose of [...active.values()].reverse()) dispose()
       active.clear()
     }
-  }, '@tingfeng/dsh-tingfeng: interaction surfaces')
+  }, 'dsh-tingfeng: interaction surfaces')
 
   // 技能管理's own surfaces follow its settings live, as the interaction surfaces do:
   // the turn's skills line (on unless switched off) and its own sidebar entry (off unless switched on).
@@ -473,7 +473,7 @@ export function apply(rawContext: unknown): void {
     if (hints && skillTail === undefined) {
       skillTail = ctx.slots.inject('conversation.chat.turnTail', () => ctx.slots.register({
         name: 'conversation.chat.turnTail',
-        id: '@tingfeng/dsh-tingfeng/skill-tail',
+        id: 'dsh-tingfeng/skill-tail',
         order: 100,
         locale: namespace,
         inject: (sessionId: unknown) => ({
@@ -509,5 +509,5 @@ export function apply(rawContext: unknown): void {
       skillsPanel = undefined
       skillTail = undefined
     }
-  }, '@tingfeng/dsh-tingfeng: skills surfaces')
+  }, 'dsh-tingfeng: skills surfaces')
 }

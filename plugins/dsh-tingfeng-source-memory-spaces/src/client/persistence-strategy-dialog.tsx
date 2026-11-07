@@ -5,7 +5,7 @@ import { NATIVE_PROVIDER_ID, type MemoryPlacementCapability, type MemoryPlacemen
 import type { MemorySpacesPageClient } from './api.ts'
 import { ProviderIcon } from './ProviderIcon.tsx'
 import { providerSummary } from './provider-presentation.ts'
-import { appearanceClass, message, SectionSpinner, SidebarModal, SelectField, TaskAgentTag } from '@tingfeng/dsh-tingfeng/client'
+import { appearanceClass, message, SectionSpinner, SidebarModal, SelectField, TaskAgentTag } from 'dsh-tingfeng/client'
 import { ProviderMemoryFields, mergeProviderDefaults, providerDraftComplete, providerUnavailableKey, readyFirst, readyProviderId, type ProviderDrafts } from './widgets.tsx'
 
 export interface MemoryPlacementSettings { setPath(path: string[], value: unknown): Promise<void> }

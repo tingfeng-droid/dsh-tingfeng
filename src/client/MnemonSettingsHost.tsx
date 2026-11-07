@@ -17,7 +17,7 @@ interface MnemonSettingsHostProps extends Omit<MnemonSettingsCardProps, 'session
   workspaces: MnemonClientContext['workspaces']
   /** The components that contributed settings to their pages. */
   componentSettingsDirectory?: ComponentSettingsDirectory
-  /** What the page lends the shipped components whose settings @tingfeng/dsh-tingfeng used to draw. */
+  /** What the page lends the shipped components whose settings dsh-tingfeng used to draw. */
   componentHost?: ComponentHosts
   /**
    * Renders a contribution on a page that does not own the settings region,
@@ -27,7 +27,7 @@ interface MnemonSettingsHostProps extends Omit<MnemonSettingsCardProps, 'session
   renderContributed?: (packageName: string, props: MemoryComponentSettingsProps) => ReactNode
 }
 
-/** The @tingfeng/dsh-tingfeng bundle page body; root-slot injection is cached, so session and workspace stay live here. */
+/** The dsh-tingfeng bundle page body; root-slot injection is cached, so session and workspace stay live here. */
 export function MnemonSettingsHost({ view, currentSession, sessions, workspaces, localeRuntime, componentSettingsDirectory, componentHost, renderSlot, renderContributed, ...props }: MnemonSettingsHostProps): JSX.Element | null {
   const sessionId = useMnemonSessionId(currentSession)
   const subscribeSessions = useCallback((listener: () => void) => sessions.list.subscribe(listener), [sessions.list])

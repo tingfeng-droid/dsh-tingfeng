@@ -3,7 +3,7 @@ import type { JSX } from 'react'
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { CATEGORIES, type Category, type Insight, type MemoryListView } from '../contracts.ts'
 import type { MemorySpacesPageClient } from './api.ts'
-import { message, PageHeader, SectionSpinner, ProgressiveFooter, EmptyState, SearchField, SelectField } from '@tingfeng/dsh-tingfeng/client'
+import { message, PageHeader, SectionSpinner, ProgressiveFooter, EmptyState, SearchField, SelectField } from 'dsh-tingfeng/client'
 import { InsightCard, ReadSourcePanel, categoryLabel, insightKey } from './widgets.tsx'
 
 export function ListPage(props: { client: MemorySpacesPageClient; revision: number; writeEnabled: boolean; onForget: (insight: Insight) => Promise<void>; onClone: (insight: Insight) => void; onExplore: (query: string) => void }): JSX.Element {

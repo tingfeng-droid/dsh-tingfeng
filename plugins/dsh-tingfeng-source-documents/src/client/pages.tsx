@@ -4,7 +4,7 @@ import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type 
 import Markdown from 'markdown-to-jsx'
 import { type DocumentRecord, type DocumentSnapshot, type DocumentView } from '../contracts.ts'
 import type { DocumentsPageClient } from './api.ts'
-import { useRequestVersion, appearanceClass, useLocale, humanBytes, message, PageHeader, ProgressiveFooter, SidebarModal, EmptyState, SearchField } from '@tingfeng/dsh-tingfeng/client'
+import { useRequestVersion, appearanceClass, useLocale, humanBytes, message, PageHeader, ProgressiveFooter, SidebarModal, EmptyState, SearchField } from 'dsh-tingfeng/client'
 
 const SAFE_LINK_PATTERN = /^(?:https?:|mailto:|#|\/)/iu
 

@@ -1,5 +1,5 @@
 import { createContext, useContext, useMemo } from 'react'
-import { memoryPageStyles, memorySidebarStyles, useT as useSharedT, useLocale, type MnemonKey } from '@tingfeng/dsh-tingfeng/client'
+import { memoryPageStyles, memorySidebarStyles, useT as useSharedT, useLocale, type MnemonKey } from 'dsh-tingfeng/client'
 import type labels from 'dsh-tingfeng-source-memory-spaces/presentation/locales.json'
 import copy from '../../presentation/locales.json' with { type: 'json' }
 import page from '../../presentation/page.module.css'
@@ -52,10 +52,10 @@ export function languageChain(snapshot: DshLocaleSnapshot): string[] {
 }
 
 /**
- * Translate as @tingfeng/dsh-tingfeng drew these settings, through DSH's language chain
+ * Translate as dsh-tingfeng drew these settings, through DSH's language chain
  * and the `mnemon` namespace it registers this copy in. This copy answers in
  * the first of zh and en the chain reaches; a language pack ahead of that one
- * is asked first, through the namespace, as @tingfeng/dsh-tingfeng asked it; a key this
+ * is asked first, through the namespace, as dsh-tingfeng asked it; a key this
  * copy lacks goes to the namespace too. Without DSH's chain the page's
  * language picks the copy, as the page frame does.
  */

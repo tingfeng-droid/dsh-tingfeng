@@ -100,7 +100,7 @@ export class MnemonSettingsScope<T extends object> implements ClientSettingsScop
       try {
         listener()
       } catch (error) {
-        console.warn('@tingfeng/dsh-tingfeng: settings listener failed; keeping the published Host snapshot', error)
+        console.warn('dsh-tingfeng: settings listener failed; keeping the published Host snapshot', error)
       }
     }
   }

@@ -88,7 +88,7 @@ describe.skipIf(!available)('Mnemon Git sync over RPC', { timeout: 90_000 }, () 
     const configured = await first.sync('configure', { repoUrl: remote, token: TOKEN })
     expect(configured).toMatchObject({
       ok: true,
-      value: { repoUrl: remote, branch: 'mnemon-sync', subdir: 'mnemon/', hasToken: true, authorName: '@tingfeng/dsh-tingfeng sync', authorEmail: 'mnemon@localhost' },
+      value: { repoUrl: remote, branch: 'mnemon-sync', subdir: 'mnemon/', hasToken: true, authorName: 'dsh-tingfeng sync', authorEmail: 'mnemon@localhost' },
     })
     // The answer names the credential without ever carrying it.
     expect(JSON.stringify(configured)).not.toContain(TOKEN)

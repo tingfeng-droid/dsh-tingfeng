@@ -150,7 +150,7 @@ try {
   const install = await run(['plugin', '--profile', 'headless', 'add', ...packages,
     ...(options.has('--registry') ? ['--registry', options.get('--registry')] : []),
   ], { env, timeoutMs: 120_000 })
-  assertSuccess('installing @tingfeng/dsh-tingfeng into the Headless profile', install)
+  assertSuccess('installing dsh-tingfeng into the Headless profile', install)
 
   // The verification exercises Mnemon composition, not DSH's native PTY
   // transport. Disable the unrelated shell stack so the check remains

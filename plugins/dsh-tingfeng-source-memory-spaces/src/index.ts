@@ -1,6 +1,6 @@
 import type { Context } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
-import { defineMemoryPlugin, installMemory, memoryConfigurationDigest } from '@tingfeng/dsh-tingfeng/extension-sdk'
+import { defineMemoryPlugin, installMemory, memoryConfigurationDigest } from 'dsh-tingfeng/extension-sdk'
 import { createMemorySpacesSource } from './source.ts'
 import { PrivateMemorySpaceProviderHost } from './providers/host.ts'
 import { defineMemorySpaceProvider, type MemorySpaceProviderEntry, type MemorySpaceProviderModule } from './providers/definitions.ts'

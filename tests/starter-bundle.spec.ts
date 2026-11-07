@@ -14,7 +14,7 @@ class NativeGroup {
   stop() { events.push('stop') }
 }
 type Bundle = { [init]: () => AsyncGenerator<() => void, void, unknown> }
-const children = [{ id: 'mnemon', name: '@tingfeng/dsh-tingfeng' }]
+const children = [{ id: 'mnemon', name: 'dsh-tingfeng' }]
 
 beforeEach(() => { events.length = 0 })
 
@@ -43,7 +43,7 @@ describe('the Starter component group', () => {
     const lifecycle = (new MnemonBundle({ loader: { builtins: {} } } as never, children) as unknown as Bundle)[init]()
     const first = lifecycle.next()
     preparation.release()
-    await expect(first).rejects.toThrow('@tingfeng/dsh-tingfeng/bundle needs the Loader\'s cordis:group builtin')
+    await expect(first).rejects.toThrow('dsh-tingfeng/bundle needs the Loader\'s cordis:group builtin')
     expect(events).toEqual([])
   })
 })

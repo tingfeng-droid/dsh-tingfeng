@@ -1,5 +1,5 @@
 import type { MemoryProviderConfigField, MemoryProviderDescriptor } from '../contracts.ts'
-import type { MnemonKey, MnemonTranslate } from '@tingfeng/dsh-tingfeng/client'
+import type { MnemonKey, MnemonTranslate } from 'dsh-tingfeng/client'
 
 export function providerSummary(t: MnemonTranslate, provider: MemoryProviderDescriptor): string {
   if (provider.summaryI18nKey === undefined) return provider.summary

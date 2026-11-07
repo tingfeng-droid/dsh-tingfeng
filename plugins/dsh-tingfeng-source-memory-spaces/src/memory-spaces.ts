@@ -670,7 +670,7 @@ export class MemorySpaceRegistry {
     if (request.placement !== undefined && placement === undefined) throw new Error('automatic provider placement must be resolved before creating a Memory Space')
     if (placement !== undefined && request.providerId !== undefined && request.providerId !== placement.providerId) throw new Error('resolved provider placement conflicts with providerId')
     const providerId = placement?.providerId ?? request.providerId ?? this.defaultProviderId()
-    if (providerId === undefined) throw new Error('No memory provider is ready: install the Mnemon CLI to use Mnemon Native, or connect another provider on the @tingfeng/dsh-tingfeng page under Plugins')
+    if (providerId === undefined) throw new Error('No memory provider is ready: install the Mnemon CLI to use Mnemon Native, or connect another provider on the dsh-tingfeng page under Plugins')
     if (!this.providerCatalog.has(providerId)) throw new Error(`unsupported memory provider: ${String(providerId)}`)
     const normalizedPlacement = placement === undefined ? undefined : normalizePlacementDecision(placement, providerId, this.providerCatalog)
     if (placement !== undefined && normalizedPlacement === undefined) throw new Error('resolved provider placement is invalid')
@@ -692,7 +692,7 @@ export class MemorySpaceRegistry {
         this.services[providerId] = this.providerCatalog.normalizeService(providerId, split.service, this.services[providerId] ?? {})
         this.serviceEnabled[providerId] = true
       }
-      if (!this.providerServiceEnabled(providerId)) throw new Error(`${this.providerCatalog.descriptor(providerId).label} service is not enabled; enable it on the @tingfeng/dsh-tingfeng page under Plugins first`)
+      if (!this.providerServiceEnabled(providerId)) throw new Error(`${this.providerCatalog.descriptor(providerId).label} service is not enabled; enable it on the dsh-tingfeng page under Plugins first`)
       connection = this.providerCatalog.normalizeMemory(providerId, split.memory)
       this.providerCatalog.normalize(providerId, { ...this.services[providerId], ...connection })
     }
@@ -740,7 +740,7 @@ export class MemorySpaceRegistry {
         this.services[current.providerId] = this.providerCatalog.normalizeService(current.providerId, split.service, this.services[current.providerId] ?? {}, clearSecrets)
         this.serviceEnabled[current.providerId] = true
       }
-      if (!this.providerServiceEnabled(current.providerId)) throw new Error(`${this.providerCatalog.descriptor(current.providerId).label} service is not enabled; enable it on the @tingfeng/dsh-tingfeng page under Plugins first`)
+      if (!this.providerServiceEnabled(current.providerId)) throw new Error(`${this.providerCatalog.descriptor(current.providerId).label} service is not enabled; enable it on the dsh-tingfeng page under Plugins first`)
       connection = this.providerCatalog.normalizeMemory(current.providerId, split.memory, previousConnection)
       this.providerCatalog.normalize(current.providerId, { ...this.services[current.providerId], ...connection })
     }
@@ -883,7 +883,7 @@ export class MemorySpaceRegistry {
         if ((parsed.version === NATIVE_REGISTRY_VERSION || parsed.version === 2) && Array.isArray(parsed.bodies)) {
           migratedProviderRegistry = parsed.version === 2
           this.spaces = parsed.bodies.filter(body => MEMORY_SPACE_ID_PATTERN.test(body.id)).map(body => {
-            // Earlier @tingfeng/dsh-tingfeng builds gave an already-existing upstream
+            // Earlier dsh-tingfeng builds gave an already-existing upstream
             // `default` Store a synthetic Chinese product name. That made a
             // compatibility import look like a newly-created default Memory
             // Space. Preserve the Store and its activation state, but restore

@@ -36,8 +36,8 @@ export async function syncReleaseMetadata(root = repositoryRoot) {
   })))
   const packagesByName = new Map(packages.map(item => [item.manifest.name, item]))
   assert.equal(packagesByName.size, packages.length, 'Package names must be unique')
-  const starter = packagesByName.get('@tingfeng/dsh-tingfeng')
-  assert(starter, 'Missing @tingfeng/dsh-tingfeng Starter package')
+  const starter = packagesByName.get('dsh-tingfeng')
+  assert(starter, 'Missing dsh-tingfeng Starter package')
 
   const changed = []
   for (const item of packages) {

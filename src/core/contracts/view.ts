@@ -13,7 +13,7 @@ import type {
   MemorySourceMode,
 } from './index.ts'
 
-export const COMPOSABLE_MEMORY_API_VERSION = '@tingfeng/dsh-tingfeng/v1' as const
+export const COMPOSABLE_MEMORY_API_VERSION = 'dsh-tingfeng/v1' as const
 
 /** Persistence truth, not a taxonomy of memory operations. */
 export type MemoryMutationCompletion = 'accepted' | 'candidate' | 'committed' | 'partial' | 'failed' | 'unknown'
@@ -436,7 +436,7 @@ export interface MemorySourceRuntimeContext {
  * Operation identity only; never the complete View or another Source's data.
  * The object is stable for this Source within one execution, and can key weak
  * execution-local state. Independent executions never share it, even when they
- * pin the exact same immutable View. Requires @tingfeng/dsh-tingfeng 0.5.40 or later.
+ * pin the exact same immutable View. Requires dsh-tingfeng 0.5.40 or later.
  */
 export interface MemorySourceViewContext {
   id: string

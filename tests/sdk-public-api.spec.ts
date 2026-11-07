@@ -1,13 +1,13 @@
 import { describe, expect, expectTypeOf, it } from 'vitest'
 import type { Context } from '@deepseek-ai/cordis'
-import * as sdk from '@tingfeng/dsh-tingfeng/extension-sdk'
-import type { MnemonMemoryService, MemorySourceRuntime } from '@tingfeng/dsh-tingfeng/extension-sdk'
+import * as sdk from 'dsh-tingfeng/extension-sdk'
+import type { MnemonMemoryService, MemorySourceRuntime } from 'dsh-tingfeng/extension-sdk'
 // @ts-expect-error Engine implementations are not plugin author contracts.
-import type { MemoryRuntime } from '@tingfeng/dsh-tingfeng/extension-sdk'
+import type { MemoryRuntime } from 'dsh-tingfeng/extension-sdk'
 // @ts-expect-error Installed records belong to Core, not the public wire protocol.
-import type { InstalledMemorySource } from '@tingfeng/dsh-tingfeng/contracts'
+import type { InstalledMemorySource } from 'dsh-tingfeng/contracts'
 // @ts-expect-error Registry snapshots are internal installation state.
-import type { MemoryContributionSnapshot } from '@tingfeng/dsh-tingfeng/contracts'
+import type { MemoryContributionSnapshot } from 'dsh-tingfeng/contracts'
 
 describe('public plugin SDK boundary', () => {
   it('types the only Context service as its contribution protocol', () => {

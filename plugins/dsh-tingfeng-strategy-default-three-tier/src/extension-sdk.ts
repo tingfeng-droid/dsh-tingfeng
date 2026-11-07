@@ -1,5 +1,5 @@
-import { defineMemoryStrategyExtension, memoryViewExtensionValues, validateMemoryViewExtension } from '@tingfeng/dsh-tingfeng/extension-sdk'
-import { COMPOSABLE_MEMORY_API_VERSION, type MemoryAvailableSource, type MemoryJsonValue, type MemoryStrategyContribution, type MemoryStrategyExtensionDefinition, type MemoryViewExtensionSlot, type MemoryViewExtensionValues, type MemoryViewRequest } from '@tingfeng/dsh-tingfeng/contracts'
+import { defineMemoryStrategyExtension, memoryViewExtensionValues, validateMemoryViewExtension } from 'dsh-tingfeng/extension-sdk'
+import { COMPOSABLE_MEMORY_API_VERSION, type MemoryAvailableSource, type MemoryJsonValue, type MemoryStrategyContribution, type MemoryStrategyExtensionDefinition, type MemoryViewExtensionSlot, type MemoryViewExtensionValues, type MemoryViewRequest } from 'dsh-tingfeng/contracts'
 
 /** The three-tier slots are Core's standard View extension slots. */
 export type ThreeTierExtensionValues = MemoryViewExtensionValues

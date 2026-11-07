@@ -55,12 +55,12 @@ export async function servePackedWebFixture(scenario) {
     assert(!packages.has(manifest.name), `Duplicate packed package: ${manifest.name}`)
     packages.set(manifest.name, { manifest, path, integrity: `sha512-${createHash('sha512').update(bytes).digest('base64')}`, sha256: createHash('sha256').update(bytes).digest('hex') })
   }
-  assert(packages.has('@tingfeng/dsh-tingfeng'), 'Packed Root is required')
-  const expected = ['@tingfeng/dsh-tingfeng', ...Object.keys(packages.get('@tingfeng/dsh-tingfeng').manifest.dependencies)
+  assert(packages.has('dsh-tingfeng'), 'Packed Root is required')
+  const expected = ['dsh-tingfeng', ...Object.keys(packages.get('dsh-tingfeng').manifest.dependencies)
     .filter(name => name.startsWith('dsh-tingfeng-'))].sort()
   assert.deepEqual([...packages.keys()].sort(), expected, 'Use the complete packed Starter composition')
-  for (const name of expected.filter(name => name !== '@tingfeng/dsh-tingfeng')) {
-    assert.equal(packages.get(name).manifest.version, packages.get('@tingfeng/dsh-tingfeng').manifest.dependencies[name],
+  for (const name of expected.filter(name => name !== 'dsh-tingfeng')) {
+    assert.equal(packages.get(name).manifest.version, packages.get('dsh-tingfeng').manifest.dependencies[name],
       `${name}: packed version must match the Starter pin`)
   }
   let registryUrl
@@ -146,7 +146,7 @@ export async function servePackedWebFixture(scenario) {
   await run('git', ['-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', 'commit', '-m', `Synthetic issue ${scenario.issue} fixture`], { cwd: workspace })
   const env = { ...process.env, PATH: `${dirname(process.execPath)}:${process.env.PATH ?? ''}`, DSH_HOME: dshHome, DSH_TELEMETRY_DISABLED: '1', DSH_TOOLS_MODE: 'native', DEEPSEEK_API_KEY: 'isolated-test-key', DEEPSEEK_BASE_URL: modelUrl, MNEMON_DATA_DIR: data, npm_config_registry: registryUrl, NPM_CONFIG_REGISTRY: registryUrl }
   const dshBin = require.resolve('@deepseek-ai/dsh/package.json').replace(/package\.json$/u, 'lib/bin.js')
-  await privateFile('install.log', await run(process.execPath, [dshBin, 'plugin', '--profile', 'web', 'add', `file:${packages.get('@tingfeng/dsh-tingfeng').path}`, ...(prepared.packages ?? []).map(path => `file:${path}`), '--registry', registryUrl], { cwd: workspace, env }))
+  await privateFile('install.log', await run(process.execPath, [dshBin, 'plugin', '--profile', 'web', 'add', `file:${packages.get('dsh-tingfeng').path}`, ...(prepared.packages ?? []).map(path => `file:${path}`), '--registry', registryUrl], { cwd: workspace, env }))
   await writeFile(join(dshHome, 'profiles/web/cordis.patch.yml'), `- id: directory-picker
   disabled: true
 - id: llm-deepseek

@@ -93,7 +93,7 @@ describe('memory tool table', () => {
     const offer = (key: string, id: string) => ({ id: `${key}/${id}`, sourceInstanceKey: key, sourceActionId: id, description: id, inputSchema: {} })
     const view = {
       id: 'view:every-operation', digest: 'every-operation', projection: [],
-      readGrants: instances.map(([key, type]) => ({ id: `${key}/grant`, sourceInstanceKey: key, schema: `@tingfeng/dsh-tingfeng.${type}/v1` })),
+      readGrants: instances.map(([key, type]) => ({ id: `${key}/grant`, sourceInstanceKey: key, schema: `dsh-tingfeng.${type}/v1` })),
       routes: [route(documents, 'search'), route(spaces, 'inspect'), route(spaces, 'recall'), route(spaces, 'related')],
       actionOffers: [offer(runtime, 'mutate'), offer(documents, 'manage'), offer(documents, 'create'), offer(spaces, 'remember'), offer(spaces, 'link'),
         offer(spaces, 'forget'), offer(spaces, 'manage-spaces'), offer(other, 'mutate')],

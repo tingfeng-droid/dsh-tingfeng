@@ -3,7 +3,7 @@ import type { JSX } from 'react'
 import { useEffect, useId, useState, type FormEvent } from 'react'
 import { CATEGORIES, type Category, type MemorySpaceView } from '../contracts.ts'
 import type { MemorySpacesPageClient } from './api.ts'
-import { message, SidebarModal, EmptyState, SelectField, TaskAgentTag, WriteReceipt } from '@tingfeng/dsh-tingfeng/client'
+import { message, SidebarModal, EmptyState, SelectField, TaskAgentTag, WriteReceipt } from 'dsh-tingfeng/client'
 import { categoryLabel } from './widgets.tsx'
 
 /** `embeddingManaged`, from this Source's status, words a memory saved without a vector; left out, the receipt keeps the caution. */

@@ -3,7 +3,7 @@ import type { JSX } from 'react'
 import { useCallback, useEffect, useId, useRef, useState, type FormEvent } from 'react'
 import { type RuntimeMemoryEntry, type RuntimeMemoryImportance, type RuntimeMemorySnapshot, type RuntimeMemoryTarget } from '../contracts.ts'
 import type { RuntimePageClient } from './api.ts'
-import { type MnemonKey, appearanceClass, useLocale, humanBytes, message, parseBranchesInput, PageHeader, ProgressiveFooter, SidebarModal, SearchField, SelectField } from '@tingfeng/dsh-tingfeng/client'
+import { type MnemonKey, appearanceClass, useLocale, humanBytes, message, parseBranchesInput, PageHeader, ProgressiveFooter, SidebarModal, SearchField, SelectField } from 'dsh-tingfeng/client'
 
 /** Whitespace folded, as a conversation turn quotes an entry it wrote. */
 function fold(text: string): string {

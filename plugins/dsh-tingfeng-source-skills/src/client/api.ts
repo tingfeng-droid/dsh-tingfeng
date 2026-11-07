@@ -1,5 +1,5 @@
-import type { MemoryJsonValue } from '@tingfeng/dsh-tingfeng/contracts'
-import type { MnemonSourceManagementClient, TaskAgentModelCatalog } from '@tingfeng/dsh-tingfeng/client'
+import type { MemoryJsonValue } from 'dsh-tingfeng/contracts'
+import type { MnemonSourceManagementClient, TaskAgentModelCatalog } from 'dsh-tingfeng/client'
 import type {
   BacktestRun, CatalogView, DraftPreferencesView, DraftView, EvalCase, MarketPreview, MarketRegistry, MarketSearchResult, MarketView, EvidencePack, ModelRoute, ReviewLogEntry, ReviewRecordResult, RunTarget, SkillDocument, SkillDraft, SkillRootKind, SkillSuggestion, SkillSummary,
   SkillVersion, SkillsOverview, SuggestionStatus, SuggestionView, Trajectory, TrajectorySummary, TrashEntry, TrashRestoreInput, TrashRestorePreview,

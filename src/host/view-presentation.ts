@@ -74,7 +74,7 @@ function memoryWakeBindings(generation: MemoryCompositionGeneration, view: Compo
     if (selected === undefined) continue
     for (const route of view.routes.filter(route => route.sourceInstanceKey === selected.sourceInstanceKey)) {
       const grant = view.readGrants.find(grant => grant.id === route.readGrantId)
-      if (grant?.schema !== `@tingfeng/dsh-tingfeng.${typeId}/v1`) continue
+      if (grant?.schema !== `dsh-tingfeng.${typeId}/v1`) continue
       const tool = ROUTE_TOOLS[typeId]?.[route.sourceRouteId]
       if (tool !== undefined) routes[route.id] = tool
     }

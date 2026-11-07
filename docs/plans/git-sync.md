@@ -71,7 +71,7 @@ history already provides retention, review and restore, so the Git channel does 
     GitHub's OAuth **device flow**: the Host asks for a device code, the page shows the one-time
     code and the verification URL, and the Host polls at the interval GitHub returns until the
     browser step finishes. The access token is stored through DSH's credentials service
-    (`@deepseek-ai/dsh-credentials`, record key `@tingfeng/dsh-tingfeng/github`, kind `grant`) and never
+    (`@deepseek-ai/dsh-credentials`, record key `dsh-tingfeng/github`, kind `grant`) and never
     reaches the browser. The service is read with `ctx.get('credentials')` rather than added to
     `inject`, so a profile that mounts no provider still loads the plugin and simply reports the
     login as unavailable; the manual token field stays as the path for those profiles. The scope is

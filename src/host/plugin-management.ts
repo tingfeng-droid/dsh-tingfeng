@@ -149,7 +149,7 @@ function orderPlugins(values: MemoryPluginEntryView[]): MemoryPluginEntryView[] 
 }
 
 /**
- * Profile-local plugin graph overlay. Every @tingfeng/dsh-tingfeng Source or Strategy Entry
+ * Profile-local plugin graph overlay. Every dsh-tingfeng Source or Strategy Entry
  * is one peer node; activation, configuration, dependency checks and rollback
  * use one transaction. Contribution roles do not create separate managers.
  */

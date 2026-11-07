@@ -30,7 +30,7 @@ function createEntry(controller: MnemonWorkspaceController): { entry: HTMLButton
   const entry = document.createElement('button')
   entry.type = 'button'
   entry.dataset.dshMnemonEntry = ''
-  entry.dataset.dshPlugin = '@tingfeng/dsh-tingfeng'
+  entry.dataset.dshPlugin = 'dsh-tingfeng'
   entry.dataset.dshPart = 'sidebar-entry'
   entry.className = css.entry ?? ''
   const icon = document.createElement('span')

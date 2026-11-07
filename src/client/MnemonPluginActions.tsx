@@ -7,7 +7,7 @@ import type { MnemonTranslate } from './locales.ts'
 import { MemoryIcon } from './memory-icon.tsx'
 
 /** The npm package whose page under DSH Plugins carries the Mnemon configuration. */
-export const MNEMON_PACKAGE_NAME = '@tingfeng/dsh-tingfeng'
+export const MNEMON_PACKAGE_NAME = 'dsh-tingfeng'
 
 interface MnemonPluginActionsProps extends PluginDetailProps {
   /** Opens the memory workspace in its current placement; absent while no placement can show it. */
@@ -18,7 +18,7 @@ interface MnemonPluginActionsProps extends PluginDetailProps {
 }
 
 /**
- * Head controls on the @tingfeng/dsh-tingfeng page under Plugins: a way back to the memory
+ * Head controls on the dsh-tingfeng page under Plugins: a way back to the memory
  * workspace. They also report the rows DSH lists below the configuration.
  */
 export function MnemonPluginActions({ subject, workspace, componentList, t }: MnemonPluginActionsProps): JSX.Element | null {

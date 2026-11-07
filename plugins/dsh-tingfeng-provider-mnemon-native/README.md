@@ -6,7 +6,7 @@ Install the `mnemon` CLI separately and ensure the DSH Host can resolve it. The 
 
 ## Use
 
-The default `@tingfeng/dsh-tingfeng` Starter already installs this package. Native is the default backend while its CLI is installed; without the CLI, Memory Spaces use another ready Provider.
+The default `dsh-tingfeng` Starter already installs this package. Native is the default backend while its CLI is installed; without the CLI, Memory Spaces use another ready Provider.
 
 For a custom composition, install this package alongside `dsh-tingfeng-source-memory-spaces` and include it in that Source's `config.providers`:
 

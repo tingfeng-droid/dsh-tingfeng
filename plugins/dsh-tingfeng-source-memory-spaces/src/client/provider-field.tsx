@@ -1,6 +1,6 @@
 import { css, useT } from './presentation.ts'
 import { useState, type JSX } from 'react'
-import { memorySettingsStyles, SelectField } from '@tingfeng/dsh-tingfeng/client'
+import { memorySettingsStyles, SelectField } from 'dsh-tingfeng/client'
 import type { MemoryProviderConfigField } from '../contracts.ts'
 import { providerFieldLabel, providerOptionLabel } from './provider-presentation.ts'
 
@@ -46,7 +46,7 @@ export function ProviderField(props: ProviderFieldProps): JSX.Element {
 
 function SettingsField(props: ProviderFieldProps): JSX.Element {
   const t = useT()
-  // Read here, not at load: @tingfeng/dsh-tingfeng 0.5.31 lacks it, and the dialogs that share this module must load beside it.
+  // Read here, not at load: dsh-tingfeng 0.5.31 lacks it, and the dialogs that share this module must load beside it.
   const settings = memorySettingsStyles
   const [secretVisible, setSecretVisible] = useState(false)
   const { field } = props

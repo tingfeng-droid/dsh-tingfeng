@@ -8,8 +8,8 @@ import type { MemoryViewConfigurationRequest, MemoryViewPreferences } from '../s
 import { viewManagementFixture } from './fixtures/view-management.ts'
 import type { RuntimeMemorySnapshot } from 'dsh-tingfeng-source-runtime/contracts'
 import type { Context } from '@deepseek-ai/cordis'
-import { COMPOSABLE_MEMORY_API_VERSION } from '@tingfeng/dsh-tingfeng/contracts'
-import { defineMemoryStrategy, defineMemoryStrategyConfiguration, installMemory } from '@tingfeng/dsh-tingfeng/extension-sdk'
+import { COMPOSABLE_MEMORY_API_VERSION } from 'dsh-tingfeng/contracts'
+import { defineMemoryStrategy, defineMemoryStrategyConfiguration, installMemory } from 'dsh-tingfeng/extension-sdk'
 import { sessionLog } from './fixtures/session-log.ts'
 
 const fixtures: Awaited<ReturnType<typeof viewManagementFixture>>[] = []
@@ -292,7 +292,7 @@ describe('View configuration with the real pinned DSH Cordis Loader', () => {
 
   it('keeps other editors and the real snapshot available when an optional module is broken', async () => {
     const f = await fixture()
-    f.modules['dsh-tingfeng-strategy-light-context'] = { memoryStrategyConfiguration: { apiVersion: '@tingfeng/dsh-tingfeng/strategy-configuration/v1', create: () => ({}), fields: null } }
+    f.modules['dsh-tingfeng-strategy-light-context'] = { memoryStrategyConfiguration: { apiVersion: 'dsh-tingfeng/strategy-configuration/v1', create: () => ({}), fields: null } }
     const catalog = await f.management.catalog()
     expect(catalog.diagnostics.join(' ')).toContain('light: Invalid plugin configuration descriptor')
     expect(catalog.entries.filter(entry => entry.roles.includes('strategy') || entry.roles.includes('strategy-extension')).map(entry => entry.entryId)).toEqual(['mnemon-strategy-default-three-tier', 'capture', 'scoped'])

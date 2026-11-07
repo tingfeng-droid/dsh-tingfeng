@@ -54,7 +54,7 @@ function fakeHost(options: FakeHostOptions = {}) {
   const config: MnemonSyncConfigView = {
     enabled: true, branch: 'mnemon-sync', subdir: 'mnemon/', hasToken: false,
     credentialSource: options.credentialSource ?? 'none',
-    authorName: options.author?.name ?? '@tingfeng/dsh-tingfeng sync', authorEmail: options.author?.email ?? 'mnemon@localhost', autoBackupMinutes: options.autoBackupMinutes ?? 0,
+    authorName: options.author?.name ?? 'dsh-tingfeng sync', authorEmail: options.author?.email ?? 'mnemon@localhost', autoBackupMinutes: options.autoBackupMinutes ?? 0,
     ...(options.repoUrl === undefined ? {} : { repoUrl: options.repoUrl }),
   }
   let github: MnemonSyncGitHubStatus = { available: false, signedIn: false, writable: false, ...options.github }
@@ -70,7 +70,7 @@ function fakeHost(options: FakeHostOptions = {}) {
   })
   const preview: MnemonSyncPreview = {
     repoUrl: config.repoUrl ?? '', branch: 'mnemon-sync', subdir: 'mnemon/', commit: COMMIT, pushedAt: '2026-08-14T12:00:00.000Z',
-    manifest: { format: 'mnemonpack', version: 1, scope: 'full', exportedAt: '2026-08-14T12:00:00.000Z', source: { plugin: '@tingfeng/dsh-tingfeng', pluginVersion: '0.5.27' }, components: ['runtime', 'documents', 'memory-spaces'], summary: [] },
+    manifest: { format: 'mnemonpack', version: 1, scope: 'full', exportedAt: '2026-08-14T12:00:00.000Z', source: { plugin: 'dsh-tingfeng', pluginVersion: '0.5.27' }, components: ['runtime', 'documents', 'memory-spaces'], summary: [] },
     archiveBytes: 10, expandedBytes: 20, targetRoot: '/data', targetScope: 'global', occupied: { runtime: true, documents: false, 'memory-spaces': false },
     components: [
       { component: 'runtime', files: 3, bytes: 10, items: 2, changed: true },
@@ -594,7 +594,7 @@ describe('This computer\'s name', () => {
     expect(screen.getByText('备份历史里显示为“来自 Studio”')).toBeTruthy()
     expect(screen.getByText('保存后，之后的同步使用新名称；已有的版本保留原来的名称')).toBeTruthy()
     fireEvent.click(save)
-    await waitFor(() => expect(host.calls('configure')).toEqual([{ branch: 'mnemon-sync', subdir: 'mnemon/', authorName: '@tingfeng/dsh-tingfeng sync', authorEmail: 'mnemon@localhost', machineLabel: 'Studio' }]))
+    await waitFor(() => expect(host.calls('configure')).toEqual([{ branch: 'mnemon-sync', subdir: 'mnemon/', authorName: 'dsh-tingfeng sync', authorEmail: 'mnemon@localhost', machineLabel: 'Studio' }]))
     // Once the Host reports the name, the summary follows it.
     await waitFor(() => expect(screen.getByRole('button', { name: /^高级设置/u }).textContent).toContain('Studio'))
 
@@ -613,7 +613,7 @@ describe('This computer\'s name', () => {
     // Changing only the branch sends no name: the one saved stays as it is.
     fireEvent.change(screen.getByLabelText('分支'), { target: { value: 'memory-backup' } })
     fireEvent.click(screen.getByRole('button', { name: '保存' }))
-    await waitFor(() => expect(host.calls('configure')).toEqual([{ branch: 'memory-backup', subdir: 'mnemon/', authorName: '@tingfeng/dsh-tingfeng sync', authorEmail: 'mnemon@localhost' }]))
+    await waitFor(() => expect(host.calls('configure')).toEqual([{ branch: 'memory-backup', subdir: 'mnemon/', authorName: 'dsh-tingfeng sync', authorEmail: 'mnemon@localhost' }]))
   })
 })
 

@@ -26,7 +26,7 @@ describe('Memory Spaces health for model tools', () => {
     // No Mnemon CLI and no other Provider: a space cannot be created yet.
     const blocked = modelStatus(status({ commandFound: false }))
     expect(blocked).toMatchObject({ healthy: true, memorySpaces: { total: 0 } })
-    expect(blocked.notice).toBe('No Memory Space exists, and none can be created until a memory Provider is ready, so durable memory has nowhere to go and a full MEMORY.md archives to a local file. Install the Mnemon CLI for Mnemon Native, or connect another Provider on the @tingfeng/dsh-tingfeng page under Plugins, then create and activate a Memory Space.')
+    expect(blocked.notice).toBe('No Memory Space exists, and none can be created until a memory Provider is ready, so durable memory has nowhere to go and a full MEMORY.md archives to a local file. Install the Mnemon CLI for Mnemon Native, or connect another Provider on the dsh-tingfeng page under Plugins, then create and activate a Memory Space.')
 
     // A ready Provider: only the space is missing.
     const native = modelStatus(status({ commandFound: true }))

@@ -4,7 +4,7 @@ Owns USER / MEMORY records, exact revisions, branch filtering, bounded projectio
 
 ## Use
 
-The `@tingfeng/dsh-tingfeng` Starter installs and mounts this Source by default. The package alone does not activate an instance or select a Strategy.
+The `dsh-tingfeng` Starter installs and mounts this Source by default. The package alone does not activate an instance or select a Strategy.
 
 For a custom Profile, mount an explicit Entry after the Host's `ctx.mnemonMemory` service is available:
 
@@ -23,14 +23,14 @@ Model projections omit default `importance=normal` and whole-day ages of `0d`; t
 
 ## Storage files
 
-The `./contracts` entry names this Source's files under a storage root (`runtime/memories.json`, `USER.md`, `MEMORY.md`, the `.memories.lock` lock and the `archived/` local archive) and exports the rules a copy of them follows: `runtimeProjection` and `runtimeBytes` write and count USER.md and MEMORY.md exactly as the controller does, and `summarizeRuntimeMemories` counts a stored file for an inventory. They are pure and browser-safe. The `@tingfeng/dsh-tingfeng` Starter's backup, sync and storage inventory use them instead of keeping copies.
+The `./contracts` entry names this Source's files under a storage root (`runtime/memories.json`, `USER.md`, `MEMORY.md`, the `.memories.lock` lock and the `archived/` local archive) and exports the rules a copy of them follows: `runtimeProjection` and `runtimeBytes` write and count USER.md and MEMORY.md exactly as the controller does, and `summarizeRuntimeMemories` counts a stored file for an inventory. They are pure and browser-safe. The `dsh-tingfeng` Starter's backup, sync and storage inventory use them instead of keeping copies.
 
 The same entry exports the size limits the configuration and the controller apply: `RUNTIME_MEMORY_LIMITS`, the default limit of USER.md and of MEMORY.md, and `RUNTIME_MEMORY_LIMIT_MAX_BYTES`, the largest limit either may be given. The Starter's settings take their defaults and bounds from them.
 
 ## Source-owned UI and tests
 
-The optional `./client` entry is an ordinary DSH Client plugin. This package owns its pages and `presentation/` resources and uses `@tingfeng/dsh-tingfeng/client` for the shared frame and scoped management client. It never receives a Host Context, credentials or another Source's controller.
+The optional `./client` entry is an ordinary DSH Client plugin. This package owns its pages and `presentation/` resources and uses `dsh-tingfeng/client` for the shared frame and scoped management client. It never receives a Host Context, credentials or another Source's controller.
 
-From a source checkout, install the declared dependencies and run `pnpm verify` to check Host behavior, Source-backed page interactions and Host/browser artifacts. Unreleased SDK work consumes a packed `@tingfeng/dsh-tingfeng` peer, not repository aliases or copied root tests.
+From a source checkout, install the declared dependencies and run `pnpm verify` to check Host behavior, Source-backed page interactions and Host/browser artifacts. Unreleased SDK work consumes a packed `dsh-tingfeng` peer, not repository aliases or copied root tests.
 
 [Plugin development](https://github.com/omdsh-dev/dsh-tingfeng/blob/main/docs/en/development/extensions.md) · [中文指南](https://github.com/omdsh-dev/dsh-tingfeng/blob/main/docs/zh-CN/development/extensions.md)

@@ -1,25 +1,25 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { MemoryComponentConfigurationSnapshot, MemoryComponentHost } from '@tingfeng/dsh-tingfeng/client'
+import type { MemoryComponentConfigurationSnapshot, MemoryComponentHost } from 'dsh-tingfeng/client'
 import type { MemoryProviderConfigField, MemoryProviderDescriptor } from '../src/contracts.ts'
 import { descriptor as openviking } from 'dsh-tingfeng-provider-openviking'
 
 // Load the installed Core's actual DSH browser artifact; no repository source alias.
 const { artifact } = vi.hoisted(() => ({ artifact: async () => {
   const { createRequire } = await import('node:module')
-  const { loadMemoryClientArtifact } = await import('@tingfeng/dsh-tingfeng/testing')
-  return loadMemoryClientArtifact<Record<string, unknown>>(createRequire(import.meta.url).resolve('@tingfeng/dsh-tingfeng/client'), {
+  const { loadMemoryClientArtifact } = await import('dsh-tingfeng/testing')
+  return loadMemoryClientArtifact<Record<string, unknown>>(createRequire(import.meta.url).resolve('dsh-tingfeng/client'), {
     react: await vi.importActual('react'),
     'react/jsx-runtime': await vi.importActual('react/jsx-runtime'),
     'react-dom': await vi.importActual('react-dom'),
     '@deepseek-ai/dsh-client-ui-primitives': await vi.importActual('@deepseek-ai/dsh-client-ui-primitives'),
   })
 } }))
-vi.mock('@tingfeng/dsh-tingfeng/client', artifact)
+vi.mock('dsh-tingfeng/client', artifact)
 afterEach(cleanup)
 
-import { MemorySourcePageFrame, translateEn as t, translateZh } from '@tingfeng/dsh-tingfeng/client'
+import { MemorySourcePageFrame, translateEn as t, translateZh } from 'dsh-tingfeng/client'
 import type { DshLocale } from '../src/client/presentation.ts'
 import { ProviderField } from '../src/client/provider-field.tsx'
 import { MemorySpacesSettings } from '../src/client/settings.tsx'
@@ -27,7 +27,7 @@ import { MemorySpacesSettings } from '../src/client/settings.tsx'
 const field = (input: MemoryProviderConfigField['input'], values: Partial<MemoryProviderConfigField> = {}): MemoryProviderConfigField =>
   ({ key: 'apiKey', label: 'API key', scope: 'service', input, required: true, ...values })
 
-/** A host as @tingfeng/dsh-tingfeng lends one, over a configuration the test controls. */
+/** A host as dsh-tingfeng lends one, over a configuration the test controls. */
 function host(value: Record<string, unknown>, operations: Partial<Record<'read' | 'write', (operation: string, input?: unknown) => Promise<unknown>>> = {}) {
   let snapshot: MemoryComponentConfigurationSnapshot = { status: 'ready', value, revision: 1, writable: true }
   const listeners = new Set<() => void>()
@@ -121,7 +121,7 @@ describe('one Provider field, drawn as each place draws it', () => {
 })
 
 describe('Memory Spaces\' own settings', () => {
-  it('saves a Provider\'s service through what @tingfeng/dsh-tingfeng lends, and tells the Memory System', async () => {
+  it('saves a Provider\'s service through what dsh-tingfeng lends, and tells the Memory System', async () => {
     const provider: MemoryProviderDescriptor = openviking
     const write = vi.fn(async (_operation: string, input?: unknown) => ({ providerId: 'openviking', enabled: true, configured: true, settings: (input as { settings: Record<string, string> }).settings, configuredSecrets: ['apiKey'] }))
     const read = vi.fn(async (operation: string) => operation === 'provider-services'
@@ -157,9 +157,9 @@ describe('Memory Spaces\' own settings', () => {
   })
 })
 
-describe('translating as @tingfeng/dsh-tingfeng drew these settings, through DSH\'s language chain', () => {
+describe('translating as dsh-tingfeng drew these settings, through DSH\'s language chain', () => {
   const locales = [{ id: 'en' }, { id: 'zh', fallback: 'en' }, { id: 'ja', fallback: 'en' }]
-  /** DSH's language service over @tingfeng/dsh-tingfeng's own zh and en copy, with a `ja` pack that may translate some keys. */
+  /** DSH's language service over dsh-tingfeng's own zh and en copy, with a `ja` pack that may translate some keys. */
   function dsh(active: string, pack: Record<string, string> = {}): DshLocale {
     const own = active === 'zh' ? translateZh : t
     return {
@@ -173,12 +173,12 @@ describe('translating as @tingfeng/dsh-tingfeng drew these settings, through DSH
   const settings = (locale: DshLocale, language: string, enabled = true) =>
     render(<MemorySpacesSettings component={{ packageName: 'dsh-tingfeng-source-memory-spaces', label: 'Memory Spaces', enabled }} writable language={language} host={host({}, { read }).lent} locale={locale} />)
 
-  it('reads English for a language pack that falls back to English, as @tingfeng/dsh-tingfeng drew them', () => {
+  it('reads English for a language pack that falls back to English, as dsh-tingfeng drew them', () => {
     settings(dsh('ja'), 'ja')
     expect(screen.getByRole('heading', { name: t('config.providersTitle') })).toBeTruthy()
   })
 
-  it('takes what a language pack translates in @tingfeng/dsh-tingfeng\'s namespace', () => {
+  it('takes what a language pack translates in dsh-tingfeng\'s namespace', () => {
     settings(dsh('ja', { 'config.providersTitle': 'メモリプロバイダー' }), 'ja')
     expect(screen.getByRole('heading', { name: 'メモリプロバイダー' })).toBeTruthy()
   })
@@ -201,16 +201,16 @@ describe('registering its own settings', () => {
     } }
   }
 
-  it('registers them beside its pages where @tingfeng/dsh-tingfeng yields the ones it keeps', async () => {
+  it('registers them beside its pages where dsh-tingfeng yields the ones it keeps', async () => {
     const { apply } = await import('../src/client/ui.tsx')
     const { registered, slots: ctxSlots } = slots()
     apply({ slots: ctxSlots, locale: { bind: () => t } } as never)
     expect(registered.filter(options => options.name === 'mnemon.component.settings')).toEqual([{ name: 'mnemon.component.settings', key: 'dsh-tingfeng-source-memory-spaces' }])
   })
 
-  it('registers none where @tingfeng/dsh-tingfeng 0.5.31 or earlier draws them itself', async () => {
-    // The CommonJS bundle reads an export that @tingfeng/dsh-tingfeng lacks as undefined.
-    vi.doMock('@tingfeng/dsh-tingfeng/client', async () => ({ ...await artifact(), MNEMON_COMPONENT_FALLBACK_PRIORITY: undefined }))
+  it('registers none where dsh-tingfeng 0.5.31 or earlier draws them itself', async () => {
+    // The CommonJS bundle reads an export that dsh-tingfeng lacks as undefined.
+    vi.doMock('dsh-tingfeng/client', async () => ({ ...await artifact(), MNEMON_COMPONENT_FALLBACK_PRIORITY: undefined }))
     vi.resetModules()
     try {
       const { apply } = await import('../src/client/ui.tsx')
@@ -219,7 +219,7 @@ describe('registering its own settings', () => {
       expect(registered.filter(options => options.name === 'mnemon.component.settings')).toEqual([])
       expect(registered.filter(options => options.name === 'mnemon.source.page')).toHaveLength(5)
     } finally {
-      vi.doMock('@tingfeng/dsh-tingfeng/client', artifact)
+      vi.doMock('dsh-tingfeng/client', artifact)
       vi.resetModules()
     }
   })

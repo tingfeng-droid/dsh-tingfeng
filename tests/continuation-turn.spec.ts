@@ -84,7 +84,7 @@ describe('continuation turns for delegated children', () => {
     await expect(child.requestError()({ turn: 1, step: 4, failure: refusal, signal: live }, next)).resolves.toEqual({ kind: 'retry' })
     expect(next).not.toHaveBeenCalled()
     expect(child.append).toHaveBeenCalledExactlyOnceWith('user/message', expect.objectContaining({
-      role: 'user', content: [{ type: 'text', text: CONTINUATION_TEXT }], source: { kind: '@tingfeng/dsh-tingfeng', form: 'instructions' },
+      role: 'user', content: [{ type: 'text', text: CONTINUATION_TEXT }], source: { kind: 'dsh-mnemon', form: 'instructions' },
     }), { surfaceOp: 'append' })
     // A second refusal of the same step is someone else's to handle.
     await child.requestError()({ turn: 1, step: 4, failure: refusal, signal: live }, next)

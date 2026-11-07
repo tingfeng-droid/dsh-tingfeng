@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type JSX, type ReactNode } from 'react'
-import { installMemorySourceUI, MemorySourcePageFrame, PageHeader, Reveal, type MemorySourcePageProps } from '@tingfeng/dsh-tingfeng/client'
+import { installMemorySourceUI, MemorySourcePageFrame, PageHeader, Reveal, type MemorySourcePageProps } from 'dsh-tingfeng/client'
 import type { SkillsOverview } from '../contracts.ts'
 import { skillsPageClient, type SkillsPageClient } from './api.ts'
 import { EvalsPage } from './evals-page.tsx'

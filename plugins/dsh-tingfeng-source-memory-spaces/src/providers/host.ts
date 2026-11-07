@@ -170,7 +170,7 @@ export class PrivateMemorySpaceProviderHost {
             active = false
             if (this.registrations.get(childKey) === registration) this.registrations.delete(childKey)
           }
-        }, `@tingfeng/dsh-tingfeng: install private Provider ${childKey}`)
+        }, `dsh-tingfeng: install private Provider ${childKey}`)
       },
     })
   }

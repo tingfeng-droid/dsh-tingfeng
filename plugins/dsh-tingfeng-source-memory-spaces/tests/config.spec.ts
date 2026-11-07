@@ -82,7 +82,7 @@ describe('Memory Spaces configuration rules', () => {
       .persistenceStrategy.rules.requiredCapabilities).toEqual([...MEMORY_PLACEMENT_CAPABILITIES])
     for (const capability of ['telepathy', 'search', 'Graph']) {
       expect(() => resolveConfig({ persistenceStrategy: { rules: { requiredCapabilities: [capability as never] } } }), capability)
-        .toThrow(`@tingfeng/dsh-tingfeng: unsupported persistence capability: ${capability}`)
+        .toThrow(`dsh-tingfeng: unsupported persistence capability: ${capability}`)
     }
   })
 

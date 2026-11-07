@@ -5,14 +5,14 @@ import { join } from 'node:path'
 import { URL as NodeURL } from 'node:url'
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { MemoryCompositionRunner } from '@tingfeng/dsh-tingfeng/testing'
+import { MemoryCompositionRunner } from 'dsh-tingfeng/testing'
 import { strategy } from './fixture.ts'
 
 // Load the installed Core's actual DSH browser artifact; no repository source alias.
-vi.mock('@tingfeng/dsh-tingfeng/client', async () => {
+vi.mock('dsh-tingfeng/client', async () => {
   const { createRequire } = await import('node:module')
-  const { loadMemoryClientArtifact } = await import('@tingfeng/dsh-tingfeng/testing')
-  return loadMemoryClientArtifact(createRequire(import.meta.url).resolve('@tingfeng/dsh-tingfeng/client'), {
+  const { loadMemoryClientArtifact } = await import('dsh-tingfeng/testing')
+  return loadMemoryClientArtifact(createRequire(import.meta.url).resolve('dsh-tingfeng/client'), {
     react: await vi.importActual('react'),
     'react/jsx-runtime': await vi.importActual('react/jsx-runtime'),
     'react-dom': await vi.importActual('react-dom'),

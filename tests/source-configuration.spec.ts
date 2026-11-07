@@ -1,8 +1,8 @@
 import type { Context } from '@deepseek-ai/cordis'
 import { describe, expect, it } from 'vitest'
-import { COMPOSABLE_MEMORY_API_VERSION } from '@tingfeng/dsh-tingfeng/contracts'
-import { defineMemorySource, defineMemoryStrategy, installMemory } from '@tingfeng/dsh-tingfeng/extension-sdk'
-import { MemoryCompositionRunner } from '@tingfeng/dsh-tingfeng/testing'
+import { COMPOSABLE_MEMORY_API_VERSION } from 'dsh-tingfeng/contracts'
+import { defineMemorySource, defineMemoryStrategy, installMemory } from 'dsh-tingfeng/extension-sdk'
+import { MemoryCompositionRunner } from 'dsh-tingfeng/testing'
 
 describe('generation-owned Source configuration', () => {
   it('captures JSON defaults, digests changes and preserves a pinned generation', async () => {

@@ -11,7 +11,7 @@ import { apply, inject } from '../src/index.ts'
 import { MnemonSubagentCoordinator } from "../src/host/subagent.ts"
 import { registerTools } from "../src/host/tools.ts"
 import { MemoryRuntime } from '../src/core/runtime.ts'
-import type { MnemonMemoryService } from '@tingfeng/dsh-tingfeng/extension-sdk'
+import type { MnemonMemoryService } from 'dsh-tingfeng/extension-sdk'
 import { compositionFixture } from './fixtures/composition.ts'
 import { agentScope } from '../src/host/runtime.ts'
 import { sessionLog } from './fixtures/session-log.ts'
@@ -139,7 +139,7 @@ async function installStarter(target: ReturnType<typeof context>) {
   return core
 }
 
-describe('@tingfeng/dsh-tingfeng plugin composition', () => {
+describe('dsh-tingfeng plugin composition', () => {
   it('registers and disposes Web RPC routes after the official Connection is already running', async () => {
     const root = new Context()
     releases.push(() => root.fiber.dispose())
@@ -307,9 +307,9 @@ describe('@tingfeng/dsh-tingfeng plugin composition', () => {
     // The row now sits inside the `mnemon-bundle` group, so `- id:` is indented
     // and a comment may separate it from `name:`. Anchoring on column 0 matched
     // the flat layout this file used before the bundle layer existed.
-    expect(bundlePatch).toMatch(/\s+- id: mnemon\n(?:\s*#.*\n)*\s+name: ['"]?@tingfeng\/dsh-tingfeng['"]?\n/u)
+    expect(bundlePatch).toMatch(/\s+- id: mnemon\n(?:\s*#.*\n)*\s+name: ['"]?dsh-tingfeng['"]?\n/u)
     expect(bundlePatch).not.toContain('bundledContributions')
-    expect(bundlePatch).not.toContain('name: @tingfeng/dsh-tingfeng/core')
+    expect(bundlePatch).not.toContain('name: dsh-tingfeng/core')
   })
 
   it('registers the full tool surface, guidance, and split RPC channels', async () => {

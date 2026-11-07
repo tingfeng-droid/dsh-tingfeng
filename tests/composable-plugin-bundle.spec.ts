@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { MemoryCompositionRunner } from '@tingfeng/dsh-tingfeng/testing'
+import { MemoryCompositionRunner } from 'dsh-tingfeng/testing'
 import * as spaces from 'dsh-tingfeng-source-memory-spaces'
 import * as runtime from 'dsh-tingfeng-source-runtime'
 import * as documents from 'dsh-tingfeng-source-documents'
@@ -45,19 +45,19 @@ describe('explicit default Starter', () => {
     ])
     const patch = readFileSync(new URL('../cordis.patch.yml', import.meta.url), 'utf8')
     // The group prepares its own dependency resolution, so no separate readiness Entry can hold it back.
-    expect(patch).toMatch(/- insert:\n(?:    #.*\n)*    - id: mnemon-bundle\n      name: @tingfeng\/dsh-tingfeng\/bundle\n      group: true\n      disabled: !!js/u)
+    expect(patch).toMatch(/- insert:\n(?:    #.*\n)*    - id: mnemon-bundle\n      name: ['"]dsh-tingfeng\/bundle['"]\n      group: true\n      disabled: !!js/u)
     expect(patch).not.toContain('mnemon-starter')
     expect(patch).not.toContain('inject:')
     expect(patch).toContain("[...loader.entries()].find(entry => entry.options.id === 'mnemon')")
     expect(patch).toContain('entry.evaluate(entry.options.disabled.__jsExpr)')
     expect(patch).toMatch(/        - id: mnemon\n          # Core\/Host/u)
     for (const name of [runtime.name, documents.name, spaces.name, strategy.name]) {
-      expect(patch).toMatch(new RegExp(`        - id: ${name.slice(4)}\\n          name: ${name}`, 'u'))
+      expect(patch).toMatch(new RegExp(`        - id: ${name.replace(/^dsh-tingfeng-/, 'mnemon-')}\\n          name: ${name}`, 'u'))
     }
     for (const name of [autoCapture.name, lightContext.name, scoped.name]) {
-      expect(patch).toMatch(new RegExp(`        - id: ${name.slice(4)}\\n          name: ${name}\\n          disabled: true`, 'u'))
+      expect(patch).toMatch(new RegExp(`        - id: ${name.replace(/^dsh-tingfeng-/, 'mnemon-')}\\n          name: ${name}\\n          disabled: true`, 'u'))
     }
-    expect(patch).not.toContain('@tingfeng/dsh-tingfeng/source-')
+    expect(patch).not.toContain('dsh-tingfeng/source-')
     expect(patch).not.toContain('bundledContributions')
   })
   it('allows a Source to mount only its explicitly selected private children', async () => {

@@ -1,8 +1,8 @@
 import type { Context } from '@deepseek-ai/cordis'
 import { describe, expect, it, vi } from 'vitest'
-import { defineMemorySource, installMemory, truncateMemoryText, type MemorySourceRuntime } from '@tingfeng/dsh-tingfeng/extension-sdk'
-import { COMPOSABLE_MEMORY_API_VERSION, type MemoryJsonValue } from '@tingfeng/dsh-tingfeng/contracts'
-import { MemoryCompositionRunner } from '@tingfeng/dsh-tingfeng/testing'
+import { defineMemorySource, installMemory, truncateMemoryText, type MemorySourceRuntime } from 'dsh-tingfeng/extension-sdk'
+import { COMPOSABLE_MEMORY_API_VERSION, type MemoryJsonValue } from 'dsh-tingfeng/contracts'
+import { MemoryCompositionRunner } from 'dsh-tingfeng/testing'
 import * as plugin from '../src/index.ts'
 import { defineThreeTierExtension } from '../src/extension-sdk.ts'
 
@@ -42,7 +42,7 @@ async function fixture(kind: 'documents' | 'memory-spaces', copies = 1) {
           role: kind === 'documents' ? 'narrative' : 'durable-evidence', availability: 'ready', revision: 'r1',
           capabilities: ['project', 'read'], routeIds: operations, actionIds: [] }),
         project: () => ({ fragments: [], readGrant: { id: `${kind}:${context.sourceInstanceKey}`, sourceInstanceKey: context.sourceInstanceKey,
-          schema: `@tingfeng/dsh-tingfeng.${kind}/v1`, value: { memoryBodyIds: ['project', 'other'] }, revision: 'r1', consistency: 'exact-snapshot' } }),
+          schema: `dsh-tingfeng.${kind}/v1`, value: { memoryBodyIds: ['project', 'other'] }, revision: 'r1', consistency: 'exact-snapshot' } }),
         query,
       }),
     })] })

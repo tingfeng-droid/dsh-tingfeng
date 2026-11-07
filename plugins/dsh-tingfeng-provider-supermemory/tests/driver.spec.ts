@@ -63,8 +63,8 @@ describe('standalone supermemory data plane', () => {
 
     expect(JSON.parse(String(requests[0]?.init?.body))).toMatchObject({ q: 'theme', containerTag: 'alice', searchMode: 'hybrid', limit: 6 })
     expect(new Headers(requests[0]?.init?.headers).get('Authorization')).toBe('Bearer sm-secret')
-    expect(new Headers(requests[0]?.init?.headers).get('x-sm-source')).toBe('@tingfeng/dsh-tingfeng')
-    expect(JSON.parse(String(requests.at(-1)?.init?.body))).toEqual({ id: 'sm-1', containerTag: 'alice', reason: 'Deleted from @tingfeng/dsh-tingfeng' })
+    expect(new Headers(requests[0]?.init?.headers).get('x-sm-source')).toBe('dsh-tingfeng')
+    expect(JSON.parse(String(requests.at(-1)?.init?.body))).toEqual({ id: 'sm-1', containerTag: 'alice', reason: 'Deleted from dsh-tingfeng' })
   })
 
   it('merges Supermemory documents with extracted entries and falls back for document deletion', async () => {

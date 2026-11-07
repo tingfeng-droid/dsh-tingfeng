@@ -1,8 +1,8 @@
 import type { Context } from '@deepseek-ai/cordis'
 import { afterEach, describe, expect, expectTypeOf, it, vi } from 'vitest'
-import { COMPOSABLE_MEMORY_API_VERSION, type MemorySourceRuntime, type MemorySourceRuntimeContext } from '@tingfeng/dsh-tingfeng/contracts'
-import { defineMemorySource, defineMemoryStrategy, installMemory } from '@tingfeng/dsh-tingfeng/extension-sdk'
-import { DEFAULT_MEMORY_VIEW_BUDGET, MemoryCompositionRunner, type MemoryTestOptions, type MemoryTestTurn } from '@tingfeng/dsh-tingfeng/testing'
+import { COMPOSABLE_MEMORY_API_VERSION, type MemorySourceRuntime, type MemorySourceRuntimeContext } from 'dsh-tingfeng/contracts'
+import { defineMemorySource, defineMemoryStrategy, installMemory } from 'dsh-tingfeng/extension-sdk'
+import { DEFAULT_MEMORY_VIEW_BUDGET, MemoryCompositionRunner, type MemoryTestOptions, type MemoryTestTurn } from 'dsh-tingfeng/testing'
 
 const runners: MemoryCompositionRunner[] = []
 afterEach(async () => { for (const runner of runners.splice(0)) await runner.dispose() })

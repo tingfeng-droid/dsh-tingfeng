@@ -9,7 +9,7 @@ import type {
 import type { MemoryProviderAdapter } from './adapter.ts'
 import type { MemoryProviderAdapterFactoryContext } from './adapter.ts'
 
-export const MEMORY_SPACE_PROVIDER_API_VERSION = '@tingfeng/dsh-tingfeng.memory-space-provider/v1' as const
+export const MEMORY_SPACE_PROVIDER_API_VERSION = 'dsh-tingfeng.memory-space-provider/v1' as const
 
 const STABLE_ID = /^[a-z][a-z0-9-]{0,127}$/u
 const FIELD_KEY = /^[a-z][a-zA-Z0-9_-]{0,127}$/u

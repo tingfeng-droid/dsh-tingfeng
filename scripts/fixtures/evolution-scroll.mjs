@@ -1,5 +1,5 @@
 // Ten synthetic suggestions for the list/detail scrolling regression (#512).
-import { MemoryCompositionRunner } from '@tingfeng/dsh-tingfeng/testing'
+import { MemoryCompositionRunner } from 'dsh-tingfeng/testing'
 import * as skillsPlugin from 'dsh-tingfeng-source-skills'
 import * as strategyPlugin from 'dsh-tingfeng-strategy-general'
 

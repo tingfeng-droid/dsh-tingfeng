@@ -3,7 +3,7 @@ import { join } from 'node:path'
 import { MEMORY_SPACE_ID_PATTERN, MNEMON_ACTIVE_STORE_FILE, type JsonValue } from './contracts.ts'
 import type { ResolvedMemorySpacesConfig as ResolvedConfig } from './config.ts'
 import { ProcessError, runProcess, type ProcessFailureReason, type ProcessOptions, type ProcessRunner } from './providers/process.ts'
-import { withMemoryStorageLock } from '@tingfeng/dsh-tingfeng/extension-sdk'
+import { withMemoryStorageLock } from 'dsh-tingfeng/extension-sdk'
 import { findMnemonCommand, isMnemonExecutable, resolveMnemonInvocation } from './native-cli.ts'
 
 /** Why a CLI call failed where callers act on the cause; a call that ran and exited non-zero carries none. */

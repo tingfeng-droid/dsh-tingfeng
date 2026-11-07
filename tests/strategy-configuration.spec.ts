@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
-import { COMPOSABLE_MEMORY_API_VERSION } from '@tingfeng/dsh-tingfeng/contracts'
-import { defineMemoryStrategy, defineMemoryStrategyConfiguration, type MemoryStrategyConfiguration } from '@tingfeng/dsh-tingfeng/extension-sdk'
+import { COMPOSABLE_MEMORY_API_VERSION } from 'dsh-tingfeng/contracts'
+import { defineMemoryStrategy, defineMemoryStrategyConfiguration, type MemoryStrategyConfiguration } from 'dsh-tingfeng/extension-sdk'
 
 const label = { en: 'Test', 'zh-CN': '测试' }
 const strategy = defineMemoryStrategy({

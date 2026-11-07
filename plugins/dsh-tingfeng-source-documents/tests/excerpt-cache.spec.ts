@@ -3,7 +3,7 @@ import { chmodSync, mkdirSync, mkdtempSync, readFileSync, renameSync, rmSync, st
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it, vi } from 'vitest'
-import { MemoryCompositionRunner } from '@tingfeng/dsh-tingfeng/testing'
+import { MemoryCompositionRunner } from 'dsh-tingfeng/testing'
 import { DocumentController } from '../src/controller.ts'
 import type { DocumentMutationResult, DocumentRecord, DocumentSnapshot } from '../src/contracts.ts'
 import * as plugin from '../src/index.ts'

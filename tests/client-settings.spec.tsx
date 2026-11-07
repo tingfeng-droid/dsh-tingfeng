@@ -1086,7 +1086,7 @@ describe('MnemonSettingsCard', () => {
   it('explains the grouping row only while DSH lists it below the configuration', () => {
     const scope = settingsScope({ status: 'ready' as const, value: {}, base: {}, user: {}, revision: 0, writable: true, mode: 'host' as const })
     const componentList = new MnemonComponentListSeat()
-    const note = () => screen.queryByText(/@tingfeng\/dsh-tingfeng\/bundle is the Starter's grouping entry/u)
+    const note = () => screen.queryByText(/dsh-tingfeng\/bundle is the Starter's grouping entry/u)
     render(<MnemonSettingsCard scope={scope} t={translateEn} componentList={componentList} />)
     expect(note()).toBeNull()
     let withdraw = (): void => {}
@@ -1501,14 +1501,14 @@ describe('MnemonSettingsCard', () => {
     })
     const connection = { rpc: { call }, isLoopback: true } as ClientConnectionHandle
 
-    render(spaces(scope, connection, { sessionId: 'session-1', workspaceId: 'workspace-1', workspaceLabel: '@tingfeng/dsh-tingfeng' }))
+    render(spaces(scope, connection, { sessionId: 'session-1', workspaceId: 'workspace-1', workspaceLabel: 'dsh-tingfeng' }))
 
     await waitFor(() => expect(screen.getByText('OpenViking')).toBeTruthy())
     expect(screen.getByRole('group', { name: 'OpenViking 服务配置' })).toBeTruthy()
     const disclosure = screen.getByText('OpenViking').closest('button') as HTMLButtonElement
     expect(disclosure.getAttribute('aria-expanded')).toBe('false')
     expect(checked(screen.getByRole('switch', { name: '启用 OpenViking' }))).toBe(true)
-    expect(screen.getByText('当前工作区：@tingfeng/dsh-tingfeng；标记“工作区”的 Provider 配置与记忆空间使用此范围。')).toBeTruthy()
+    expect(screen.getByText('当前工作区：dsh-tingfeng；标记“工作区”的 Provider 配置与记忆空间使用此范围。')).toBeTruthy()
     fireEvent.click(screen.getByText('OpenViking'))
     expect(disclosure.getAttribute('aria-expanded')).toBe('true')
     expect((screen.getByLabelText('服务地址') as HTMLInputElement).value).toBe('http://127.0.0.1:1933')
@@ -1638,7 +1638,7 @@ describe('MnemonSettingsCard', () => {
           occupied: { runtime: true, documents: true, 'memory-spaces': true },
           manifest: {
             format: 'mnemonpack', version: 1, scope: 'full', exportedAt: '2026-08-14T12:00:00.000Z',
-            source: { plugin: '@tingfeng/dsh-tingfeng', pluginVersion: '0.1.0' },
+            source: { plugin: 'dsh-tingfeng', pluginVersion: '0.1.0' },
             components: ['runtime', 'documents', 'memory-spaces'],
             summary: [
               { component: 'runtime', files: 3, bytes: 600, items: 2 },
@@ -1687,7 +1687,7 @@ describe('MnemonSettingsCard', () => {
       if (endpoint === 'inspect') return { ok: true as const, value: {
         fileName: 'backup.zip', archiveBytes: 4, expandedBytes: 2048, targetRoot: '/active/.mnemon', targetScope: 'global',
         occupied: { runtime: true, documents: true, 'memory-spaces': true },
-        manifest: { format: 'mnemonpack', version: 1, scope: 'full', exportedAt: '2026-08-14T12:00:00.000Z', source: { plugin: '@tingfeng/dsh-tingfeng', pluginVersion: '0.1.0' },
+        manifest: { format: 'mnemonpack', version: 1, scope: 'full', exportedAt: '2026-08-14T12:00:00.000Z', source: { plugin: 'dsh-tingfeng', pluginVersion: '0.1.0' },
           components: ['memory-spaces'], summary: [{ component: 'memory-spaces', files: 2, bytes: 748, items: 1 }] },
       } }
       // The Host merged the archive, then reading Memory Spaces again failed.

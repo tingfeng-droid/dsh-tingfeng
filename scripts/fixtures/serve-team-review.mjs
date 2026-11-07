@@ -149,7 +149,7 @@ const env = { ...process.env, DSH_HOME: dshHome, DSH_TELEMETRY_DISABLED: '1',
   MNEMON_DATA_DIR: join(state, 'data'), npm_config_registry: registryUrl, NPM_CONFIG_REGISTRY: registryUrl }
 const dshBin = join(profile, 'node_modules/@deepseek-ai/dsh/lib/bin.js')
 await privateFile('install.log', await run(process.execPath, [dshBin, 'plugin', '--profile', 'web', 'add',
-  `file:${packages.get('@tingfeng/dsh-tingfeng').path}`, `@deepseek-ai/dsh-experimental-agent-team-profile@${dshVersion}`, '--registry', registryUrl], { cwd: workspace, env }))
+  `file:${packages.get('dsh-tingfeng').path}`, `@deepseek-ai/dsh-experimental-agent-team-profile@${dshVersion}`, '--registry', registryUrl], { cwd: workspace, env }))
 // Keep the official Coding preset and all its services, including PTC. Only
 // replace the native directory dialog with the published browser picker.
 const disabled = ['directory-picker']

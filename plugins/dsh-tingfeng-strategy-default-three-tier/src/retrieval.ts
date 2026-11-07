@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto'
-import { memoryInputRecord as object, truncateMemoryText as clip, type ComposableMemoryView, type MemoryEvidence, type MemoryStrategyRead, type MemoryStrategyReadRequest, type MemoryStrategyTurn } from '@tingfeng/dsh-tingfeng/extension-sdk'
-import type { MemoryJsonValue } from '@tingfeng/dsh-tingfeng/contracts'
+import { memoryInputRecord as object, truncateMemoryText as clip, type ComposableMemoryView, type MemoryEvidence, type MemoryStrategyRead, type MemoryStrategyReadRequest, type MemoryStrategyTurn } from 'dsh-tingfeng/extension-sdk'
+import type { MemoryJsonValue } from 'dsh-tingfeng/contracts'
 
 /** The three-tier public read shape. Other strategies are free to use other Source protocols. */
 interface RecallInsight {
@@ -170,8 +170,8 @@ class ThreeTierTurn implements MemoryStrategyTurn {
   async query(request: MemoryStrategyReadRequest, read: MemoryStrategyRead): Promise<MemoryEvidence> {
     const grant = this.view.readGrants.find(grant => grant.id === request.route.readGrantId && grant.sourceInstanceKey === request.route.sourceInstanceKey)!
     const input = object(request.input, 'three-tier read')
-    if (grant.schema === '@tingfeng/dsh-tingfeng.documents/v1' && request.route.sourceRouteId === 'search') return this.documents(request, read)
-    if (grant.schema !== '@tingfeng/dsh-tingfeng.memory-spaces/v1' || !['recall', 'related', 'inspect'].includes(request.route.sourceRouteId)) return read(request.input)
+    if (grant.schema === 'dsh-tingfeng.documents/v1' && request.route.sourceRouteId === 'search') return this.documents(request, read)
+    if (grant.schema !== 'dsh-tingfeng.memory-spaces/v1' || !['recall', 'related', 'inspect'].includes(request.route.sourceRouteId)) return read(request.input)
     if (request.route.sourceRouteId === 'inspect') {
       const evidence = await read(request.input)
       // Catalog is already bounded and sanitized by its Source. Never split JSON.

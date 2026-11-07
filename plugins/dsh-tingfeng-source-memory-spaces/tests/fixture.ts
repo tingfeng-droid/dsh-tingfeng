@@ -1,6 +1,6 @@
 import type { Context } from '@deepseek-ai/cordis'
-import { COMPOSABLE_MEMORY_API_VERSION } from '@tingfeng/dsh-tingfeng/contracts'
-import { defineMemoryStrategy, installMemory } from '@tingfeng/dsh-tingfeng/extension-sdk'
+import { COMPOSABLE_MEMORY_API_VERSION } from 'dsh-tingfeng/contracts'
+import { defineMemoryStrategy, installMemory } from 'dsh-tingfeng/extension-sdk'
 import { MEMORY_SPACE_PROVIDER_API_VERSION, defineMemorySpaceProvider, NORMALIZED_RELEVANCE_SCORE, type MemoryProviderDescriptor } from '../src/provider-sdk.ts'
 
 export const descriptor: MemoryProviderDescriptor = {

@@ -145,7 +145,7 @@ function signalWithTimeout(signal: AbortSignal | undefined): AbortSignal {
 
 function githubHeaders(): Record<string, string> {
   const token = process.env.GITHUB_TOKEN?.trim() || process.env.GH_TOKEN?.trim()
-  return { accept: 'application/vnd.github+json', 'user-agent': '@tingfeng/dsh-tingfeng', ...(token ? { authorization: `Bearer ${token}` } : {}) }
+  return { accept: 'application/vnd.github+json', 'user-agent': 'dsh-tingfeng', ...(token ? { authorization: `Bearer ${token}` } : {}) }
 }
 
 async function request(fetcher: Fetcher, url: string, signal?: AbortSignal, headers?: Record<string, string>): Promise<FetchResponse> {

@@ -2,7 +2,7 @@ import { css, useT } from './presentation.ts'
 import type { JSX } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { normalizeEntityKey, type MemorySpaceView, type MemoryGraphNode, type MemoryGraphSnapshot } from '../contracts.ts'
-import { type MnemonTranslate, short } from '@tingfeng/dsh-tingfeng/client'
+import { type MnemonTranslate, short } from 'dsh-tingfeng/client'
 import { categoryLabel } from './widgets.tsx'
 
 const GRAPH_WIDTH = 930

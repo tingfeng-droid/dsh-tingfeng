@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { memoryPageStyles, memorySidebarStyles, useT as useSharedT, useLocale, type MnemonKey } from '@tingfeng/dsh-tingfeng/client'
+import { memoryPageStyles, memorySidebarStyles, useT as useSharedT, useLocale, type MnemonKey } from 'dsh-tingfeng/client'
 import type labels from 'dsh-tingfeng-source-runtime/presentation/locales.json'
 import copy from '../../presentation/locales.json' with { type: 'json' }
 import page from '../../presentation/page.module.css'

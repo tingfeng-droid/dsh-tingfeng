@@ -45,7 +45,7 @@ function harness(eventIssue, { snapshots = [eventIssue], comments = [], action =
   const updateComment = vi.fn(async () => ({ data: {} }))
   const listComments = vi.fn(async () => ({ data: comments }))
   const paginate = vi.fn(async (method, params) => (await method(params)).data)
-  const context = { repo: { owner: 'omdsh-dev', repo: '@tingfeng/dsh-tingfeng' }, payload: { issue: eventIssue, action } }
+  const context = { repo: { owner: 'omdsh-dev', repo: 'dsh-tingfeng' }, payload: { issue: eventIssue, action } }
   const check = {
     get, update, addLabels, createComment, updateComment, listComments, paginate,
     run: () => runWorkflow(context, { paginate, rest: { issues: { get, update, addLabels, createComment, updateComment, listComments } } }),
@@ -85,7 +85,7 @@ describe('advisory issue template checks', () => {
     const check = harness(issue({ labels: [{ name: 'help wanted' }] }))
     await check.run()
     expect(check.addLabels).toHaveBeenCalledExactlyOnceWith({
-      owner: 'omdsh-dev', repo: '@tingfeng/dsh-tingfeng', issue_number: 235, labels: ['bug'],
+      owner: 'omdsh-dev', repo: 'dsh-tingfeng', issue_number: 235, labels: ['bug'],
     })
     expect(check.createComment).not.toHaveBeenCalled()
   })
@@ -158,7 +158,7 @@ describe('advisory issue template checks', () => {
     await check.run()
     expect(check.createComment).not.toHaveBeenCalled()
     expect(check.updateComment).toHaveBeenCalledExactlyOnceWith({
-      owner: 'omdsh-dev', repo: '@tingfeng/dsh-tingfeng', comment_id: 123, body: expect.stringContaining('环境信息 / Environment'),
+      owner: 'omdsh-dev', repo: 'dsh-tingfeng', comment_id: 123, body: expect.stringContaining('环境信息 / Environment'),
     })
   })
 

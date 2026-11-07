@@ -1,5 +1,5 @@
 /**
- * A request to open one component's page on the @tingfeng/dsh-tingfeng configuration
+ * A request to open one component's page on the dsh-tingfeng configuration
  * under Plugins, such as 技能管理's gear asking for its own settings. DSH opens
  * the bundle page; the configuration takes the request once it can name the
  * component, or at once when it is already on screen.

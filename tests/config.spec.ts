@@ -156,7 +156,7 @@ describe('Mnemon config and resolution', () => {
       expect(resolveConfig({ runtimeMemory: { [key]: RUNTIME_MEMORY_LIMIT_MAX_BYTES } }).runtimeMemory[key]).toBe(RUNTIME_MEMORY_LIMIT_MAX_BYTES)
       expect(RuntimeConfig({ [key]: RUNTIME_MEMORY_LIMIT_MAX_BYTES })[key]).toBe(RUNTIME_MEMORY_LIMIT_MAX_BYTES)
       expect(() => resolveConfig({ runtimeMemory: { [key]: RUNTIME_MEMORY_LIMIT_MAX_BYTES + 1 } }))
-        .toThrow(`@tingfeng/dsh-tingfeng: Runtime ${file} limit must be an integer within 1..${RUNTIME_MEMORY_LIMIT_MAX_BYTES} bytes`)
+        .toThrow(`dsh-tingfeng: Runtime ${file} limit must be an integer within 1..${RUNTIME_MEMORY_LIMIT_MAX_BYTES} bytes`)
       expect(() => Config({ runtimeMemory: { [key]: RUNTIME_MEMORY_LIMIT_MAX_BYTES + 1 } })).toThrow(`$.runtimeMemory.${key} expected number <= 1048576 but got 1048577`)
       expect(() => RuntimeConfig({ [key]: RUNTIME_MEMORY_LIMIT_MAX_BYTES + 1 })).toThrow(`$.${key} expected number <= 1048576 but got 1048577`)
     }
@@ -291,7 +291,7 @@ describe('Mnemon config and resolution', () => {
     // A store names a Native space's directory, so it takes exactly a space id.
     for (const store of ['default', 'A-1_b', '9lives']) expect(resolveConfig({ store }).store).toBe(store)
     for (const store of ['-lead', '_lead', 'a.b', 'a/b', 'ä', 'a b']) {
-      expect(() => resolveConfig({ store }), store).toThrow('@tingfeng/dsh-tingfeng: store must match [a-zA-Z0-9][a-zA-Z0-9_-]*')
+      expect(() => resolveConfig({ store }), store).toThrow('dsh-tingfeng: store must match [a-zA-Z0-9][a-zA-Z0-9_-]*')
     }
   })
 

@@ -172,7 +172,7 @@ describe('automatic Git backup', () => {
     // the same fact.
     await vi.advanceTimersByTimeAsync(60 * MINUTE)
     expect(state.pushes).toBe(0)
-    expect(scheduler.snapshot().lastError).toBe('@tingfeng/dsh-tingfeng is configured read-only')
+    expect(scheduler.snapshot().lastError).toBe('dsh-tingfeng is configured read-only')
     expect(scheduler.snapshot().available).toBe(true)
 
     state.writeEnabled = true
@@ -189,7 +189,7 @@ describe('automatic Git backup', () => {
 
     await vi.advanceTimersByTimeAsync(60 * MINUTE)
     expect(scheduler.snapshot().lastError).toBe('authentication failed')
-    expect(warn).toHaveBeenCalledWith('@tingfeng/dsh-tingfeng: automatic Git backup failed', expect.anything())
+    expect(warn).toHaveBeenCalledWith('dsh-tingfeng: automatic Git backup failed', expect.anything())
     // A failure does not stop the cadence: the next tick tries again.
     await vi.advanceTimersByTimeAsync(60 * MINUTE)
     expect(state.pushes).toBe(2)

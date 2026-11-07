@@ -134,13 +134,13 @@ Mnemon 在 DSH 中展示的一切都注册到 DSH 自己的界面区域。对话
 
 | DSH 区域 | 注册 | 行为 |
 |---|---|---|
-| `conversation.chat.turnTail` | list，`id=@tingfeng/dsh-tingfeng/turn-tail` | 通过 `turn-activity` 汇总完成回合中的 `mnemon_*` 调用，以及工具活动元数据中每次调用读到或写入的内容；无活动或未完成回合不渲染 |
-| `conversation.chat.turnTail` | list，`id=@tingfeng/dsh-tingfeng/skill-tail` | `skills.hints` 开启时：通过 `skill-activity` 列出每个完成回合用到的技能，以及随后复盘的状态和仍在等待的建议；没有内容的回合不渲染 |
+| `conversation.chat.turnTail` | list，`id=dsh-tingfeng/turn-tail` | 通过 `turn-activity` 汇总完成回合中的 `mnemon_*` 调用，以及工具活动元数据中每次调用读到或写入的内容；无活动或未完成回合不渲染 |
+| `conversation.chat.turnTail` | list，`id=dsh-tingfeng/skill-tail` | `skills.hints` 开启时：通过 `skill-activity` 列出每个完成回合用到的技能，以及随后复盘的状态和仍在等待的建议；没有内容的回合不渲染 |
 | `conversation.chat.assistant-actions` | list，`id=mnemon-save` | 通过 `assistant-message` 读取已定稿文本；只在用户确认后调用 `supervise` |
 | `conversation.session.header.lineage` | DSH 官方条目的低优先级副本 | 任务 Agent 会话页眉只统计该 Agent 自己的 token，不含其 fork 来源的日志 |
 | `plugins.bundle.config` | keyed，`dsh-mnemon` | 插件页中 dsh-mnemon 页面上的全部配置 |
 | `plugins.row.config` | keyed，`dsh-mnemon#<row>` | 每个随包组件的行打开的页面，含该组件注册的设置 |
-| `plugins.detail.actions` | list，`id=@tingfeng/dsh-tingfeng/open-workspace` | 从插件详情页打开记忆系统 |
+| `plugins.detail.actions` | list，`id=dsh-tingfeng/open-workspace` | 从插件详情页打开记忆系统 |
 | `sidebar.panellist` 与 `main` | `id=mnemon-skills` | `skills.sidebar` 开启时：技能管理在记忆系统之后的独立侧边栏入口与页面，此时记忆系统不再显示技能管理页 |
 
 Mnemon 自己声明两个 keyed 区域，都以组件包名为键：`mnemon.component.settings` 渲染在该组件的页面上，`mnemon.component.status` 是它在状态页上的卡片。官方组件与第三方组件都通过这两个区域注册，见[插件开发](../development/extensions.md)。
@@ -160,7 +160,7 @@ Headless 等没有 Web 工作区目录的 profile 不提供任意查看目标；
 
 ## RPC 通道
 
-RPC 是 DSH Host 与插件客户端之间的内部桥，不是稳定外部 HTTP API。页面与组件插件应使用 `@tingfeng/dsh-tingfeng/client` 提供的限定范围客户端，见[插件开发](../development/extensions.md)。
+RPC 是 DSH Host 与插件客户端之间的内部桥，不是稳定外部 HTTP API。页面与组件插件应使用 `dsh-tingfeng/client` 提供的限定范围客户端，见[插件开发](../development/extensions.md)。
 
 | 通道 | 承载 | 远程页面 |
 |---|---|---|
@@ -258,7 +258,7 @@ Gateway 通过 Mnemon 在 `dshMnemon` 命名空间下的 `mnemonRemote` Typert �
 
 凭据与网络：
 
-- token 不会出现在任何响应或错误信息中。通道在每次网络操作时解析一个凭据，顺序为：环境变量 `MNEMON_SYNC_GIT_TOKEN`、`state/sync-git.json`（权限 `0600`）中保存的 token，最后是 GitHub 登录写入 DSH 凭据存储（键 `@tingfeng/dsh-tingfeng/github`）的凭据。
+- token 不会出现在任何响应或错误信息中。通道在每次网络操作时解析一个凭据，顺序为：环境变量 `MNEMON_SYNC_GIT_TOKEN`、`state/sync-git.json`（权限 `0600`）中保存的 token，最后是 GitHub 登录写入 DSH 凭据存储（键 `dsh-tingfeng/github`）的凭据。
 - `credentialSource` 指出生效的那一个——`environment`、`token`、`github` 或 `none`——前三者都让 `hasToken` 为 `true`，因此已登录的账号完全不需要填 token。失败会以 `details.reason` 带上类别，页面据此用自己的语言说明；有可用凭据时出现 `remote-auth`，表示主机拒绝了这个凭据。
 - Git 从一个只为一条命令存在的凭据存储取得 token，用户名为仓库地址中写明的用户名；没有写明时，`gitee.com` 用 `oauth2`，其他主机用 `x-access-token`。Git 2.26 及以后的版本在命令行上得到这个用户名，它优先于这台电脑配置的任何 `credential.username`，同时关闭 `credential.useHttpPath`，交给 Git 的地址不带用户名。更早的 Git 得到的命令与以前相同，除非在该命令自身的环境中运行 `git config --get-urlmatch credential <地址>` 发现为这个地址配置了与凭据存储不同的用户名（此时地址带上凭据存储中的用户名），或开启了 `credential.useHttpPath`（此时命令将其关闭）。
 - GitHub 请求先走环境自带的 `fetch`（与版本检查相同的接缝），启动器配置的代理策略对它同样生效。当这次请求完全连不上时，通道会用从 `HTTPS_PROXY`、`http_proxy`、`all_proxy` 发现的代理——Windows 上还会读系统代理设置——以 Node 自带模块搭建的 CONNECT 隧道重试一次；应答成功的代理会被记住，失效的代理会被丢弃，因此换网络后无需重启即可恢复。
@@ -302,11 +302,11 @@ Core 发布 `ctx.mnemonMemory: MnemonMemoryService`，实际服务只提供 `ins
 | 入口 | 职责 |
 |---|---|
 | `dsh-mnemon` | DSH Host 与默认 Starter |
-| `@tingfeng/dsh-tingfeng/core` | 不带 Host/UI 的、Source 无关的 `ctx.mnemonMemory` 服务 |
-| `@tingfeng/dsh-tingfeng/contracts` | JSON 安全的 manifest、facts、ViewSpec、View、Evidence、Receipt |
-| `@tingfeng/dsh-tingfeng/extension-sdk` | Source/Strategy 定义、生命周期注册与校验 |
-| `@tingfeng/dsh-tingfeng/testing` | 真实 Cordis 组合测试夹具与已构建 Client 制品加载器 |
-| `@tingfeng/dsh-tingfeng/client` | DSH 工作台与 Source 页面 SDK |
+| `dsh-tingfeng/core` | 不带 Host/UI 的、Source 无关的 `ctx.mnemonMemory` 服务 |
+| `dsh-tingfeng/contracts` | JSON 安全的 manifest、facts、ViewSpec、View、Evidence、Receipt |
+| `dsh-tingfeng/extension-sdk` | Source/Strategy 定义、生命周期注册与校验 |
+| `dsh-tingfeng/testing` | 真实 Cordis 组合测试夹具与已构建 Client 制品加载器 |
+| `dsh-tingfeng/client` | DSH 工作台与 Source 页面 SDK |
 | `dsh-tingfeng-source-memory-spaces/provider-sdk` | Memory Spaces 自己的 Provider 子模块协议 |
 | `dsh-tingfeng-source-memory-spaces/testing` | Provider 驱动测试夹具 |
 

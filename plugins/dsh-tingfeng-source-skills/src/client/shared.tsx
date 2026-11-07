@@ -4,7 +4,7 @@ import {
   Button, Checkbox, IconChevronDownOutlineRegular, IconEllipsisOutlineRegular, Menu, StateDot, Tag, TextShimmer,
   type StateDotState, type TagTone,
 } from '@deepseek-ai/dsh-client-ui-primitives'
-import { EmptyState, Reveal, SidebarModal } from '@tingfeng/dsh-tingfeng/client'
+import { EmptyState, Reveal, SidebarModal } from 'dsh-tingfeng/client'
 import type { EvolutionSignal, RunStatus, SuggestionStatus, TrajectoryAnnotation, TrajectoryStep } from '../contracts.ts'
 import { css, useT, type SkillsKey, type SkillsTranslate } from './presentation.ts'
 

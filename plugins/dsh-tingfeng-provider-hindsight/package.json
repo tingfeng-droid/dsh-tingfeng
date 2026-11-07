@@ -45,11 +45,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/omdsh-dev/dsh-tingfeng.git",
+    "url": "git+https://github.com/tingfeng-droid/dsh-tingfeng.git",
     "directory": "plugins/dsh-tingfeng-provider-hindsight"
   },
-  "homepage": "https://github.com/omdsh-dev/dsh-tingfeng/tree/main/plugins/dsh-tingfeng-provider-hindsight#readme",
+  "homepage": "https://github.com/tingfeng-droid/dsh-tingfeng/tree/main/plugins/dsh-tingfeng-provider-hindsight#readme",
   "bugs": {
-    "url": "https://github.com/omdsh-dev/dsh-tingfeng/issues"
+    "url": "https://github.com/tingfeng-droid/dsh-tingfeng/issues"
   }
 }

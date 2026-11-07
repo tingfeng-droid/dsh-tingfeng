@@ -56,11 +56,11 @@ function protocolFixture(options: Config = {}) {
     sync: {
       status: vi.fn(async () => ({
         configured: false,
-        config: { branch: 'mnemon-sync', subdir: 'mnemon/', hasToken: false, authorName: '@tingfeng/dsh-tingfeng sync', authorEmail: 'mnemon@localhost' },
+        config: { branch: 'mnemon-sync', subdir: 'mnemon/', hasToken: false, authorName: 'dsh-tingfeng sync', authorEmail: 'mnemon@localhost' },
         configPath: '/fixture/data/state/sync-git.json', mirrorPath: '/fixture/data/state/sync/git',
         git: { available: true, required: '2.20' }, remote: { reachable: false, branchExists: false },
       })),
-      configure: vi.fn(() => ({ branch: 'mnemon-sync', subdir: 'mnemon/', hasToken: false, authorName: '@tingfeng/dsh-tingfeng sync', authorEmail: 'mnemon@localhost' })),
+      configure: vi.fn(() => ({ branch: 'mnemon-sync', subdir: 'mnemon/', hasToken: false, authorName: 'dsh-tingfeng sync', authorEmail: 'mnemon@localhost' })),
       push: vi.fn(async () => ({ pushed: false })),
       preview: vi.fn(async () => ({ commit: 'a'.repeat(40) })),
       pull: vi.fn(async () => ({ imported: true })),

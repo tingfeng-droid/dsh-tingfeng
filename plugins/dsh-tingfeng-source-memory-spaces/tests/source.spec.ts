@@ -5,7 +5,7 @@ import { join } from 'node:path'
 import type { Context } from '@deepseek-ai/cordis'
 import { describe, expect, it, vi } from 'vitest'
 
-import { DEFAULT_MEMORY_VIEW_BUDGET, MemoryCompositionRunner } from '@tingfeng/dsh-tingfeng/testing'
+import { DEFAULT_MEMORY_VIEW_BUDGET, MemoryCompositionRunner } from 'dsh-tingfeng/testing'
 import * as spaces from '../src/index.ts'
 import { installMemorySpaces } from '../src/index.ts'
 import { MemorySpaceRegistry } from '../src/memory-spaces.ts'

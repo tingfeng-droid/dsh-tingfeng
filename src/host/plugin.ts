@@ -25,7 +25,7 @@ import { plainHostConfig, type LiveHostConfig } from './live-config.ts'
 import { ProfileMnemonSettings } from './settings-service.ts'
 import { dshPluginCommand, VersionUpdateManager, type DshBundleInstaller } from './version-updates.ts'
 
-export const name = '@tingfeng/dsh-tingfeng'
+export const name = 'dsh-tingfeng'
 export const provide = ['mnemonMemory']
 export const inject = ['tools', 'settings', 'commands', 'agents', 'subagents']
 export { LiveConfig as Config } from './live-config.ts'
@@ -114,8 +114,8 @@ export function apply(rawContext: unknown, rawConfig: MnemonConfig | LiveHostCon
     }
     if (namespace !== 'mnemon') return
     runtime.swap(createRuntimeGraph(effectiveConfig(value as MnemonConfig), undefined, extensions))
-  }), '@tingfeng/dsh-tingfeng: live runtime settings')
-  ctx.effect(() => memoryPlugins.start(), '@tingfeng/dsh-tingfeng: plugin graph settings')
+  }), 'dsh-tingfeng: live runtime settings')
+  ctx.effect(() => memoryPlugins.start(), 'dsh-tingfeng: plugin graph settings')
   hostSettings.register('mnemon-ui', InteractionConfig, {
     base: resolveInteractionConfig(resolved.conversationInteraction),
     applies: 'live',
@@ -130,7 +130,7 @@ export function apply(rawContext: unknown, rawConfig: MnemonConfig | LiveHostCon
     const migrate = (): void => {
       if (disposed) return
       void migrateLegacyDisplayMode(hostSettings).catch(error => {
-        console.warn('@tingfeng/dsh-tingfeng: could not persist the builtin displayMode migration', error)
+        console.warn('dsh-tingfeng: could not persist the builtin displayMode migration', error)
       })
     }
     const unsubscribe = ctx.on('settings/document-updated', ((namespace: string) => {
@@ -138,7 +138,7 @@ export function apply(rawContext: unknown, rawConfig: MnemonConfig | LiveHostCon
     }) as never)
     migrate()
     return () => { disposed = true; unsubscribe() }
-  }, '@tingfeng/dsh-tingfeng: canonical displayMode migration')
+  }, 'dsh-tingfeng: canonical displayMode migration')
   ctx.effect(() => {
     let disposed = false
     const loader = ctx.get('loader') as { await?(): Promise<unknown> } | undefined
@@ -147,9 +147,9 @@ export function apply(rawContext: unknown, rawConfig: MnemonConfig | LiveHostCon
       const catalog = await memoryPlugins.catalog()
       if (disposed) return
       await hostSettings.importLegacy(catalog.entries.filter(entry => entry.roles.includes('source')).map(entry => entry.entryId))
-    }).catch(error => { console.warn('@tingfeng/dsh-tingfeng: could not recover retained legacy settings', error) })
+    }).catch(error => { console.warn('dsh-tingfeng: could not recover retained legacy settings', error) })
     return () => { disposed = true }
-  }, '@tingfeng/dsh-tingfeng: retained settings migration')
+  }, 'dsh-tingfeng: retained settings migration')
   const coordinator: MnemonSubagentCoordinator = new MnemonSubagentCoordinator(ctx.subagents, runtime, ctx, () => {
     const taskAgentModel = runtime.config.taskAgentModel
     if (taskAgentModel.mode !== 'fixed') return undefined
@@ -172,7 +172,7 @@ export function apply(rawContext: unknown, rawConfig: MnemonConfig | LiveHostCon
   ctx.effect(() => {
     const stop = autoBackup.start()
     return () => { stop() }
-  }, '@tingfeng/dsh-tingfeng: automatic Git backup')
+  }, 'dsh-tingfeng: automatic Git backup')
   ctx.effect(() => {
     const stop = lifecycle.start()
     return async () => {
@@ -181,11 +181,11 @@ export function apply(rawContext: unknown, rawConfig: MnemonConfig | LiveHostCon
       await coordinator.dispose()
       runtime.dispose()
     }
-  }, '@tingfeng/dsh-tingfeng.lifecycle-root()')
+  }, 'dsh-tingfeng.lifecycle-root()')
   ctx.effect(() => {
     const loader = ctx.get('loader') as { await?(): Promise<unknown> } | undefined
     return registerTools(ctx, runtime, coordinator, extensions, loader?.await?.())
-  }, '@tingfeng/dsh-tingfeng: Source tool lifecycle')
+  }, 'dsh-tingfeng: Source tool lifecycle')
   registerCommands(ctx.commands, runtime, coordinator)
   registerGuidance(ctx, resolved)
   ctx.inject(['connection', 'webServer'], (webContext) => {

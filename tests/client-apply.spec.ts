@@ -107,11 +107,11 @@ describe('Mnemon Web client composition', () => {
     expect(slots.some(options => options.name === 'conversation.view')).toBe(false)
   })
 
-  it('edits the whole configuration on the @tingfeng/dsh-tingfeng page under Plugins, not in Settings', () => {
+  it('edits the whole configuration on the dsh-tingfeng page under Plugins, not in Settings', () => {
     const { context, slots, scope } = workspaceContext({})
     expect(slots.some(options => options.name === 'settings.section')).toBe(false)
     const entry = slots.find(options => options.name === 'plugins.bundle.config')!
-    expect(entry).toMatchObject({ key: '@tingfeng/dsh-tingfeng', locale: 'mnemon' })
+    expect(entry).toMatchObject({ key: 'dsh-tingfeng', locale: 'mnemon' })
     expect(context.slots.register).toHaveBeenCalledWith(entry, MnemonSettingsHost)
     const props = (entry.inject as () => Record<string, unknown> & { t: (key: keyof typeof zh) => string })()
     expect(props).toMatchObject({
@@ -124,14 +124,14 @@ describe('Mnemon Web client composition', () => {
     expect(props.renderContributed).toBeTypeOf('function')
     // Each component row DSH lists under the bundle opens that component's page, with the same services.
     const rows = slots.filter(options => options.name === 'plugins.row.config')
-    expect(rows.map(row => row.key)).toEqual(STARTER_COMPONENT_ROWS.map(({ rowId }) => `@tingfeng/dsh-tingfeng#${rowId}`))
+    expect(rows.map(row => row.key)).toEqual(STARTER_COMPONENT_ROWS.map(({ rowId }) => `dsh-tingfeng#${rowId}`))
     for (const row of rows) {
       // Only the configuration declares the settings region; a row page renders what was registered there.
       expect(row).toMatchObject({ locale: 'mnemon' })
       expect(row.children).toBeUndefined()
       expect(context.slots.register).toHaveBeenCalledWith(row, MnemonComponentRowHost)
       const injected = (row.inject as () => Record<string, unknown>)()
-      expect(injected).toMatchObject({ scope, component: STARTER_COMPONENT_ROWS.find(({ rowId }) => `@tingfeng/dsh-tingfeng#${rowId}` === row.key)!.packageName })
+      expect(injected).toMatchObject({ scope, component: STARTER_COMPONENT_ROWS.find(({ rowId }) => `dsh-tingfeng#${rowId}` === row.key)!.packageName })
       expect(injected.renderContributed).toBeTypeOf('function')
     }
   })
@@ -140,7 +140,7 @@ describe('Mnemon Web client composition', () => {
     const { context, slots, scope, provide, workspaceStops } = workspaceContext({ displayMode: 'sidebar' })
     await vi.waitFor(() => expect(workspaceStops).toHaveLength(1))
     const action = slots.find(options => options.name === 'plugins.detail.actions')!
-    expect(action).toMatchObject({ id: '@tingfeng/dsh-tingfeng/open-workspace', locale: 'mnemon' })
+    expect(action).toMatchObject({ id: 'dsh-tingfeng/open-workspace', locale: 'mnemon' })
     expect(context.slots.register).toHaveBeenCalledWith(action, MnemonPluginActions)
     const injected = (action.inject as () => { workspace: MnemonActionSeat; componentList: unknown })()
     const workspace = injected.workspace
@@ -156,7 +156,7 @@ describe('Mnemon Web client composition', () => {
     const openBundle = vi.fn()
     provide('pluginNavigation', { openBundle })
     configuration.getSnapshot()!()
-    expect(openBundle).toHaveBeenCalledWith('@tingfeng/dsh-tingfeng')
+    expect(openBundle).toHaveBeenCalledWith('dsh-tingfeng')
 
     // Hiding the workspace withdraws its entry from the Plugins page.
     await scope.mutate([{ op: 'set', path: ['tabEnabled'], value: false }])

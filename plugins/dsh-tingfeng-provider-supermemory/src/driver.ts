@@ -115,7 +115,7 @@ export class SupermemoryProvider extends HttpMemoryProvider implements MemoryPro
         containerTag: String(connection.containerTag),
         taskType: 'memory',
         metadata: {
-          sm_source: '@tingfeng/dsh-tingfeng',
+          sm_source: 'dsh-tingfeng',
           ...(request.category === undefined ? {} : { category: request.category }),
           ...(request.importance === undefined ? {} : { importance: request.importance }),
         },
@@ -138,7 +138,7 @@ export class SupermemoryProvider extends HttpMemoryProvider implements MemoryPro
       const payload = await this.request(body, '/v4/memories', {
         method: 'DELETE',
         headers: this.headers(connection),
-        json: { id, containerTag: String(connection.containerTag), reason: 'Deleted from @tingfeng/dsh-tingfeng' },
+        json: { id, containerTag: String(connection.containerTag), reason: 'Deleted from dsh-tingfeng' },
         signal,
       })
       return {
@@ -160,6 +160,6 @@ export class SupermemoryProvider extends HttpMemoryProvider implements MemoryPro
 
   private headers(connection: Record<string, string | number | boolean>): HeadersInit {
     const token = String(connection.apiKey ?? '').replace(/^Bearer\s+/iu, '')
-    return { Authorization: `Bearer ${token}`, 'x-sm-source': '@tingfeng/dsh-tingfeng' }
+    return { Authorization: `Bearer ${token}`, 'x-sm-source': 'dsh-tingfeng' }
   }
 }

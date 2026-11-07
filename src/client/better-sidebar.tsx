@@ -6,7 +6,7 @@ import { MemoryIcon } from './memory-icon.tsx'
 import css from './MnemonWorkspace.module.css'
 
 /** Stable type id exposed to Better Sidebar and its persisted tab state. */
-export const MNEMON_BETTER_SIDEBAR_TAB_ID = '@tingfeng/dsh-tingfeng:memory'
+export const MNEMON_BETTER_SIDEBAR_TAB_ID = 'dsh-tingfeng:memory'
 
 interface BetterSidebarTabProps {
   scope: MnemonWorkspaceScope

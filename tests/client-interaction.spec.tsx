@@ -145,7 +145,7 @@ describe('interaction surfaces binding', () => {
     const peers = [...core.entriesOfSlot(slot)]
     const ids = () => core.entriesOfSlot(slot).map(entry => entry.options.id)
     // The memory line, then the skills line: each follows its own settings.
-    const tails = ['@tingfeng/dsh-tingfeng/turn-tail', '@tingfeng/dsh-tingfeng/skill-tail']
+    const tails = ['dsh-tingfeng/turn-tail', 'dsh-tingfeng/skill-tail']
 
     apply(ctx)
     // The default-on entries must wait for the Host settings snapshot.
@@ -158,7 +158,7 @@ describe('interaction surfaces binding', () => {
       interactionScope: { mutate: (ops: unknown[]) => Promise<void> }
     }
     await settings.interactionScope.mutate([{ op: 'set', path: ['turnBar'], value: false }])
-    expect(ids()).toEqual(['@tingfeng/dsh-tingfeng/skill-tail', ...peerIds])
+    expect(ids()).toEqual(['dsh-tingfeng/skill-tail', ...peerIds])
     await settings.interactionScope.mutate([{ op: 'set', path: ['turnBar'], value: true }])
     expect(ids()).toEqual([...tails, ...peerIds])
     expect(core.entries(slot)).toHaveLength(4)
@@ -178,14 +178,14 @@ describe('interaction surfaces binding', () => {
     // Sidebar has a DSH-owned seat even before any session exists.
     expect(injects).toContain('plugins.bundle.config')
     await waitFor(() => expect(injects).toContain('shell.overlay'))
-    await waitFor(() => expect(activeRegistrations()).toEqual(expect.arrayContaining(['@tingfeng/dsh-tingfeng/turn-tail', 'mnemon-save'])))
+    await waitFor(() => expect(activeRegistrations()).toEqual(expect.arrayContaining(['dsh-tingfeng/turn-tail', 'mnemon-save'])))
   })
 
   it('registers explicitly enabled surfaces after settings load', async () => {
     const { ctx, activeRegistrations } = makeCtx({ toolviews: true, turnBar: true, saveAction: true })
     apply(ctx)
-    await waitFor(() => expect(activeRegistrations()).toEqual(expect.arrayContaining(['@tingfeng/dsh-tingfeng/turn-tail', 'mnemon-save'])))
-    expect(activeRegistrations()).toEqual(expect.arrayContaining(['@tingfeng/dsh-tingfeng/turn-tail', 'mnemon-save']))
+    await waitFor(() => expect(activeRegistrations()).toEqual(expect.arrayContaining(['dsh-tingfeng/turn-tail', 'mnemon-save'])))
+    expect(activeRegistrations()).toEqual(expect.arrayContaining(['dsh-tingfeng/turn-tail', 'mnemon-save']))
   })
 
   it('registers only the enabled surfaces when toggles are mixed', async () => {
@@ -193,7 +193,7 @@ describe('interaction surfaces binding', () => {
     apply(ctx)
     await waitFor(() => expect(activeRegistrations()).toEqual(expect.arrayContaining(['mnemon-save'])))
     expect(activeRegistrations()).toEqual(expect.arrayContaining(['mnemon-save']))
-    expect(activeRegistrations()).not.toContain('@tingfeng/dsh-tingfeng/turn-tail')
+    expect(activeRegistrations()).not.toContain('dsh-tingfeng/turn-tail')
   })
 
   it('opens the default sidebar for a conversation anchor', async () => {
@@ -234,7 +234,7 @@ describe('interaction surfaces binding', () => {
     apply(ctx)
     await waitFor(() => expect(injects).toContain('conversation.view'))
     expect(activeRegistrations().filter(id => id === 'mnemon')).toHaveLength(1)
-    expect(activeRegistrations()).toContain('@tingfeng/dsh-tingfeng')
+    expect(activeRegistrations()).toContain('dsh-tingfeng')
 
     dispatchMnemonAnchor({ page: 'documents/library', sessionId: 'session-b' })
     expect(clicked).not.toHaveBeenCalled()
@@ -260,7 +260,7 @@ describe('interaction surfaces binding', () => {
     setSessions({})
     apply(ctx)
     await waitFor(() => expect(injects).toContain('conversation.view'))
-    const actions = registeredOptions.find(options => options.id === '@tingfeng/dsh-tingfeng/open-workspace')!
+    const actions = registeredOptions.find(options => options.id === 'dsh-tingfeng/open-workspace')!
     const workspace = actions.inject!().workspace as { getSnapshot(): (() => void) | undefined }
     // An unsent draft has no conversation tabs to open.
     expect(workspace.getSnapshot()).toBeUndefined()
@@ -275,7 +275,7 @@ describe('interaction surfaces binding', () => {
     apply(ctx)
     await waitFor(() => expect(activeRegistrations()).toContain('mnemon-save'))
     expect(activeRegistrations().filter(id => id === 'mnemon')).toHaveLength(0)
-    expect(activeRegistrations()).toContain('@tingfeng/dsh-tingfeng') // the configuration page only
+    expect(activeRegistrations()).toContain('dsh-tingfeng') // the configuration page only
     dispatchMnemonAnchor({ page: 'documents/library', sessionId: 'session-a' })
     expect(document.documentElement.hasAttribute('data-dsh-tingfeng-active')).toBe(false)
     expect(consumeMnemonAnchor('session-a')).toMatchObject({ page: 'documents/library' })
@@ -290,9 +290,9 @@ describe('interaction surfaces binding', () => {
     if (injected?.interactionScope === undefined) throw new Error('mnemon-ui settings scope was not injected')
 
     await injected.interactionScope.mutate([{ op: 'set', path: ['turnBar'], value: true }])
-    await waitFor(() => expect(activeRegistrations()).toContain('@tingfeng/dsh-tingfeng/turn-tail'))
+    await waitFor(() => expect(activeRegistrations()).toContain('dsh-tingfeng/turn-tail'))
 
     await injected.interactionScope.mutate([{ op: 'set', path: ['turnBar'], value: false }])
-    await waitFor(() => expect(activeRegistrations()).not.toContain('@tingfeng/dsh-tingfeng/turn-tail'))
+    await waitFor(() => expect(activeRegistrations()).not.toContain('dsh-tingfeng/turn-tail'))
   })
 })

@@ -1,4 +1,4 @@
-// The memory components the @tingfeng/dsh-tingfeng Starter ships, named once for the
+// The memory components the dsh-tingfeng Starter ships, named once for the
 // Host, the browser client and the repository scripts. Keep this file plain
 // data with erasable types only and no imports: the scripts load it as is,
 // with Node's own TypeScript support, without a build step.

@@ -281,7 +281,7 @@ try {
   const defaults = expectOk(await sync(a, 'configure', { repoUrl: origin }), 'configure')
   check('a repository alone is enough: branch, directory and author keep their defaults',
     defaults.repoUrl === origin && defaults.branch === 'mnemon-sync' && defaults.subdir === 'mnemon/'
-    && defaults.authorName === '@tingfeng/dsh-tingfeng sync' && defaults.authorEmail === 'mnemon@localhost'
+    && defaults.authorName === 'dsh-tingfeng sync' && defaults.authorEmail === 'mnemon@localhost'
     && defaults.hasToken === false && defaults.credentialSource === 'none', JSON.stringify(defaults))
   const configured = expectOk(await sync(a, 'configure', { authorName: '', authorEmail: '' }), 'configure')
   check('an empty author clears the identity so Git uses the one on this machine',

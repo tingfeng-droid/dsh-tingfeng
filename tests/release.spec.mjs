@@ -38,7 +38,7 @@ function fixture({
   secondProviderVersion,
 } = {}) {
   const source = item('/source', 'dsh-tingfeng-source-memory-spaces', sourceVersion, {
-    peerDependencies: { '@tingfeng/dsh-tingfeng': '^0.5.0' },
+    peerDependencies: { 'dsh-tingfeng': '^0.5.0' },
   })
   const providers = [item('/provider', 'dsh-tingfeng-provider-example', providerVersion, {
     peerDependencies: { 'dsh-tingfeng-source-memory-spaces': '^0.5.0' },
@@ -47,7 +47,7 @@ function fixture({
     peerDependencies: { 'dsh-tingfeng-source-memory-spaces': '^0.5.0' },
   }))
   const dependencies = Object.fromEntries([source, ...providers].map(packageItem => [packageItem.manifest.name, packageItem.manifest.version]))
-  const starter = item('/starter', '@tingfeng/dsh-tingfeng', starterVersion, { dependencies })
+  const starter = item('/starter', 'dsh-tingfeng', starterVersion, { dependencies })
   return [starter, source, ...providers]
 }
 
@@ -71,7 +71,7 @@ describe('selective, channel-safe official release', () => {
     const plan = createReleasePlan(packages)
     expect(plan.composition).toHaveLength(19)
     expect(plan.distTag).toBe('latest')
-    expect(plan.composition.at(-1).manifest.name).toBe('@tingfeng/dsh-tingfeng')
+    expect(plan.composition.at(-1).manifest.name).toBe('dsh-tingfeng')
     for (const { directory, manifest } of packages.filter(packageItem => packageItem.manifest.name.startsWith('dsh-tingfeng-provider-'))) {
       const source = await readFile(join(directory, 'src/index.ts'), 'utf8')
       expect(source).toContain(`version: '${manifest.version}'`)
@@ -81,18 +81,18 @@ describe('selective, channel-safe official release', () => {
   it('selects one changed plugin plus the aggregate Starter and reuses unchanged versions', () => {
     const packages = fixture()
     const baseVersions = previousVersions(packages, {
-      '@tingfeng/dsh-tingfeng': '0.5.1',
+      'dsh-tingfeng': '0.5.1',
       'dsh-tingfeng-provider-example': '0.5.0',
     })
     const plan = createReleasePlan(packages, { baseVersions })
     expect(plan.composition.map(packageItem => `${packageItem.manifest.name}@${packageItem.manifest.version}`)).toEqual([
       'dsh-tingfeng-provider-example@0.5.1',
       'dsh-tingfeng-source-memory-spaces@0.5.0',
-      '@tingfeng/dsh-tingfeng@0.5.2',
+      'dsh-tingfeng@0.5.2',
     ])
     expect(plan.releasePackages.map(packageItem => packageItem.manifest.name)).toEqual([
       'dsh-tingfeng-provider-example',
-      '@tingfeng/dsh-tingfeng',
+      'dsh-tingfeng',
     ])
   })
 
@@ -102,7 +102,7 @@ describe('selective, channel-safe official release', () => {
     expect(() => createReleasePlan(packages, { baseVersions })).toThrow('Starter version must advance')
 
     const exactPeer = fixture()
-    exactPeer[1].manifest.peerDependencies['@tingfeng/dsh-tingfeng'] = '0.5.2'
+    exactPeer[1].manifest.peerDependencies['dsh-tingfeng'] = '0.5.2'
     expect(() => createReleasePlan(exactPeer)).toThrow('must declare a compatible range')
 
     const stalePeer = fixture()
@@ -130,13 +130,13 @@ describe('selective, channel-safe official release', () => {
     wrongChannel[2].manifest.publishConfig.tag = 'beta'
     expect(() => createReleasePlan(wrongChannel)).toThrow('publishConfig.tag')
     const packages = fixture()
-    expect(() => createReleasePlan(packages, { baseVersions: previousVersions(packages, { '@tingfeng/dsh-tingfeng': '0.5.3' }) })).toThrow('version must advance')
+    expect(() => createReleasePlan(packages, { baseVersions: previousVersions(packages, { 'dsh-tingfeng': '0.5.3' }) })).toThrow('version must advance')
   })
 
   it('orders changed dependencies before dependents while leaving unrelated plugins in one layer', () => {
     const packages = fixture({ sourceVersion: '0.5.1', secondProviderVersion: '0.5.1' })
     const plan = createReleasePlan(packages, { baseVersions: previousVersions(packages, {
-      '@tingfeng/dsh-tingfeng': '0.5.1',
+      'dsh-tingfeng': '0.5.1',
       'dsh-tingfeng-source-memory-spaces': '0.5.0',
       'dsh-tingfeng-provider-example': '0.5.0',
       'dsh-tingfeng-provider-second': '0.5.0',
@@ -145,13 +145,13 @@ describe('selective, channel-safe official release', () => {
       ['dsh-tingfeng-source-memory-spaces'],
       ['dsh-tingfeng-provider-example', 'dsh-tingfeng-provider-second'],
     ])
-    expect(plan.releasePackages.at(-1).manifest.name).toBe('@tingfeng/dsh-tingfeng')
+    expect(plan.releasePackages.at(-1).manifest.name).toBe('dsh-tingfeng')
   })
 
   it('requires every changed publication input to have an advanced package version', () => {
     const packages = fixture()
     const plan = createReleasePlan(packages, { baseVersions: previousVersions(packages, {
-      '@tingfeng/dsh-tingfeng': '0.5.1',
+      'dsh-tingfeng': '0.5.1',
       'dsh-tingfeng-provider-example': '0.5.0',
     }) })
     expect(publicationInputsChanged(plan, [
@@ -159,8 +159,8 @@ describe('selective, channel-safe official release', () => {
       'plugins/dsh-tingfeng-source-memory-spaces/tests/source.spec.ts',
       '.github/workflows/ci.yml',
       'src/index.ts',
-    ])).toEqual(new Set(['dsh-tingfeng-provider-example', '@tingfeng/dsh-tingfeng']))
-    expect(publicationInputsChanged(plan, ['bin/repair-legacy-session.mjs'])).toEqual(new Set(['@tingfeng/dsh-tingfeng']))
+    ])).toEqual(new Set(['dsh-tingfeng-provider-example', 'dsh-tingfeng']))
+    expect(publicationInputsChanged(plan, ['bin/repair-legacy-session.mjs'])).toEqual(new Set(['dsh-tingfeng']))
     expect(() => assertVersionedPublicationChanges(plan, ['plugins/dsh-tingfeng-source-memory-spaces/src/source.ts']))
       .toThrow('dsh-tingfeng-source-memory-spaces')
     expect(() => assertVersionedPublicationChanges(plan, ['plugins/dsh-tingfeng-source-memory-spaces/tests/source.spec.ts']))
@@ -183,19 +183,19 @@ describe('selective, channel-safe official release', () => {
     const plan = createReleasePlan(packages, { baseVersions: previousVersions(packages) })
     const paths = ['locale/zh.json']
     const changed = publicationInputsChanged(plan, paths)
-    expect(changed).toEqual(new Set(['@tingfeng/dsh-tingfeng']))
-    expect(() => assertReleaseIntentCoverage(changed, [])).toThrow('@tingfeng/dsh-tingfeng')
-    expect(() => assertVersionedPublicationChanges(plan, paths)).toThrow('@tingfeng/dsh-tingfeng')
-    const release = createReleasePlan(packages, { baseVersions: previousVersions(packages, { '@tingfeng/dsh-tingfeng': '0.5.1' }) })
+    expect(changed).toEqual(new Set(['dsh-tingfeng']))
+    expect(() => assertReleaseIntentCoverage(changed, [])).toThrow('dsh-tingfeng')
+    expect(() => assertVersionedPublicationChanges(plan, paths)).toThrow('dsh-tingfeng')
+    const release = createReleasePlan(packages, { baseVersions: previousVersions(packages, { 'dsh-tingfeng': '0.5.1' }) })
     expect(() => assertVersionedPublicationChanges(release, paths)).not.toThrow()
   })
 
   it('requires a changeset for every package with changed publication inputs', () => {
-    const changed = new Set(['@tingfeng/dsh-tingfeng', 'dsh-tingfeng-provider-example'])
-    expect(() => assertReleaseIntentCoverage(changed, [{ name: '@tingfeng/dsh-tingfeng', type: 'patch' }]))
+    const changed = new Set(['dsh-tingfeng', 'dsh-tingfeng-provider-example'])
+    expect(() => assertReleaseIntentCoverage(changed, [{ name: 'dsh-tingfeng', type: 'patch' }]))
       .toThrow('dsh-tingfeng-provider-example')
     expect(() => assertReleaseIntentCoverage(changed, [
-      { name: '@tingfeng/dsh-tingfeng', type: 'patch' },
+      { name: 'dsh-tingfeng', type: 'patch' },
       { name: 'dsh-tingfeng-provider-example', type: 'patch' },
     ])).not.toThrow()
   })
@@ -203,7 +203,7 @@ describe('selective, channel-safe official release', () => {
   it('packs only selected versions and freezes the full mixed-version composition', async () => {
     const packages = fixture()
     const plan = createReleasePlan(packages, { baseVersions: previousVersions(packages, {
-      '@tingfeng/dsh-tingfeng': '0.5.1',
+      'dsh-tingfeng': '0.5.1',
       'dsh-tingfeng-provider-example': '0.5.0',
     }) })
     const destination = await mkdtemp(join(tmpdir(), 'mnemon-release-test-'))
@@ -225,14 +225,14 @@ describe('selective, channel-safe official release', () => {
       expect(calls.map(([, cwd]) => cwd)).toEqual(['/provider', '/starter'])
       expect(artifacts.map(artifact => `${artifact.name}@${artifact.version}`)).toEqual([
         'dsh-tingfeng-provider-example@0.5.1',
-        '@tingfeng/dsh-tingfeng@0.5.2',
+        'dsh-tingfeng@0.5.2',
       ])
       const manifest = await writeReleaseManifest(plan, artifacts, destination, { revision, baseRevision })
       expect(manifest.schemaVersion).toBe(2)
       expect(manifest.composition).toEqual([
         { name: 'dsh-tingfeng-provider-example', version: '0.5.1' },
         { name: 'dsh-tingfeng-source-memory-spaces', version: '0.5.0' },
-        { name: '@tingfeng/dsh-tingfeng', version: '0.5.2' },
+        { name: 'dsh-tingfeng', version: '0.5.2' },
       ])
       await expect(readReleaseArtifacts(plan, destination, { revision, baseRevision })).resolves.toHaveLength(2)
     } finally {
@@ -243,7 +243,7 @@ describe('selective, channel-safe official release', () => {
   it('submits independent plugins concurrently, waits for their cohort and never includes the Starter', async () => {
     const packages = fixture({ secondProviderVersion: '0.5.1' })
     const plan = createReleasePlan(packages, { baseVersions: previousVersions(packages, {
-      '@tingfeng/dsh-tingfeng': '0.5.1',
+      'dsh-tingfeng': '0.5.1',
       'dsh-tingfeng-provider-example': '0.5.0',
       'dsh-tingfeng-provider-second': '0.5.0',
     }) })
@@ -278,7 +278,7 @@ describe('selective, channel-safe official release', () => {
   it('resumes only when an existing selected artifact matches the frozen bytes', async () => {
     const packages = fixture()
     const plan = createReleasePlan(packages, { baseVersions: previousVersions(packages, {
-      '@tingfeng/dsh-tingfeng': '0.5.1',
+      'dsh-tingfeng': '0.5.1',
       'dsh-tingfeng-provider-example': '0.5.0',
     }) })
     const artifacts = plan.releasePackages.map(artifactFor)
@@ -309,7 +309,7 @@ describe('selective, channel-safe official release', () => {
   it('installs the frozen Starter and verifies every mixed-version Registry package', async () => {
     const packages = fixture()
     const plan = createReleasePlan(packages, { baseVersions: previousVersions(packages, {
-      '@tingfeng/dsh-tingfeng': '0.5.1',
+      'dsh-tingfeng': '0.5.1',
       'dsh-tingfeng-provider-example': '0.5.0',
     }) })
     const artifacts = plan.releasePackages.map(artifactFor)
@@ -338,7 +338,7 @@ describe('selective, channel-safe official release', () => {
       log.mockRestore()
     }
     expect(run).toHaveBeenCalledOnce()
-    expect(run.mock.calls[0][0]).toContain(`file:${artifacts.find(artifact => artifact.name === '@tingfeng/dsh-tingfeng').filename}`)
+    expect(run.mock.calls[0][0]).toContain(`file:${artifacts.find(artifact => artifact.name === 'dsh-tingfeng').filename}`)
   })
 
   it('keeps the workflow frozen, selective, dependency-ordered and Starter-last', async () => {
@@ -357,7 +357,7 @@ describe('selective, channel-safe official release', () => {
     const workflow = await readFile(join(root, '.github/workflows/publish.yml'), 'utf8')
     const verifier = await readFile(join(root, 'scripts/verify-plugin-artifacts.mjs'), 'utf8')
     // Both install that release on the pinned DSH first, so a move of the DSH baseline moves them together.
-    const published = /--upgrade-from @tingfeng\/dsh-tingfeng@(\d+\.\d+\.\d+)/u.exec(workflow)?.[1]
+    const published = /--upgrade-from dsh-tingfeng@(\d+\.\d+\.\d+)/u.exec(workflow)?.[1]
     const verified = /const upgradeBase = '(\d+\.\d+\.\d+)'/u.exec(verifier)?.[1]
     expect(verified).toMatch(/^\d+\.\d+\.\d+$/u)
     expect(published).toBe(verified)
@@ -373,18 +373,18 @@ describe('release metadata synchronization', () => {
       await mkdir(join(providerDirectory, 'src'), { recursive: true })
       await mkdir(join(directory, 'scripts/fixtures/plugin-consumer'), { recursive: true })
       await writeFile(join(directory, 'package.json'), JSON.stringify({
-        name: '@tingfeng/dsh-tingfeng', version: '0.5.3', dependencies: { [providerName]: '0.5.1' }, publishConfig: { access: 'public', tag: 'latest' },
+        name: 'dsh-tingfeng', version: '0.5.3', dependencies: { [providerName]: '0.5.1' }, publishConfig: { access: 'public', tag: 'latest' },
       }, null, 2) + '\n')
       await writeFile(join(providerDirectory, 'package.json'), JSON.stringify({
         name: providerName,
         version: '0.5.2',
-        peerDependencies: { '@tingfeng/dsh-tingfeng': '^0.5.0' },
-        devDependencies: { '@tingfeng/dsh-tingfeng': '^0.5.0' },
+        peerDependencies: { 'dsh-tingfeng': '^0.5.0' },
+        devDependencies: { 'dsh-tingfeng': '^0.5.0' },
         publishConfig: { access: 'public', tag: 'latest' },
       }, null, 2) + '\n')
       await writeFile(join(providerDirectory, 'src/index.ts'), `export const value = { packageName: '${providerName}', version: '0.5.1' }\n`)
       await writeFile(join(directory, 'scripts/fixtures/plugin-consumer/package.json'), JSON.stringify({
-        name: 'consumer', private: true, dependencies: { '@tingfeng/dsh-tingfeng': '0.5.1', [providerName]: '0.5.1' },
+        name: 'consumer', private: true, dependencies: { 'dsh-tingfeng': '0.5.1', [providerName]: '0.5.1' },
       }, null, 2) + '\n')
 
       await syncReleaseMetadata(directory)
@@ -393,10 +393,10 @@ describe('release metadata synchronization', () => {
       const provider = JSON.parse(await readFile(join(providerDirectory, 'package.json'), 'utf8'))
       const consumer = JSON.parse(await readFile(join(directory, 'scripts/fixtures/plugin-consumer/package.json'), 'utf8'))
       expect(starter.dependencies[providerName]).toBe('0.5.2')
-      expect(provider.peerDependencies['@tingfeng/dsh-tingfeng']).toBe('^0.5.0')
-      expect(provider.devDependencies['@tingfeng/dsh-tingfeng']).toBe('^0.5.0')
+      expect(provider.peerDependencies['dsh-tingfeng']).toBe('^0.5.0')
+      expect(provider.devDependencies['dsh-tingfeng']).toBe('^0.5.0')
       expect(await readFile(join(providerDirectory, 'src/index.ts'), 'utf8')).toContain("version: '0.5.2'")
-      expect(consumer.dependencies).toEqual({ '@tingfeng/dsh-tingfeng': '0.5.3', [providerName]: '0.5.2' })
+      expect(consumer.dependencies).toEqual({ 'dsh-tingfeng': '0.5.3', [providerName]: '0.5.2' })
     } finally {
       await rm(directory, { recursive: true, force: true })
     }

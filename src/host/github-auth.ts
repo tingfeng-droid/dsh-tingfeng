@@ -28,11 +28,11 @@ export const MNEMON_GITHUB_DEFAULT_CLIENT_ID = 'Ov23liq4i7n8UsylGRfb'
 export const MNEMON_GITHUB_SCOPE = 'repo'
 /**
  * The one record this plugin keeps in DSH's credentials store, as
- * `credentialKey('@tingfeng/dsh-tingfeng', 'github')` builds it. Both segments satisfy the
+ * `credentialKey('dsh-tingfeng', 'github')` builds it. Both segments satisfy the
  * store's `^[a-z][a-z0-9-]*$` rule, and the key is spelled here rather than
  * imported so the plugin keeps no dependency on the credentials package.
  */
-export const MNEMON_SYNC_GITHUB_CREDENTIAL_KEY = '@tingfeng/dsh-tingfeng/github'
+export const MNEMON_SYNC_GITHUB_CREDENTIAL_KEY = 'dsh-tingfeng/github'
 export const MNEMON_GITHUB_REQUEST_TIMEOUT_MS = 30_000
 export const MNEMON_GITHUB_DEFAULT_INTERVAL_MS = 5_000
 export const MNEMON_GITHUB_SLOW_DOWN_MS = 5_000

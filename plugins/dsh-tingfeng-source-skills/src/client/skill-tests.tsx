@@ -1,6 +1,6 @@
 import { useEffect, useState, type JSX } from 'react'
 import { Button, Checkbox, Switch, Tag } from '@deepseek-ai/dsh-client-ui-primitives'
-import { SidebarModal } from '@tingfeng/dsh-tingfeng/client'
+import { SidebarModal } from 'dsh-tingfeng/client'
 import type { BacktestRun, EvalCase, ModelRoute } from '../contracts.ts'
 import type { CaseDraft } from './api.ts'
 import { css, errorText, points, relative, useT, type SkillsTranslate } from './presentation.ts'

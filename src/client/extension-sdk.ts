@@ -1,4 +1,4 @@
-// Browser-only public helpers behind @tingfeng/dsh-tingfeng/client. No Source registration,
+// Browser-only public helpers behind dsh-tingfeng/client. No Source registration,
 // default workbench, Host Context, or raw transport is part of this module.
 export {
   installMemorySourceUI, memorySourcePageEntryId, MNEMON_SOURCE_PAGE_SLOT,
@@ -9,14 +9,14 @@ export {
 export type { MnemonSourceManagementClient, MemorySourcePageInstance } from './source-contracts.ts'
 // The directory a page may offer as a per-run model choice, as its management
 // client answers it; the pages read it and nothing else here drives it.
-export type { TaskAgentModelCatalog, TaskAgentModelCatalogGroup, TaskAgentModelCatalogModel } from '@tingfeng/dsh-tingfeng/contracts'
+export type { TaskAgentModelCatalog, TaskAgentModelCatalogGroup, TaskAgentModelCatalogModel } from 'dsh-tingfeng/contracts'
 export {
   installMemoryComponentUI, MNEMON_COMPONENT_FALLBACK_PRIORITY, MNEMON_COMPONENT_SETTINGS_SLOT, MNEMON_COMPONENT_STATUS_SLOT,
   type MemoryComponentConfigurationSnapshot, type MemoryComponentHost,
   type MemoryComponentSettingsComponent, type MemoryComponentSettingsProps, type MemoryComponentStatusComponent, type MemoryComponentStatusProps,
   type MemoryComponentUIContext, type MemoryComponentUIContribution,
 } from './component-ui.tsx'
-// What Memory Spaces' own settings are drawn with, the controls and styles @tingfeng/dsh-tingfeng drew them with.
+// What Memory Spaces' own settings are drawn with, the controls and styles dsh-tingfeng drew them with.
 export { memorySettingsStyles, ToggleRow } from './settings-controls.tsx'
 export { PanelActions, useLive, useStaged, WriteFailure } from './settings-panel.tsx'
 export { Callout, Reveal } from './feedback.tsx'

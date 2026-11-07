@@ -31,9 +31,15 @@ function failure(error: unknown): Error {
 export class IdleReviewWatermarkStore {
   private readonly directory: string
   private readonly path: string
+  // Declared as a plain field rather than a parameter property: Node's
+  // `--experimental-strip-types` erases types without transforming syntax, and
+  // parameter properties are a transform. A test imports this module through
+  // that flag to prove the admission lock works across two processes.
+  private readonly sessionId: string
 
-  constructor(directory: string, private readonly sessionId: string) {
+  constructor(directory: string, sessionId: string) {
     if (!sessionId || Buffer.byteLength(sessionId) > 4096 || Buffer.byteLength(JSON.stringify(sessionId)) > MAX_STATE_BYTES - 256) throw failure(undefined)
+    this.sessionId = sessionId
     this.directory = join(resolve(directory), 'state', 'idle-review')
     this.path = join(this.directory, createHash('sha256').update(sessionId).digest('hex') + '.json')
   }

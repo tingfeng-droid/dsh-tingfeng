@@ -34,11 +34,11 @@
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.1",
-    "@tingfeng/dsh-tingfeng": "0.5.41-ours.6"
+    "dsh-tingfeng": "^0.6.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
-    "@tingfeng/dsh-tingfeng": "workspace:*",
+    "dsh-tingfeng": "workspace:*",
     "tsdown": "^0.22.0",
     "typescript": "^5.9.0",
     "vitest": "^3.2.0"
@@ -49,11 +49,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/omdsh-dev/dsh-tingfeng.git",
+    "url": "git+https://github.com/tingfeng-droid/dsh-tingfeng.git",
     "directory": "plugins/dsh-tingfeng-strategy-general"
   },
-  "homepage": "https://github.com/omdsh-dev/dsh-tingfeng/tree/main/plugins/dsh-tingfeng-strategy-general#readme",
+  "homepage": "https://github.com/tingfeng-droid/dsh-tingfeng/tree/main/plugins/dsh-tingfeng-strategy-general#readme",
   "bugs": {
-    "url": "https://github.com/omdsh-dev/dsh-tingfeng/issues"
+    "url": "https://github.com/tingfeng-droid/dsh-tingfeng/issues"
   }
 }

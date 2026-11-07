@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type JSX, type ReactNode } from '
 import {
   createMemorySourcePageClient, installMemorySourceUI, MemorySourcePageFrame, translateEn,
   type MemorySourcePageProps, type MnemonSourceManagementClient, type MnemonTranslate,
-} from '@tingfeng/dsh-tingfeng/client'
+} from 'dsh-tingfeng/client'
 import { RuntimePage } from './pages.tsx'
 import type { RuntimePageClient } from './api.ts'
 

@@ -20,7 +20,7 @@ OpenViking `keyword` search uses `POST /api/v1/search/grep` for case-insensitive
 
 ## Use
 
-The default `@tingfeng/dsh-tingfeng` Starter already installs this package. Enable and configure the service on the `@tingfeng/dsh-tingfeng` page under **Plugins**, then inspect its synchronized Memory Spaces.
+The default `dsh-tingfeng` Starter already installs this package. Enable and configure the service on the `dsh-tingfeng` page under **Plugins**, then inspect its synchronized Memory Spaces.
 
 For a user API key without Admin API access, including managed OpenViking Service endpoints, fill `endpoint`, `apiKey`, `account`, and **User key owner (skip admin)** (`discoveryUser`) with the supplied account/user identifiers. The adapter validates `viking://user/<discoveryUser>/memories` through the read-only `/api/v1/fs/ls` data API and synchronizes that one space. It sends no account/user identity headers in this mode: the key determines the authenticated tenant, and `account` identifies the local projection rather than overriding that identity. Use an existing accessible memory root; an absent root, rejected key, invalid response, or denied owner fails the save and preserves previous settings. Health-only success is insufficient. This path does not verify write permission or certify a particular cloud deployment; exact writes still require the content API above.
 

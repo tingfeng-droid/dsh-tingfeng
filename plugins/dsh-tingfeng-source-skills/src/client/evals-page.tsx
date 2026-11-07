@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type JSX } from 'react'
 import { Tag } from '@deepseek-ai/dsh-client-ui-primitives'
-import { SearchField, SelectField } from '@tingfeng/dsh-tingfeng/client'
+import { SearchField, SelectField } from 'dsh-tingfeng/client'
 import type { CatalogView, EvalCase, ModelRoute } from '../contracts.ts'
 import { modelOptionPick, modelOptionValue, useModelChoice } from './model-choice.tsx'
 import { css, points, relative, useT } from './presentation.ts'

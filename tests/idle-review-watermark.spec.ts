@@ -59,7 +59,7 @@ describe('persistent idle-review admission', () => {
         process.stdout.write('blocked');
       }
     `
-    const launch = () => promisify(execFile)(process.execPath, ['--experimental-transform-types', '--input-type=module', '-e', script,
+    const launch = () => promisify(execFile)(process.execPath, ['--experimental-strip-types', '--input-type=module', '-e', script,
       new URL('../src/host/idle-review-watermark.ts', import.meta.url).href, f.root], { env: { ...process.env, NODE_NO_WARNINGS: '1' } })
     const results = await Promise.all([launch(), launch()])
     expect(results.map(result => result.stdout).sort()).toEqual(['blocked', 'reserved'])

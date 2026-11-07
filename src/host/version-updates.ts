@@ -151,7 +151,7 @@ export interface DshBundleChange {
   packageResult?: { output?: string; logPath?: string; kind?: string }
 }
 
-const DSH_MNEMON_PACKAGE = '@tingfeng/dsh-tingfeng'
+const DSH_MNEMON_PACKAGE = 'dsh-tingfeng'
 const MNEMON_NPM_PACKAGE = '@mnemon-dev/mnemon'
 const SUBPACKAGE = /^dsh-tingfeng-(source|strategy|provider)-[a-z0-9][a-z0-9._-]*$/
 
@@ -678,8 +678,8 @@ export class VersionUpdateManager {
       ...(this.lastUpdate === undefined ? {} : { lastUpdate: this.lastUpdate }),
       components: [
         {
-          id: '@tingfeng/dsh-tingfeng',
-          name: '@tingfeng/dsh-tingfeng',
+          id: 'dsh-tingfeng',
+          name: 'dsh-tingfeng',
           ...(dshInstall.profileName === undefined ? {} : { installProfile: dshInstall.profileName }),
           installPath: dshInstall.locationDir,
           current: installed,
@@ -758,7 +758,7 @@ export class VersionUpdateManager {
     if (child !== undefined && !child.updateSupported) throw new Error('This subpackage must be updated through its Starter or original installation method')
     const previousVersion = child?.current ?? this.currentDshMnemonVersion
     const latest = await this.latestPackageVersion(component, previousVersion)
-    if (latest === undefined) throw new Error('Unable to verify the latest @tingfeng/dsh-tingfeng release')
+    if (latest === undefined) throw new Error('Unable to verify the latest dsh-tingfeng release')
     if (compareVersions(previousVersion, latest) >= 0) {
       const restartRequired = component === DSH_MNEMON_PACKAGE ? previousVersion !== this.runningVersion : this.replaced(component, previousVersion)
       return { component, previousVersion, currentVersion: previousVersion, updated: false, restartRequired }
@@ -772,7 +772,7 @@ export class VersionUpdateManager {
       if (install.mode === 'npm' && install.profileDir !== undefined) return this.updateThroughPluginCommand(install.profileDir, install.profileName, component, previousVersion, latest)
     }
     const pnpm = this.executable('pnpm')
-    if (install.mode !== 'npm' || install.profileDir === undefined || pnpm === undefined) throw new Error('This @tingfeng/dsh-tingfeng installation cannot be updated automatically')
+    if (install.mode !== 'npm' || install.profileDir === undefined || pnpm === undefined) throw new Error('This dsh-tingfeng installation cannot be updated automatically')
     const output = await resultOrThrow(this.processRunner, pnpm, ['add', `${component}@${latest}`, '--save-exact'], UPDATE_TIMEOUT_MS, { cwd: install.profileDir })
     // The running module may still reside in pnpm's old versioned directory.
     // Read the profile's current public link, not that stale package path.

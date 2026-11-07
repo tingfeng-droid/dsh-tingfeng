@@ -127,7 +127,7 @@ export async function archiveDocumentLocked(host: DocumentWorkflowHost, parent: 
     // even if the caller's View ends or a later configuration replaces it.
     const cleanup = graph.source('memory-spaces', agentScope(parent, graph.config))
       .forInstance(identity.sourceInstanceKey).forGeneration(lease.generation)
-    const grant = authority?.context.view.readGrants.find(grant => grant.sourceInstanceKey === identity.sourceInstanceKey && grant.schema === '@tingfeng/dsh-tingfeng.memory-spaces/v1')
+    const grant = authority?.context.view.readGrants.find(grant => grant.sourceInstanceKey === identity.sourceInstanceKey && grant.schema === 'dsh-tingfeng.memory-spaces/v1')
     if (authority !== undefined && grant === undefined) throw new Error('document archive requires a Memory Space namespace grant')
     const allowed = grant === undefined ? undefined : new Set(strings(object(grant.value).memoryBodyIds))
     const directory = await memoryService.read<MemorySpaceCatalog>('body-directory', null, signal)
@@ -244,7 +244,7 @@ async function documentCommit(host: DocumentWorkflowHost, parent: HostAgent, req
  */
 async function documentIndexSpaces(host: DocumentWorkflowHost, parent: HostAgent, generation: MemoryCompositionGeneration, signal: AbortSignal): Promise<SourceSession | undefined> {
   const graph = host.runtimeSource.forAgent(parent)
-  if (!graph.config.writeEnabled || !host.runtimeSource.config.writeEnabled) throw new Error('@tingfeng/dsh-tingfeng is configured read-only')
+  if (!graph.config.writeEnabled || !host.runtimeSource.config.writeEnabled) throw new Error('dsh-tingfeng is configured read-only')
   if (!allowsParticipation(graph.config, 'memory-spaces', 'write', 'automatic')) return undefined
   const installed = generation.sourceInstances().filter(source => source.sourceTypeId === 'memory-spaces')
   if (installed.length === 0) return undefined
@@ -270,7 +270,7 @@ async function archiveDocumentLocally(counters: SubagentCounters, controller: So
 
 async function assertAutomaticMemoryWrite(host: DocumentWorkflowHost, parent: HostAgent): Promise<SourceSession> {
   const graph = host.runtimeSource.forAgent(parent)
-  if (!graph.config.writeEnabled || !host.runtimeSource.config.writeEnabled) throw new Error('@tingfeng/dsh-tingfeng is configured read-only')
+  if (!graph.config.writeEnabled || !host.runtimeSource.config.writeEnabled) throw new Error('dsh-tingfeng is configured read-only')
   assertParticipation(graph.config, 'memory-spaces', 'write', 'automatic')
   return host.writableSourceFor(parent, 'memory-spaces', 'remember')
 }

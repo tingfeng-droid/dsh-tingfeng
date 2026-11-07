@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type JSX, type ReactNode } from '
 import {
   createMemorySourcePageClient, installMemorySourceUI, MemorySourcePageFrame, translateEn,
   type MemorySourcePageProps, type MnemonSourceManagementClient, type MnemonTranslate,
-} from '@tingfeng/dsh-tingfeng/client'
+} from 'dsh-tingfeng/client'
 import { DocumentsPage } from './pages.tsx'
 import type { DocumentsPageClient } from './api.ts'
 

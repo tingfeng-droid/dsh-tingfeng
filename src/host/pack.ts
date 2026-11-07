@@ -198,7 +198,7 @@ export function parseManifest(value: unknown): MnemonPackManifest {
   const expected = componentsForScope(manifest.scope as MnemonPackScope)
   if (components.length !== expected.length || expected.some(component => !components.includes(component))) throw new Error('Mnemon Pack scope does not match its components')
   const source = record(manifest.source)
-  if (source?.plugin !== '@tingfeng/dsh-tingfeng' || typeof source.pluginVersion !== 'string') throw new Error('Mnemon Pack source is invalid')
+  if (source?.plugin !== 'dsh-tingfeng' || typeof source.pluginVersion !== 'string') throw new Error('Mnemon Pack source is invalid')
   if (!Array.isArray(manifest.summary)) throw new Error('Mnemon Pack summary is invalid')
   const summary = manifest.summary.map((entry): MnemonPackComponentSummary => {
     const item = record(entry)
@@ -217,7 +217,7 @@ export function parseManifest(value: unknown): MnemonPackManifest {
     version: MNEMON_PACK_VERSION,
     scope: manifest.scope as MnemonPackScope,
     exportedAt: manifest.exportedAt,
-    source: { plugin: '@tingfeng/dsh-tingfeng', pluginVersion: source.pluginVersion },
+    source: { plugin: 'dsh-tingfeng', pluginVersion: source.pluginVersion },
     components,
     summary,
   }
@@ -883,7 +883,7 @@ export function documentVersions(files: Readonly<Record<string, Uint8Array>>): R
  * only a sync channel knows, and it decides only for a document both hold. One the branch did
  * not change since then keeps this machine's version, edited or not. One only the branch
  * changed is the newer version of the same document and replaces the one here, unless its
- * revision is lower than this machine's, as an older @tingfeng/dsh-tingfeng can publish; that one is kept
+ * revision is lower than this machine's, as an older dsh-tingfeng can publish; that one is kept
  * beside it, as a merge without `base` keeps every document whose text differs.
  */
 function mergeDocuments(root: string, pack: ParsedPack, base?: Readonly<Record<string, string>>): { index: DocumentIndex; files: Map<string, Uint8Array> } {
@@ -1234,7 +1234,7 @@ export class MnemonPackManager {
         const summary = summaryFor(components, payload, this.runtimeLimits)
         const manifest: MnemonPackManifest = {
           format: MNEMON_PACK_FORMAT, version: MNEMON_PACK_VERSION, scope, exportedAt,
-          source: { plugin: '@tingfeng/dsh-tingfeng', pluginVersion: pluginPackageVersion() }, components, summary,
+          source: { plugin: 'dsh-tingfeng', pluginVersion: pluginPackageVersion() }, components, summary,
         }
         const checksums: ChecksumFile = { algorithm: 'sha256', files: Object.fromEntries(Object.entries(payload).map(([path, bytes]) => [path, sha256(bytes)])) }
         const entries: Zippable = {

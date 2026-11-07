@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { cpSync, existsSync, mkdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { dirname, isAbsolute, join, resolve } from 'node:path'
-import { withMemoryStorageLock } from '@tingfeng/dsh-tingfeng/extension-sdk'
+import { withMemoryStorageLock } from 'dsh-tingfeng/extension-sdk'
 import {
   SKILL_ROOT_KINDS,
   type BacktestRun, type CaseResult, type CatalogView, type DraftPreferencesView, type DraftView, type EvalCase, type EvidencePack, type ModelRoute, type SuggestionView,

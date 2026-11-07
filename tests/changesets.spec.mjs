@@ -36,12 +36,12 @@ describe('independent package versioning', () => {
       await writeFile(join(directory, 'pnpm-workspace.yaml'), 'packages:\n  - .\n  - plugins/*\n')
       await writeFile(join(directory, '.changeset/config.json'), await readFile(join(repositoryRoot, '.changeset/config.json'), 'utf8'))
       await writeFile(join(directory, '.changeset/one-plugin.md'), `---\n"${changedName}": patch\n---\n\nFix one Provider.\n`)
-      await json(join(directory, 'package.json'), published('@tingfeng/dsh-tingfeng', '0.5.1', {
+      await json(join(directory, 'package.json'), published('dsh-tingfeng', '0.5.1', {
         dependencies: { [sourceName]: '0.5.1', [changedName]: '0.5.1', [unchangedName]: '0.5.1' },
       }))
       await json(join(directory, 'plugins', sourceName, 'package.json'), published(sourceName, '0.5.1', {
-        peerDependencies: { '@tingfeng/dsh-tingfeng': '^0.5.0' },
-        devDependencies: { '@tingfeng/dsh-tingfeng': '^0.5.0', [changedName]: '^0.5.0', [unchangedName]: '^0.5.0' },
+        peerDependencies: { 'dsh-tingfeng': '^0.5.0' },
+        devDependencies: { 'dsh-tingfeng': '^0.5.0', [changedName]: '^0.5.0', [unchangedName]: '^0.5.0' },
       }))
       await json(join(directory, 'plugins', changedName, 'package.json'), published(changedName, '0.5.1', {
         peerDependencies: { [sourceName]: '^0.5.0' },
@@ -63,8 +63,8 @@ describe('independent package versioning', () => {
       expect(changed.version).toBe('0.5.2')
       expect(source).toMatchObject({
         version: '0.5.1',
-        peerDependencies: { '@tingfeng/dsh-tingfeng': '^0.5.0' },
-        devDependencies: { '@tingfeng/dsh-tingfeng': '^0.5.0', [changedName]: '^0.5.0', [unchangedName]: '^0.5.0' },
+        peerDependencies: { 'dsh-tingfeng': '^0.5.0' },
+        devDependencies: { 'dsh-tingfeng': '^0.5.0', [changedName]: '^0.5.0', [unchangedName]: '^0.5.0' },
       })
       expect(unchanged).toMatchObject({
         version: '0.5.1',
@@ -81,15 +81,15 @@ describe('independent package versioning', () => {
     const packages = [
       {
         directory: `/fixture/plugins/${pluginName}`,
-        manifest: published(pluginName, '0.5.2', { peerDependencies: { '@tingfeng/dsh-tingfeng': '^0.5.1' } }),
+        manifest: published(pluginName, '0.5.2', { peerDependencies: { 'dsh-tingfeng': '^0.5.1' } }),
       },
       {
         directory: '/fixture',
-        manifest: published('@tingfeng/dsh-tingfeng', '0.5.2', { dependencies: { [pluginName]: '0.5.2' } }),
+        manifest: published('dsh-tingfeng', '0.5.2', { dependencies: { [pluginName]: '0.5.2' } }),
       },
     ]
     const plan = createReleasePlan(packages, { baseVersions: new Map([
-      ['@tingfeng/dsh-tingfeng', '0.5.1'],
+      ['dsh-tingfeng', '0.5.1'],
       [pluginName, '0.5.1'],
     ]) })
     const paths = ['package.json', `plugins/${pluginName}/package.json`]
@@ -102,7 +102,7 @@ describe('independent package versioning', () => {
       ? { ...item, manifest: { ...item.manifest, version: '0.5.1' } }
       : { ...item, manifest: { ...item.manifest, dependencies: { [pluginName]: '0.5.1' } } })
     const incompletePlan = createReleasePlan(incompletePackages, { baseVersions: new Map([
-      ['@tingfeng/dsh-tingfeng', '0.5.1'],
+      ['dsh-tingfeng', '0.5.1'],
       [pluginName, '0.5.1'],
     ]) })
     expect(() => assertVersionedReleaseIntent(incompletePlan, paths, { ignoredPackageJson: new Set() }, []))
@@ -114,21 +114,21 @@ describe('independent package versioning', () => {
     const packages = [
       {
         directory: `/fixture/plugins/${introduced}`,
-        manifest: published(introduced, '0.5.0', { peerDependencies: { '@tingfeng/dsh-tingfeng': '^0.5.1' } }),
+        manifest: published(introduced, '0.5.0', { peerDependencies: { 'dsh-tingfeng': '^0.5.1' } }),
       },
       {
         directory: '/fixture',
-        manifest: published('@tingfeng/dsh-tingfeng', '0.5.1', { dependencies: { [introduced]: '0.5.0' } }),
+        manifest: published('dsh-tingfeng', '0.5.1', { dependencies: { [introduced]: '0.5.0' } }),
       },
     ]
-    const baseVersions = new Map([['@tingfeng/dsh-tingfeng', '0.5.1']])
+    const baseVersions = new Map([['dsh-tingfeng', '0.5.1']])
     expect(() => createReleasePlan(packages, { baseVersions })).toThrow(/Starter version must advance/u)
 
     const plan = createReleasePlan(packages, { baseVersions: introducedPackageBaseVersions(packages, baseVersions) })
     expect(plan.releasePackages).toEqual([])
     const changed = publicationInputsChanged(plan, ['package.json', `plugins/${introduced}/package.json`, `plugins/${introduced}/src/index.ts`])
-    expect([...changed].sort()).toEqual(['@tingfeng/dsh-tingfeng', introduced])
-    expect(() => assertReleaseIntentCoverage(changed, [{ name: '@tingfeng/dsh-tingfeng', type: 'patch' }])).toThrow(introduced)
-    expect(() => assertReleaseIntentCoverage(changed, [{ name: '@tingfeng/dsh-tingfeng', type: 'patch' }, { name: introduced, type: 'patch' }])).not.toThrow()
+    expect([...changed].sort()).toEqual(['dsh-tingfeng', introduced])
+    expect(() => assertReleaseIntentCoverage(changed, [{ name: 'dsh-tingfeng', type: 'patch' }])).toThrow(introduced)
+    expect(() => assertReleaseIntentCoverage(changed, [{ name: 'dsh-tingfeng', type: 'patch' }, { name: introduced, type: 'patch' }])).not.toThrow()
   })
 })

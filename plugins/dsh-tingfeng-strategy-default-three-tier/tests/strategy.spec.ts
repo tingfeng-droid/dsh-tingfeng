@@ -1,8 +1,8 @@
 import type { Context } from '@deepseek-ai/cordis'
 import { describe, expect, it } from 'vitest'
-import { defineMemorySource, installMemory, type MemoryAvailableSource } from '@tingfeng/dsh-tingfeng/extension-sdk'
-import { COMPOSABLE_MEMORY_API_VERSION } from '@tingfeng/dsh-tingfeng/contracts'
-import { MemoryCompositionRunner, DEFAULT_MEMORY_VIEW_BUDGET } from '@tingfeng/dsh-tingfeng/testing'
+import { defineMemorySource, installMemory, type MemoryAvailableSource } from 'dsh-tingfeng/extension-sdk'
+import { COMPOSABLE_MEMORY_API_VERSION } from 'dsh-tingfeng/contracts'
+import { MemoryCompositionRunner, DEFAULT_MEMORY_VIEW_BUDGET } from 'dsh-tingfeng/testing'
 import * as plugin from '../src/index.ts'
 import { BOUNDED_RUNTIME_MEMORY_PROTOCOL, LOCAL_ARCHIVE_RUNTIME_MEMORY_PROTOCOL, ROUTING_GUIDANCE, ROUTING_GUIDANCE_WITHOUT_RECALL, THREE_TIER_REMINDERS, THREE_TIER_REMINDERS_WITHOUT_RECALL } from '../src/guidance.ts'
 

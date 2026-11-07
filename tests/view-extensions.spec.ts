@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { Context } from '@deepseek-ai/cordis'
-import { ANY_MEMORY_STRATEGY, COMPOSABLE_MEMORY_API_VERSION, type MemoryStrategyDefinition } from '@tingfeng/dsh-tingfeng/contracts'
-import { defineMemorySource, defineMemoryStrategy, defineMemoryStrategyExtension, defineMemoryViewExtension, installMemory, memoryViewExtensionValues, validateMemoryViewExtension } from '@tingfeng/dsh-tingfeng/extension-sdk'
-import { MemoryCompositionRunner } from '@tingfeng/dsh-tingfeng/testing'
+import { ANY_MEMORY_STRATEGY, COMPOSABLE_MEMORY_API_VERSION, type MemoryStrategyDefinition } from 'dsh-tingfeng/contracts'
+import { defineMemorySource, defineMemoryStrategy, defineMemoryStrategyExtension, defineMemoryViewExtension, installMemory, memoryViewExtensionValues, validateMemoryViewExtension } from 'dsh-tingfeng/extension-sdk'
+import { MemoryCompositionRunner } from 'dsh-tingfeng/testing'
 
 function plugin(contribution: Parameters<typeof installMemory>[1]) {
   return { inject: ['mnemonMemory'], apply(ctx: Context) { installMemory(ctx, contribution) } }

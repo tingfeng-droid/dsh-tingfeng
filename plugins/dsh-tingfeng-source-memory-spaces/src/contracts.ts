@@ -4,8 +4,8 @@
  * and related wire fields keep their v0.5.x spelling for installed consumers
  * and persisted Document/Pack lineage; they all refer to memory spaces.
  */
-export type { MemoryJsonValue as JsonValue } from '@tingfeng/dsh-tingfeng/contracts'
-import type { MemoryReadGrant } from '@tingfeng/dsh-tingfeng/contracts'
+export type { MemoryJsonValue as JsonValue } from 'dsh-tingfeng/contracts'
+import type { MemoryReadGrant } from 'dsh-tingfeng/contracts'
 
 export type MemoryProviderId = string
 
@@ -42,7 +42,7 @@ export interface MemoryProviderConfigField {
   label: string
   /** Optional Host-provided translation key; clients fall back to label. */
   i18nKey?: string
-  /** Service fields are configured once on the @tingfeng/dsh-tingfeng page under Plugins; memory fields belong to each Memory Space. */
+  /** Service fields are configured once on the dsh-tingfeng page under Plugins; memory fields belong to each Memory Space. */
   scope: 'service' | 'memory'
   /** A reusable local data location presented with the same default/custom scope UI as Mnemon Native. */
   role?: 'global-location'

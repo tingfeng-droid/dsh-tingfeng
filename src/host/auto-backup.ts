@@ -130,7 +130,7 @@ export class MnemonAutoBackupScheduler {
       } else if (!this.runtime.config.writeEnabled) {
         // A Host that cannot write says so, and the message matches what the RPC
         // layer refuses with, so the page never shows two names for one fact.
-        this.lastError = '@tingfeng/dsh-tingfeng is configured read-only'
+        this.lastError = 'dsh-tingfeng is configured read-only'
         this.lastFailure = undefined
       } else {
         const result = await sync.push({ signal: controller.signal })
@@ -150,7 +150,7 @@ export class MnemonAutoBackupScheduler {
       if (!this.stopped && reason !== 'busy' && !message.includes(BUSY_MESSAGE)) {
         this.lastError = message
         this.lastFailure = typeof reason === 'string' ? reason as MnemonSyncFailureReason : undefined
-        console.warn('@tingfeng/dsh-tingfeng: automatic Git backup failed', error)
+        console.warn('dsh-tingfeng: automatic Git backup failed', error)
       }
     } finally {
       this.running = false

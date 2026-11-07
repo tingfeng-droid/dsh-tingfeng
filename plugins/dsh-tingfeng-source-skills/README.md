@@ -1,9 +1,9 @@
 # dsh-tingfeng-source-skills
 
-The Skills Source of [@tingfeng/dsh-tingfeng](https://github.com/omdsh-dev/dsh-tingfeng), experimental: one place for the DSH skills a workspace can load, the data their self-evolution keeps, their tests, and a market of more skills.
+The Skills Source of [dsh-tingfeng](https://github.com/omdsh-dev/dsh-tingfeng), experimental: one place for the DSH skills a workspace can load, the data their self-evolution keeps, their tests, and a market of more skills.
 
 - **Skills.** Every `SKILL.md` in `<project>/.dsh/skills`, `<project>/.agents/skills`, `~/.dsh/skills` and `~/.agents/skills`, read with DSH's own rules and precedence. Switch a skill off for the model or the `/` menu (DSH's `disable-model-invocation` and `user-invocable` keys), use it in the conversation, edit it, restore an earlier version, or move it to the trash. Every write is fenced by the file's hash and leaves a version.
-- **Evolution.** With self-evolution on, the @tingfeng/dsh-tingfeng Host records each conversation's steps as turns end and reviews it in the background once it has earned it. A suggestion names the steps it rests on; a task Agent drafts the new `SKILL.md`, which is backtested against the current version before you adopt it. This Source admits suggestions by confidence, dismissal, expiry and per-conversation limits, and keeps the ledger.
+- **Evolution.** With self-evolution on, the dsh-tingfeng Host records each conversation's steps as turns end and reviews it in the background once it has earned it. A suggestion names the steps it rests on; a task Agent drafts the new `SKILL.md`, which is backtested against the current version before you adopt it. This Source admits suggestions by confidence, dismissal, expiry and per-conversation limits, and keeps the ledger.
 - **Evidence.** The conversations reviews read, as numbered steps with the review's notes and secrets redacted; pin them, delete them, or make test cases from chosen steps.
 - **Evals.** Each skill's cases, from reviews, evidence or by hand, and its backtest runs. A backtest is a simulation: an executor follows the skill without tools, and a judge grades each check. Mark cases that require image input as `requiresVision`; the supporting Host records them as **Not measured**, without model calls or scores, and excludes them from baseline comparisons.
 - **Market.** Skills from sources: a featured catalog shipped in `market/official.json` and refreshed from the repository; skills.sh, the open index the `skills` CLI searches, queried as the user types; any GitHub repository (every `SKILL.md` in it, plugin marketplaces included); any site publishing an [Agent Skills discovery index](https://github.com/cloudflare/agent-skills-discovery-rfc) at `/.well-known/agent-skills/` (digests checked, `.tar.gz` and `.zip` artifacts unpacked safely); and catalogs in the format below. Installing previews the skill, fetches its whole folder from its upstream, checks it against DSH's rules and records where it came from, so an update can be offered.
@@ -18,7 +18,7 @@ The Source never calls a model and never joins a model View; skills reach the mo
 | `dshHome` | `$DSH_HOME`, then `~/.dsh` | DSH's home; its `skills` folder is read |
 | `agentsHome` | `$DSH_AGENTS_HOME`, then `~/.agents` | The shared agents home; its `skills` folder is read |
 
-Self-evolution, its review parameters, the line under each turn and the sidebar entry are @tingfeng/dsh-tingfeng settings, under `skills` in its configuration, edited on this component's page under **Plugins → @tingfeng/dsh-tingfeng**; see [Skills settings](https://github.com/omdsh-dev/dsh-tingfeng/blob/main/docs/en/reference/configuration.md#skills-settings). The Host passes the admission rules with each review, so this Source keeps no settings of its own.
+Self-evolution, its review parameters, the line under each turn and the sidebar entry are dsh-tingfeng settings, under `skills` in its configuration, edited on this component's page under **Plugins → dsh-tingfeng**; see [Skills settings](https://github.com/omdsh-dev/dsh-tingfeng/blob/main/docs/en/reference/configuration.md#skills-settings). The Host passes the admission rules with each review, so this Source keeps no settings of its own.
 
 The Host's `skills.allowCreate` and `skills.allowUpdate` independently control new-skill and existing-skill improvement suggestions. Both default to `true` for older configurations. The Source enforces these rules against the current skill catalog for suggestions and proposed eval cases; labeling an existing skill as `create` does not bypass the update rule. Turning both off pauses conversation reviews, while existing suggestions and explicit draft, backtest and adopt actions remain available.
 
@@ -56,7 +56,7 @@ The scoped management API exposes `trash-list` (`trash` is an alias), `trash-res
 
 ## Source-owned UI and tests
 
-The optional `./client` entry is an ordinary DSH Client plugin. This package owns its pages and `presentation/` resources and uses `@tingfeng/dsh-tingfeng/client` for the shared frame and scoped management client. It never receives a Host Context, credentials or another Source's controller.
+The optional `./client` entry is an ordinary DSH Client plugin. This package owns its pages and `presentation/` resources and uses `dsh-tingfeng/client` for the shared frame and scoped management client. It never receives a Host Context, credentials or another Source's controller.
 
 From a source checkout, install the declared dependencies and run `pnpm verify` to check the Source's behavior, the market's parsers and archive reader, and Source-backed page interactions.
 

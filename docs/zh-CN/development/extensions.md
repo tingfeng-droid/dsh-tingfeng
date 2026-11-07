@@ -17,11 +17,11 @@ Source 不需要再实现 Provider；Provider 不需要理解 View 组合；Stra
 | 入口 | 职责 |
 |---|---|
 | `dsh-mnemon` | DSH Host 与默认 Starter |
-| `@tingfeng/dsh-tingfeng/core` | 安装 Source 无关服务的 Cordis 插件；不导出引擎，不带 Host/UI |
-| `@tingfeng/dsh-tingfeng/contracts` | Source/Strategy 回调契约，以及 JSON 安全的 manifest、facts、ViewSpec、View、Evidence、Receipt |
-| `@tingfeng/dsh-tingfeng/extension-sdk` | Source/Strategy 定义、生命周期注册与校验 |
-| `@tingfeng/dsh-tingfeng/testing` | 限定范围的组合、route/action、管理测试，JSON 诊断与已构建 Client 制品加载器 |
-| `@tingfeng/dsh-tingfeng/client` | DSH 工作台与 Source 页面 SDK |
+| `dsh-tingfeng/core` | 安装 Source 无关服务的 Cordis 插件；不导出引擎，不带 Host/UI |
+| `dsh-tingfeng/contracts` | Source/Strategy 回调契约，以及 JSON 安全的 manifest、facts、ViewSpec、View、Evidence、Receipt |
+| `dsh-tingfeng/extension-sdk` | Source/Strategy 定义、生命周期注册与校验 |
+| `dsh-tingfeng/testing` | 限定范围的组合、route/action、管理测试，JSON 诊断与已构建 Client 制品加载器 |
+| `dsh-tingfeng/client` | DSH 工作台与 Source 页面 SDK |
 | `dsh-tingfeng-source-memory-spaces/provider-sdk` | Memory Spaces 自己的 Provider 子模块协议 |
 | `dsh-tingfeng-source-memory-spaces/testing` | 私有子模块夹具，以及驱动权限/连接夹具 |
 
@@ -33,11 +33,11 @@ Source 不需要再实现 Provider；Provider 不需要理解 View 组合；Stra
 
 ## 工作区标识工具
 
-Host 侧工具可从 `@tingfeng/dsh-tingfeng/extension-sdk` 导入 `canonicalWorkspacePath` 和 `workspaceStorageId`。它们与内置 Host 使用同一套同步函数，不属于浏览器 API：
+Host 侧工具可从 `dsh-tingfeng/extension-sdk` 导入 `canonicalWorkspacePath` 和 `workspaceStorageId`。它们与内置 Host 使用同一套同步函数，不属于浏览器 API：
 
 ```ts
 import { resolve } from 'node:path'
-import { canonicalWorkspacePath, workspaceStorageId } from '@tingfeng/dsh-tingfeng/extension-sdk'
+import { canonicalWorkspacePath, workspaceStorageId } from 'dsh-tingfeng/extension-sdk'
 
 const workspace = resolve(process.argv[2] ?? '.')
 const canonical = canonicalWorkspacePath(workspace)
@@ -65,7 +65,7 @@ const id = workspaceStorageId(workspace)
 
 ```ts
 import type { Context } from '@deepseek-ai/cordis'
-import type { MemoryPluginDescriptor } from '@tingfeng/dsh-tingfeng/contracts'
+import type { MemoryPluginDescriptor } from 'dsh-tingfeng/contracts'
 
 export const name = 'dsh-tingfeng-source-notes'
 export const inject = ['mnemonMemory']
@@ -77,7 +77,7 @@ export const memoryPlugin = {
   provides: [{ id: 'source' }, { id: 'source.durable-evidence' }],
 } satisfies Omit<MemoryPluginDescriptor, 'apiVersion'>
 export async function apply(ctx: Context): Promise<void> {
-  const { defineMemoryPlugin, installMemory } = await import('@tingfeng/dsh-tingfeng/extension-sdk')
+  const { defineMemoryPlugin, installMemory } = await import('dsh-tingfeng/extension-sdk')
   const { notesSource } = await import('./source.js')
   installMemory(ctx, { plugin: defineMemoryPlugin(memoryPlugin), sources: [notesSource] })
 }
@@ -127,7 +127,7 @@ DSH 自己的插件列表从包内的 `locale/en.json` 与 `locale/zh.json`（`m
 声明的选项不够用时，组件可以在 `./client` 入口把自己的设置加入它的组件页，记忆空间就是这样带来它的 Provider 与嵌入。其他随附组件的设置仍由 dsh-mnemon 通过同一区域绘制：运行时记忆的用户画像范围、分层策略的后台任务。Source 还可以提供它运行时在记忆系统“状态”页卡片上显示的内容。
 
 ```tsx
-import { installMemoryComponentUI } from '@tingfeng/dsh-tingfeng/client'
+import { installMemoryComponentUI } from 'dsh-tingfeng/client'
 
 export function apply(ctx) {
   ctx.effect(() => installMemoryComponentUI(ctx, {
@@ -140,25 +140,25 @@ export function apply(ctx) {
 
 设置渲染在 `mnemon.component.settings` 区域，以插件声明中的包名为键，位于组件页的状态、关系与声明的选项之后；该组件的行会出现打开它们的齿轮。它只接收页面知道的信息：`component`（`packageName`、`label`、`enabled`）、`writable`、`language`，以及存在时对话的 `sessionId` 与 `workspace`；所需的服务请通过自己的注册注入。注册会等待 dsh-mnemon 的配置出现，调用返回的函数即结束。请遵循页面的交互规则：开关与下拉选择改动即生效，需要输入的值等待你自己的**应用**，且不并入其他分组的保存。
 
-`@tingfeng/dsh-tingfeng/client` 还导出记忆空间自己的设置所用的控件与样式，即 dsh-mnemon 绘制这些设置时所用的：`ToggleRow`，`useLive`、`useStaged` 以及 `PanelActions`、`WriteFailure`（一组设置的两种保存方式），`Callout`、`Reveal`、`GlobalLocationSetting`，以及配置页的类名表 `memorySettingsStyles`。类名表的键是一组固定的类名，属于 API：比 Starter 更旧或更新的已安装组件按名称查找它们，因此任何版本都不会重命名其中的类。配置页不会在组件的设置外层设置翻译，所以 `PanelActions` 与 `WriteFailure` 接收你传入的 `t`。导入它们的组件，应把 `dsh-mnemon` peer 最低版本声明为首个导出它们的 Starter，也就是同时导出 `MNEMON_COMPONENT_FALLBACK_PRIORITY` 的那一版。
+`dsh-tingfeng/client` 还导出记忆空间自己的设置所用的控件与样式，即 dsh-mnemon 绘制这些设置时所用的：`ToggleRow`，`useLive`、`useStaged` 以及 `PanelActions`、`WriteFailure`（一组设置的两种保存方式），`Callout`、`Reveal`、`GlobalLocationSetting`，以及配置页的类名表 `memorySettingsStyles`。类名表的键是一组固定的类名，属于 API：比 Starter 更旧或更新的已安装组件按名称查找它们，因此任何版本都不会重命名其中的类。配置页不会在组件的设置外层设置翻译，所以 `PanelActions` 与 `WriteFailure` 接收你传入的 `t`。导入它们的组件，应把 `dsh-mnemon` peer 最低版本声明为首个导出它们的 Starter，也就是同时导出 `MNEMON_COMPONENT_FALLBACK_PRIORITY` 的那一版。
 
 记忆空间是 dsh-mnemon 曾代为绘制设置的随附组件。dsh-mnemon 保留它的设置，并把只有自己掌握的内容借给记忆空间自己的设置：
 
 - **后备注册。** dsh-mnemon 以 `MNEMON_COMPONENT_FALLBACK_PRIORITY` 自行注册记忆空间的设置（取自它固定的记忆空间版本），为随附组件保留的状态卡片也会这样注册。DSH 对每个键只渲染优先级数值最低的注册，因此记忆空间以默认优先级注册自己的设置后，只要仍在注册，就会替代后备注册。所以只要记忆空间自己的客户端没有注册设置，页面就由后备注册绘制：记忆空间关闭时、打开后其客户端加载期间、客户端加载失败或其条目出错时，以及搭配本身没有设置的 0.5.21 及更早的记忆空间时。打开记忆空间会在已打开的页面下把前者换成后者；前者存在 `host.retained` 中的内容让后者从前者所在的状态开始。
-- **只在 dsh-mnemon 让出时注册。** dsh-mnemon 0.5.31 及更早版本以默认优先级自己绘制记忆空间的设置，而 DSH 拒绝同一个包在同一优先级上的第二次注册。导出 `MNEMON_COMPONENT_FALLBACK_PRIORITY` 是 dsh-mnemon 的承诺：它以该优先级保留这些设置，并借给它们 `host`。因此记忆空间只在 `@tingfeng/dsh-tingfeng/client` 导出它时注册自己的设置。客户端包读取已加载的 dsh-mnemon 缺少的导出时得到 `undefined`，所以记忆空间在绘制时才读取较新的导出，而不是在加载时。
+- **只在 dsh-mnemon 让出时注册。** dsh-mnemon 0.5.31 及更早版本以默认优先级自己绘制记忆空间的设置，而 DSH 拒绝同一个包在同一优先级上的第二次注册。导出 `MNEMON_COMPONENT_FALLBACK_PRIORITY` 是 dsh-mnemon 的承诺：它以该优先级保留这些设置，并借给它们 `host`。因此记忆空间只在 `dsh-tingfeng/client` 导出它时注册自己的设置。客户端包读取已加载的 dsh-mnemon 缺少的导出时得到 `undefined`，所以记忆空间在绘制时才读取较新的导出，而不是在加载时。
 - **`host`。** 注册在记忆空间键下的设置会收到 `host`。`host.configuration` 读取借给记忆空间的配置键，并通过页面带修订栅栏的设置写入 `set` 它拥有的那个键。`host.operations.read`/`write` 调用 dsh-mnemon 为记忆空间提供的 Host 操作，并始终在页面自己的对话与工作区中执行：输入中带 `sessionId` 或 `workspaceId` 的会被拒绝。记忆空间的设置自行发起的读取（`provider-services`、`status-summary`）在相同读取仍在进行时会与之合并，但只合并在配置当前修订下发起的那一次；嵌入测试总是向 Host 重新询问。`host.retained` 在页面的客户端运行期间保存设置重新挂载时需要的内容，`host.changed()` 让记忆系统重新读取它的页面。与 Source 页面的 `management` 客户端一样，`host` 从不交出设置服务或传输层。它跟随键而不是注册者：注册在其他键下的设置不会收到它；其他包只有抢先注册在记忆空间的键下才能拿到它，而这不会给它超出 DSH 已与所有客户端插件共享的连接之外的任何权限。
 
 状态卡片渲染在 `mnemon.component.status` 区域，同样以包名为键，在组件声明的名称下方显示 `<strong>` 中的一行要点与 `<p>` 中的一行说明。它接收 `component`、`language`，以及存在时记忆系统的 `sessionId` 与 `workspace`，并自行读取自己的 Source。无论是否提供内容，每个 Source 组件都有一张卡片：组件已关闭或其 Source 未运行时显示页面自己的说明，未提供内容时显示正在运行。标签页、卡片与页头都使用组件声明的名称。
 
 第三方插件仍走 DSH 原生 Profile/Loader 流程：用准确包名执行 `dsh plugin --profile <Profile> add <包名>@<版本> --save-exact`，检查其 `peerDependencies` 与 `dsh.bundle.patch`，重启后在 Profile 装配中明确激活。下载 npm 包本身不等于激活，Mnemon 也不会在当前进程热加载新代码。欢迎外部作者按本页契约贡献独立仓库；通用图形化管理会在接口和社区用例稳定后再评估，不是 v0.5 承诺。
 
-卸载 dsh-mnemon 后，第三方 bundle 行可能仍然安装着，因此入口必须能在 Mnemon 包缺席时加载：`name`、`inject`、`memoryPlugin` 保持为纯数据，模块顶层只使用类型导入，把 `@tingfeng/dsh-tingfeng/*` 的运行时导入延迟到 `apply()` 内。间接导入 SDK 的本地模块也要延迟，如上面的 `source.js`。声明 `inject: ['mnemonMemory']` 后，Cordis 会等待服务出现才调用 `apply`，服务消失时清理 Source 注册，服务恢复后重新激活。构建时将这些导入保留为 external，避免把运行时依赖提升到入口顶层。不要吞掉激活错误并伪装为注册成功；服务存在时 SDK 缺失或不兼容仍应报错。除了正常激活和清理，还要把构建入口放进没有 Mnemon 依赖的独立目录验证；外部消费方的 `absent-host.spec.ts` 覆盖这两条路径。
+卸载 dsh-mnemon 后，第三方 bundle 行可能仍然安装着，因此入口必须能在 Mnemon 包缺席时加载：`name`、`inject`、`memoryPlugin` 保持为纯数据，模块顶层只使用类型导入，把 `dsh-tingfeng/*` 的运行时导入延迟到 `apply()` 内。间接导入 SDK 的本地模块也要延迟，如上面的 `source.js`。声明 `inject: ['mnemonMemory']` 后，Cordis 会等待服务出现才调用 `apply`，服务消失时清理 Source 注册，服务恢复后重新激活。构建时将这些导入保留为 external，避免把运行时依赖提升到入口顶层。不要吞掉激活错误并伪装为注册成功；服务存在时 SDK 缺失或不兼容仍应报错。除了正常激活和清理，还要把构建入口放进没有 Mnemon 依赖的独立目录验证；外部消费方的 `absent-host.spec.ts` 覆盖这两条路径。
 
 <a id="默认三层扩展"></a>
 
 ### 标准 View 扩展
 
-`@tingfeng/dsh-tingfeng/extension-sdk` 的 `defineMemoryViewExtension` 以 `ANY_MEMORY_STRATEGY`（`'*'`）为目标：扩展跟随声明了该槽的所选 Strategy，否则保持停用并给出诊断。每个槽只有一个所有者：两个扩展指向同一 Strategy，或其中任一以 `'*'` 为目标时，后注册者会被拒绝，因为切换主策略后二者会在同一个槽相遇。`validateMemoryViewExtension` 与 `memoryViewExtensionValues` 让 Strategy 读取同样经过校验的值。`dsh-tingfeng-strategy-default-three-tier/extension-sdk` 保留 `defineThreeTierExtension`，供只作用于该 Strategy 的扩展使用。随附增强使用以下标准槽：
+`dsh-tingfeng/extension-sdk` 的 `defineMemoryViewExtension` 以 `ANY_MEMORY_STRATEGY`（`'*'`）为目标：扩展跟随声明了该槽的所选 Strategy，否则保持停用并给出诊断。每个槽只有一个所有者：两个扩展指向同一 Strategy，或其中任一以 `'*'` 为目标时，后注册者会被拒绝，因为切换主策略后二者会在同一个槽相遇。`validateMemoryViewExtension` 与 `memoryViewExtensionValues` 让 Strategy 读取同样经过校验的值。`dsh-tingfeng-strategy-default-three-tier/extension-sdk` 保留 `defineThreeTierExtension`，供只作用于该 Strategy 的扩展使用。随附增强使用以下标准槽：
 
 | 可选插件 | 槽 | 贡献与边界 |
 |---|---|---|
@@ -174,7 +174,7 @@ Starter 会安装这三个包并注册为停用的 DSH Entry，因此开关始�
 
 ```ts
 import type { Context } from '@deepseek-ai/cordis'
-import { defineMemoryViewExtension, installMemory } from '@tingfeng/dsh-tingfeng/extension-sdk'
+import { defineMemoryViewExtension, installMemory } from 'dsh-tingfeng/extension-sdk'
 
 export const inject = ['mnemonMemory']
 export function apply(ctx: Context): void {
@@ -233,7 +233,7 @@ Provider 使用 Memory Spaces SDK 的 `defineMemorySpaceProvider`。模块只收
 
 Provider 还可以实现可选的 `get(body, id, signal)`：返回空间中这个精确 id 对应的记忆，没有时返回 `undefined`，读取时不能有副作用。实现后，遗忘、建立关联和相关记忆遍历都可以接受当前 View 没有返回过的 id，例如 Agent 刚写入的记忆，或委派请求中点名的记忆：Source 会在 View 可读的空间中查找这个 id，只有恰好一个空间持有它时才执行。没有 `get` 时，即使指明空间，这样的 id 也要等 View 把它作为证据返回后才能使用：Provider 自己的遗忘或建立关联调用未必限定在该空间内。
 
-可选的 `./client` 通过 `@tingfeng/dsh-tingfeng/client` 的 `installMemorySourceUI` 注册，由 DSH 作为普通 Client 插件加载。页面接收 `MemorySourcePageProps`：选中实例、locale、可写状态和限定范围的 `management.read/mutate`。用 `MemorySourcePageFrame` 复用 locale/appearance；React 不接收 Host Context、驱动、令牌、LLM grant 或传输层。缺少专属页面时有通用管理入口，重复归属和渲染失败局部诊断。
+可选的 `./client` 通过 `dsh-tingfeng/client` 的 `installMemorySourceUI` 注册，由 DSH 作为普通 Client 插件加载。页面接收 `MemorySourcePageProps`：选中实例、locale、可写状态和限定范围的 `management.read/mutate`。用 `MemorySourcePageFrame` 复用 locale/appearance；React 不接收 Host Context、驱动、令牌、LLM grant 或传输层。缺少专属页面时有通用管理入口，重复归属和渲染失败局部诊断。
 
 保留的面板或其浏览器文档隐藏时，`active` 为 false。此时暂停自动读取与轮询，重新激活后再读取；已经开始的用户流程仍绑定原范围，直到范围变化或卸载。目录修订与描述未变时，management 客户端保持同一身份。自动检查可显式使用 `management.read(operation, input, { coalesce: true })`，`createMemorySourcePageClient().read` 也接受这个选项：只有同一绑定与读取周期内、参数相同且尚未完成的请求才共用工作。人工刷新、可见性变化与写操作分隔读取周期；写操作开始和结束时都会清除待合并的读取。每位调用者得到独立副本，完成或失败的结果均不保留。不传选项的读取各自发出，保留检索和重复用户操作的先后关系。旧 management 客户端可以忽略这个可选提示；它不授予权限，也不改变 Host 校验。
 
@@ -245,7 +245,7 @@ Provider 还可以实现可选的 `get(body, id, signal)`：返回空间中这�
 
 用户每次点击工作区顶栏的**刷新**，`refreshKey` 都会变化；配置页改变了页面要显示的内容时也会变化，例如切换组件、保存 Provider、同步、合并、导入 ZIP 或执行整理方案，页面隐藏时也可能变化。页面应在它变化时重新读取数据，而不是自己放置刷新或同步按钮。只有对话中的锚点（例如回合记忆栏里的一条内容）打开页面时，`navigationInput` 才是 `{ seed, nonce }`；点击标签页打开时没有它。默认 Source 把 seed 分别理解为档案 id（项目档案选中它）、召回查询（记忆空间打开后立即执行）或条目文本（运行时记忆高亮并滚动到它）。新的 `nonce` 表示对同一 seed 的又一次请求。
 
-`@tingfeng/dsh-tingfeng/client` 还导出默认 Source 使用的控件，让安装的 Source 与它们外观和行为一致：`SearchField`（带搜索图标的 DSH 输入框）、`SelectField`（带标签的 DSH 选择菜单，支持 `inline`、`size: 'sm'`、`hideLabel` 与 `ariaLabel`）、`WriteReceipt`（写入的结果、摘要与可选的查看操作）和 `TaskAgentTag`（任务 Agent 能否接手）。它们遵循[交互约定](../guides/ui-guide.md#交互约定)。导入这些控件或读取 `refreshKey` 的 Source，应把 `dsh-mnemon` peer 最低版本声明为首个导出它们的 Starter 0.5.19。传入 `unembedded` 时，`WriteReceipt` 会多一行说明这条记忆没有向量，`embeddingManaged` 决定它的措辞：`false` 表示 DSH 不管理 Mnemon Native 嵌入配置，显示中性的说明；`true` 或不传则显示嵌入没有成功的提醒。dsh-mnemon 0.5.31 及更早版本会忽略 `embeddingManaged`。
+`dsh-tingfeng/client` 还导出默认 Source 使用的控件，让安装的 Source 与它们外观和行为一致：`SearchField`（带搜索图标的 DSH 输入框）、`SelectField`（带标签的 DSH 选择菜单，支持 `inline`、`size: 'sm'`、`hideLabel` 与 `ariaLabel`）、`WriteReceipt`（写入的结果、摘要与可选的查看操作）和 `TaskAgentTag`（任务 Agent 能否接手）。它们遵循[交互约定](../guides/ui-guide.md#交互约定)。导入这些控件或读取 `refreshKey` 的 Source，应把 `dsh-mnemon` peer 最低版本声明为首个导出它们的 Starter 0.5.19。传入 `unembedded` 时，`WriteReceipt` 会多一行说明这条记忆没有向量，`embeddingManaged` 决定它的措辞：`false` 表示 DSH 不管理 Mnemon Native 嵌入配置，显示中性的说明；`true` 或不传则显示嵌入没有成功的提醒。dsh-mnemon 0.5.31 及更早版本会忽略 `embeddingManaged`。
 
 ## 独立仓库验收
 
@@ -258,7 +258,7 @@ Provider 还可以实现可选的 `get(body, id, signal)`：返回空间中这�
 只有默认 Starter 挂载默认组合；Source/Strategy 包不携带自动激活默认实例的 patch。用户 Profile、Bundle 或明确的父组合负责激活和替换。
 
 ```ts
-import { MemoryCompositionRunner } from '@tingfeng/dsh-tingfeng/testing'
+import { MemoryCompositionRunner } from 'dsh-tingfeng/testing'
 import * as notes from './index.js'
 import * as focus from './strategy.js'
 

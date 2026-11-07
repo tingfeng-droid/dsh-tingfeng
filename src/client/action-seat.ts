@@ -1,6 +1,6 @@
 /**
  * One action a surface offers while its owner can perform it, such as opening
- * the @tingfeng/dsh-tingfeng page under DSH Plugins while that page provides navigation.
+ * the dsh-tingfeng page under DSH Plugins while that page provides navigation.
  * Readers render the control only while an action is present.
  */
 export class MnemonActionSeat {

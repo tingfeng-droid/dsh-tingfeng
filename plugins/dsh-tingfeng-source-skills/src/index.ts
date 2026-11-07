@@ -1,5 +1,5 @@
 import type { Context } from '@deepseek-ai/cordis'
-import { defineMemoryPlugin, installMemory, memoryConfigurationDigest } from '@tingfeng/dsh-tingfeng/extension-sdk'
+import { defineMemoryPlugin, installMemory, memoryConfigurationDigest } from 'dsh-tingfeng/extension-sdk'
 import { createSkillsMemorySource, type Config } from './source.ts'
 
 export const name = 'dsh-tingfeng-source-skills'

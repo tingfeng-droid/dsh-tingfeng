@@ -9,9 +9,9 @@ import type {
   MemoryReadGrant,
   MemoryViewRoute,
   MemoryStrategyDefinition,
-} from "@tingfeng/dsh-tingfeng/contracts"
-import { MemoryCompositionRunner } from '@tingfeng/dsh-tingfeng/testing'
-import { installMemory } from '@tingfeng/dsh-tingfeng/extension-sdk'
+} from "dsh-tingfeng/contracts"
+import { MemoryCompositionRunner } from 'dsh-tingfeng/testing'
+import { installMemory } from 'dsh-tingfeng/extension-sdk'
 const DEFAULT_MEMORY_VIEW_BUDGET = { maxProjectionCharacters: 16_384, maxRoutes: 16, maxActions: 16, maxEvidenceResults: 20, maxEvidenceCharacters: 16_384 }
 import { resolveMemorySpacesConfig } from "../src/config.ts"
 import { createMemorySpacesSource } from '../src/source.ts'
@@ -367,7 +367,7 @@ describe('Memory Spaces Provider child-module conformance', () => {
     })
     const strategy: MemoryStrategyDefinition = {
       manifest: {
-        apiVersion: '@tingfeng/dsh-tingfeng/v1', kind: 'strategy', typeId: 'fixture', packageName: 'dsh-tingfeng-strategy-fixture',
+        apiVersion: 'dsh-tingfeng/v1', kind: 'strategy', typeId: 'fixture', packageName: 'dsh-tingfeng-strategy-fixture',
         deterministic: true, supportedSourceRoles: ['durable-evidence'], maxSources: 1, maxRoutes: 1, maxActions: 1,
       },
       compose: (_request, sources) => ({

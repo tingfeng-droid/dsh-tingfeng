@@ -102,7 +102,7 @@ function runtimeMigrationSources(
 }
 
 export async function runtimeArchiveSource(runtimeSource: MnemonAgentRuntimeSource, graph: MnemonRuntimeGraph, scope: MemoryOperationScope, view: ComposableMemoryView, generation: MemoryCompositionGeneration, turn?: ComposableMemoryTurn, signal?: AbortSignal): Promise<RuntimeArchiveScope | undefined> {
-  if (!graph.config.writeEnabled || !runtimeSource.config.writeEnabled) throw new Error('@tingfeng/dsh-tingfeng is configured read-only')
+  if (!graph.config.writeEnabled || !runtimeSource.config.writeEnabled) throw new Error('dsh-tingfeng is configured read-only')
   // Memory Spaces switched off, or taking no automatic writes, leave the archive
   // to the Runtime Source (#336).
   if (!allowsParticipation(graph.config, 'memory-spaces', 'write', 'automatic')) return undefined
@@ -119,7 +119,7 @@ export async function runtimeArchiveSource(runtimeSource: MnemonAgentRuntimeSour
   const cleanup = graph.source('memory-spaces', scope).forInstance(candidates[0]!.sourceInstanceKey).forGeneration(generation)
   let source = cleanup
   if (turn !== undefined) source = source.forTurn(turn)
-  const grant = view.readGrants.find(grant => grant.sourceInstanceKey === candidates[0]!.sourceInstanceKey && grant.schema === '@tingfeng/dsh-tingfeng.memory-spaces/v1')
+  const grant = view.readGrants.find(grant => grant.sourceInstanceKey === candidates[0]!.sourceInstanceKey && grant.schema === 'dsh-tingfeng.memory-spaces/v1')
   if (grant === undefined) throw new Error('Runtime archival requires the selected Memory Spaces namespace scope')
   return { source, cleanup, memoryBodyIds: new Set(strings(object(grant.value).memoryBodyIds)), writeScope: { viewId: view.id, grant },
     elsewhere: await archivableElsewhere(graph, scope, generation, candidates[0]!.sourceInstanceKey, signal) }

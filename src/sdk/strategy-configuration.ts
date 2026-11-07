@@ -24,7 +24,7 @@ export interface MemoryStrategyConfigurationField {
  * Cordis. Configuration here must be public; credentials belong to Sources.
  */
 export interface MemoryStrategyConfiguration {
-  apiVersion: '@tingfeng/dsh-tingfeng/strategy-configuration/v1'
+  apiVersion: 'dsh-tingfeng/strategy-configuration/v1'
   kind: 'strategy' | 'strategy-extension'
   typeId: string
   label: MemoryLocalizedText
@@ -35,7 +35,7 @@ export interface MemoryStrategyConfiguration {
 }
 
 export function defineMemoryStrategyConfiguration(value: Omit<MemoryStrategyConfiguration, 'apiVersion'>): MemoryStrategyConfiguration {
-  return readMemoryStrategyConfiguration({ ...value, apiVersion: '@tingfeng/dsh-tingfeng/strategy-configuration/v1' })
+  return readMemoryStrategyConfiguration({ ...value, apiVersion: 'dsh-tingfeng/strategy-configuration/v1' })
 }
 
 /** Host discovery also validates modules that do not use the author helper. */
@@ -44,7 +44,7 @@ export function readMemoryStrategyConfiguration(value: MemoryStrategyConfigurati
     const item = (input as Record<string, unknown>)[key]
     return typeof item === 'string' && item.trim() !== '' && item.length <= 4_000
   })
-  if (!value || value.apiVersion !== '@tingfeng/dsh-tingfeng/strategy-configuration/v1' || typeof value.create !== 'function'
+  if (!value || value.apiVersion !== 'dsh-tingfeng/strategy-configuration/v1' || typeof value.create !== 'function'
     || !['strategy', 'strategy-extension'].includes(value.kind) || !/^[a-z][a-z0-9-]{0,127}$/u.test(value.typeId)
     || !Array.isArray(value.fields) || value.fields.length > 16
     || value.fields.some(field => !field || !/^[a-zA-Z][a-zA-Z0-9]{0,99}$/u.test(field.key)

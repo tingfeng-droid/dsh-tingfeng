@@ -119,7 +119,7 @@ export function mountSubagentTokenUsageOverride(ctx: MnemonClientContext): () =>
       priority: MNEMON_SHADOW_PRIORITY,
       locale: official.locale,
       inject: official.inject,
-      registrant: '@tingfeng/dsh-tingfeng/subagent-token-usage',
+      registrant: 'dsh-tingfeng/subagent-token-usage',
     }, lineageShadow(official.component as LineageComponent))
   }
   const unsubscribe = slots.subscribe(SUBAGENT_LINEAGE_SLOT, reconcile)

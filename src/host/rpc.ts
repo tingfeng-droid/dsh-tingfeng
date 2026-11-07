@@ -54,7 +54,7 @@ function requireAligned(runtime: ScopedRuntime): void {
   if (!runtime.aligned) throw new Error('the selected memory workspace differs from the current session; align the workbench before running an Agent-backed operation')
 }
 function requireWritable(runtime: ScopedRuntime): void {
-  if (!runtime.graph.config.writeEnabled) throw new Error('@tingfeng/dsh-tingfeng is configured read-only (writeEnabled: false)')
+  if (!runtime.graph.config.writeEnabled) throw new Error('dsh-tingfeng is configured read-only (writeEnabled: false)')
 }
 function requireCapability(runtime: ScopedRuntime, typeId: string, capability: MemoryCapability): void {
   assertParticipation(runtime.graph.config, typeId, capability, 'manual')
@@ -443,7 +443,7 @@ export function createWriteHandler(input: LiveMnemonRuntime, lifecycle?: MnemonL
       const payload = object(rawPayload)
       if (endpoint === 'version-update') {
         if (versions === undefined) throw new Error('version updates are unavailable')
-        if (!input.config.writeEnabled) throw new Error('@tingfeng/dsh-tingfeng is configured read-only (writeEnabled: false)')
+        if (!input.config.writeEnabled) throw new Error('dsh-tingfeng is configured read-only (writeEnabled: false)')
         if (!isVersionComponentId(payload.component)) return badRequest('unknown version component')
         return success(await versions.update(payload.component))
       }

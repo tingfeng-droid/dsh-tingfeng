@@ -35,10 +35,10 @@ for (const filename of await readdir(artifacts)) {
   const path = join(artifacts, filename), bytes = await readFile(path)
   const manifest = JSON.parse(await run('tar', ['-xOf', path, 'package/package.json']))
   assert(!packages.has(manifest.name), `Duplicate candidate ${manifest.name}`)
-  assert(manifest.name === '@tingfeng/dsh-tingfeng' || manifest.name.startsWith('dsh-tingfeng-'), 'Only Mnemon candidates are accepted')
+  assert(manifest.name === 'dsh-tingfeng' || manifest.name.startsWith('dsh-tingfeng-'), 'Only Mnemon candidates are accepted')
   packages.set(manifest.name, { manifest, path, integrity: `sha512-${createHash('sha512').update(bytes).digest('base64')}`, sha256: createHash('sha256').update(bytes).digest('hex') })
 }
-assert(packages.has('@tingfeng/dsh-tingfeng'), 'Missing candidate Starter')
+assert(packages.has('dsh-tingfeng'), 'Missing candidate Starter')
 const metadata = new Map()
 let registryUrl
 const registry = createServer(async (request, response) => {

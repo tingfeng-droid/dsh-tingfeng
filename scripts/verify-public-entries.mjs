@@ -1,5 +1,5 @@
 // Import every public Node entry and check that no declaration it reaches exposes a private type, and that
-// @tingfeng/dsh-tingfeng/client's declarations stay on the browser side.
+// dsh-tingfeng/client's declarations stay on the browser side.
 import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
 import { dirname, relative, resolve } from 'node:path'
@@ -49,13 +49,13 @@ function verifyClientDeclarations(filename, seen = new Set()) {
   if (seen.has(filename)) return seen
   seen.add(filename)
   const path = relative(root, filename).split('\\').join('/')
-  if (/^lib\/types\/src\/(?:host|sdk)\//u.test(path)) throw new Error(`@tingfeng/dsh-tingfeng/client declarations reach ${path}`)
+  if (/^lib\/types\/src\/(?:host|sdk)\//u.test(path)) throw new Error(`dsh-tingfeng/client declarations reach ${path}`)
   const source = readFileSync(filename, 'utf8')
-  if (/declare\s+module\s+['"]@deepseek-ai\/cordis['"]/u.test(source)) throw new Error(`@tingfeng/dsh-tingfeng/client declarations reach a cordis Context augmentation in ${path}`)
+  if (/declare\s+module\s+['"]@deepseek-ai\/cordis['"]/u.test(source)) throw new Error(`dsh-tingfeng/client declarations reach a cordis Context augmentation in ${path}`)
   const dependencies = ts.preProcessFile(source, true, true)
   for (const { fileName } of [...dependencies.importedFiles, ...dependencies.referencedFiles, ...dependencies.typeReferenceDirectives]) {
     if (fileName.startsWith('.')) verifyClientDeclarations(resolve(dirname(filename), fileName.replace(/(?<!\.d)\.[cm]?[jt]sx?$/u, '.d.ts')), seen)
-    else if (!CLIENT_DECLARATION_PACKAGES.has(fileName)) throw new Error(`@tingfeng/dsh-tingfeng/client declarations import ${fileName} in ${path}; only ${[...CLIENT_DECLARATION_PACKAGES].join(', ')} may be imported there`)
+    else if (!CLIENT_DECLARATION_PACKAGES.has(fileName)) throw new Error(`dsh-tingfeng/client declarations import ${fileName} in ${path}; only ${[...CLIENT_DECLARATION_PACKAGES].join(', ')} may be imported there`)
   }
   return seen
 }

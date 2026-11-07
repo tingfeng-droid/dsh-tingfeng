@@ -9,7 +9,7 @@ import { resolveConfig } from "../src/host/config.ts"
 import { MnemonPackManager, MNEMON_PACK_FORMAT, MNEMON_PACK_MIME, documentVersion } from "../src/host/pack.ts"
 import { createStorageRoot } from '../src/host/storage-root.ts'
 import { sourceFixture } from './fixtures/sources.ts'
-import { withMemoryStorageLock } from '@tingfeng/dsh-tingfeng/extension-sdk'
+import { withMemoryStorageLock } from 'dsh-tingfeng/extension-sdk'
 import { DOCUMENTS_DIRECTORY, DOCUMENTS_LOCK_FILE, DOCUMENTS_LOCK_STALE_MS } from 'dsh-tingfeng-source-documents/contracts'
 import { RUNTIME_DIRECTORY, RUNTIME_ENTRY_DELIMITER, RUNTIME_LOCK_FILE, RUNTIME_LOCK_STALE_MS, RUNTIME_PROJECTION_FILES, runtimeProjection } from 'dsh-tingfeng-source-runtime/contracts'
 import { sqlite as nodeSqlite, writeSpace, type SpaceInsight } from '../plugins/dsh-tingfeng-source-memory-spaces/tests/memory-space-db.ts'
@@ -636,7 +636,7 @@ describe('Mnemon Pack', () => {
       expect(textOf(here.root, first!.id)).toContain('Version 1')
     })
 
-    it('never replaces a document with a lower revision from the branch, as an older @tingfeng/dsh-tingfeng republishes', async () => {
+    it('never replaces a document with a lower revision from the branch, as an older dsh-tingfeng republishes', async () => {
       const here = await documents('pack-revision-here')
       await here.sources.documents.mutate('mutate', { action: 'create', title: 'Release plan', content: '# Release plan\n\nVersion 1' }, { confirmed: true })
       const older = (await here.manager.exportPack('documents')).base64

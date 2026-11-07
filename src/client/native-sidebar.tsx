@@ -11,11 +11,11 @@ import { MemoryIcon } from './memory-icon.tsx'
 import css from './MnemonWorkspace.module.css'
 
 export const MNEMON_MAIN_PANEL_ID = 'mnemon' as MainPanelId
-const ICON_SELECTOR = '[data-dsh-plugin="@tingfeng/dsh-tingfeng"][data-dsh-part="sidebar-icon"]'
+const ICON_SELECTOR = '[data-dsh-plugin="dsh-tingfeng"][data-dsh-part="sidebar-icon"]'
 
 /** The native Sidebar owns the surrounding button, label, tooltip and state. */
 function MnemonSidebarIcon({ size }: Pick<PropsRuntime<'sidebar.panellist'>, 'size'>): JSX.Element {
-  return <MemoryIcon size={size} data-dsh-plugin="@tingfeng/dsh-tingfeng" data-dsh-part="sidebar-icon" />
+  return <MemoryIcon size={size} data-dsh-plugin="dsh-tingfeng" data-dsh-part="sidebar-icon" />
 }
 
 /** DSH selects this seat; the shell registration retains Source render authority. */

@@ -29,7 +29,7 @@ export default class MnemonBundle {
     await prepareStarterResolution(this.ctx)
     // DSH registers the native group for `cordis:group` rows before it mounts a profile.
     const Group = (this.ctx as unknown as { loader?: { builtins?: { group?: NativeGroupClass } } }).loader?.builtins?.group
-    if (typeof Group !== 'function') throw new Error('@tingfeng/dsh-tingfeng/bundle needs the Loader\'s cordis:group builtin')
+    if (typeof Group !== 'function') throw new Error('dsh-tingfeng/bundle needs the Loader\'s cordis:group builtin')
     // Constructed in this fiber, the native group owns this Entry's children and config updates.
     const group = new Group(this.ctx, this.config)
     yield () => group.stop()

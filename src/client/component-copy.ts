@@ -2,7 +2,7 @@ import { STARTER_COMPONENT_ROWS } from '../host/protocol.ts'
 import type { MemoryPluginEntryView } from '../host/view-protocol.ts'
 import type { MnemonTranslate } from './locales.ts'
 
-/** Packages the @tingfeng/dsh-tingfeng Starter installs; any other component came from an installed extension. */
+/** Packages the dsh-tingfeng Starter installs; any other component came from an installed extension. */
 const SHIPPED_PACKAGES: ReadonlySet<string> = new Set(STARTER_COMPONENT_ROWS.map(row => row.packageName))
 
 /** Shipped components still taking shape: their row and page say so, and they may change more than the rest. */
@@ -13,7 +13,7 @@ export function isExperimental(entry: Pick<MemoryPluginEntryView, 'packageName'>
   return EXPERIMENTAL_PACKAGES.has(entry.packageName)
 }
 
-/** Whether a component ships with @tingfeng/dsh-tingfeng rather than an installed extension. */
+/** Whether a component ships with dsh-tingfeng rather than an installed extension. */
 export function isShipped(entry: MemoryPluginEntryView): boolean {
   return SHIPPED_PACKAGES.has(entry.packageName)
 }

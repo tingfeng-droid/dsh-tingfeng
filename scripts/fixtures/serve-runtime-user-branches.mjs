@@ -60,7 +60,7 @@ for (const filename of await readdir(artifacts)) {
   })
 }
 assert.equal(packages.size, 1 + Object.keys(starterManifest.dependencies).filter(name => name.startsWith('dsh-tingfeng-')).length, 'Use Root and every packed plugin artifact it pins')
-assert(packages.has('@tingfeng/dsh-tingfeng'), 'The packed Root is required')
+assert(packages.has('dsh-tingfeng'), 'The packed Root is required')
 let registryUrl
 const registry = createServer((request, response) => {
   const name = decodeURIComponent(new URL(request.url, 'http://localhost').pathname).slice(1)
@@ -213,7 +213,7 @@ const env = { ...process.env, DSH_HOME: dshHome, DSH_TELEMETRY_DISABLED: '1', DS
   MNEMON_DATA_DIR: join(state, 'data'), npm_config_registry: registryUrl, NPM_CONFIG_REGISTRY: registryUrl }
 const dshBin = join(profile, 'node_modules/@deepseek-ai/dsh/lib/bin.js')
 await privateFile('install.log', await run(process.execPath, [dshBin, 'plugin', '--profile', 'web', 'add',
-  `file:${packages.get('@tingfeng/dsh-tingfeng').path}`, '--registry', registryUrl], { cwd: workspace, env }))
+  `file:${packages.get('dsh-tingfeng').path}`, '--registry', registryUrl], { cwd: workspace, env }))
 // The official Coding preset and native tools stay intact. Configure only the
 // supported model/idle-review settings and replace the OS directory dialog.
 await writeFile(join(dshHome, 'profiles/web/cordis.patch.yml'), `- id: directory-picker

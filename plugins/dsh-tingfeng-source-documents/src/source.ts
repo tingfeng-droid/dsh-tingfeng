@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto'
-import type { MemoryEvidenceItem, MemoryJsonValue, MemoryReadGrant, MemorySourceDefinition } from '@tingfeng/dsh-tingfeng/contracts'
-import { COMPOSABLE_MEMORY_API_VERSION } from '@tingfeng/dsh-tingfeng/contracts'
-import { defineMemorySource, createMemoryMutationReceipt as receipt, memoryInputRecord as record, memoryInputStringArray as stringArray, memoryInputText as text, truncateMemoryText as truncate } from '@tingfeng/dsh-tingfeng/extension-sdk'
+import type { MemoryEvidenceItem, MemoryJsonValue, MemoryReadGrant, MemorySourceDefinition } from 'dsh-tingfeng/contracts'
+import { COMPOSABLE_MEMORY_API_VERSION } from 'dsh-tingfeng/contracts'
+import { defineMemorySource, createMemoryMutationReceipt as receipt, memoryInputRecord as record, memoryInputStringArray as stringArray, memoryInputText as text, truncateMemoryText as truncate } from 'dsh-tingfeng/extension-sdk'
 import { DocumentManager } from './controller.ts'
 import type { DocumentMutation } from './contracts.ts'
 import { documentsSourceConfig, type Config } from './config.ts'
@@ -153,7 +153,7 @@ export function createDocumentsMemorySource(config: Config = {}): MemorySourceDe
         const readGrant: MemoryReadGrant = {
           id: `${context.sourceInstanceKey}/grant/${current.revision}`,
           sourceInstanceKey: context.sourceInstanceKey,
-          schema: '@tingfeng/dsh-tingfeng.documents/v1',
+          schema: 'dsh-tingfeng.documents/v1',
           value: { workspaceRoot: root, documentIds: active.map(document => document.id),
             archivedDocumentIds: current.documents.filter(document => document.status === 'archived' && document.healthy).map(document => document.id).sort() },
           revision: current.revision,

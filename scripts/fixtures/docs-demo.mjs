@@ -3,7 +3,7 @@
 // with the real View tools. It holds no personal memory and needs the Mnemon
 // CLI for the native Memory Spaces. The skills half is in docs-demo-skills.mjs.
 import { realpathSync } from 'node:fs'
-import { MemoryCompositionRunner } from '@tingfeng/dsh-tingfeng/testing'
+import { MemoryCompositionRunner } from 'dsh-tingfeng/testing'
 import * as runtimePlugin from 'dsh-tingfeng-source-runtime'
 import * as documentsPlugin from 'dsh-tingfeng-source-documents'
 import * as spacesPlugin from 'dsh-tingfeng-source-memory-spaces'

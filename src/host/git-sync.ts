@@ -193,9 +193,12 @@ export function credentialTarget(url: string): { user: string; name: string; nam
 export function remoteIssueOf(message: string): MnemonSyncRemoteIssue {
   const text = message.toLowerCase()
   if (/did not respond within|timed out|timeout was reached/u.test(text)) return 'timeout'
-  if (/authentication failed|could not read (username|password)|terminal prompts disabled|permission denied|invalid username or password|bad credentials|returned error: 40[13]|host key verification failed|access denied|denied to /u.test(text)) return 'auth'
-  if (/repository not found|not found|does not appear to be a git repository|no such file or directory|does not exist|returned error: 404/u.test(text)) return 'not-found'
-  if (/could not resolve|failed to connect|couldn't connect|connection (refused|reset|closed|timed out)|network is unreachable|no route to host|unable to access|ssl|tls|proxy|empty reply/u.test(text)) return 'network'
+  // Git localizes its own diagnostics to the active locale, so an English-only
+  // list reports `unknown` for the same failure on a zh_CN host. The Chinese
+  // phrases are Git's own translations of the cases above.
+  if (/authentication failed|could not read (username|password)|terminal prompts disabled|permission denied|invalid username or password|bad credentials|returned error: 40[13]|host key verification failed|access denied|denied to |鉴权失败|认证失败|无法读取用户名|无法读取密码|权限被拒绝|无效的用户名或密码|主机密钥验证失败/u.test(text)) return 'auth'
+  if (/repository not found|not found|does not appear to be a git repository|no such file or directory|does not exist|returned error: 404|仓库未找到|找不到仓库|不是一个 git 仓库|没有那个文件或目录|不存在/u.test(text)) return 'not-found'
+  if (/could not resolve|failed to connect|couldn't connect|connection (refused|reset|closed|timed out)|network is unreachable|no route to host|unable to access|ssl|tls|proxy|empty reply|无法解析|连接失败|连接被拒绝|连接重置|网络不可达|没有到主机的路由/u.test(text)) return 'network'
   return 'unknown'
 }
 
@@ -963,7 +966,7 @@ export class MnemonGitSync {
   }
 
   /**
-   * Without an agreement on record, as after an update from @tingfeng/dsh-tingfeng 0.5.28, which remembered
+   * Without an agreement on record, as after an update from dsh-tingfeng 0.5.28, which remembered
    * only when it last synced: that run's commit holds the documents as the branch held them,
    * which this machine had just published or merged in. Read from there while the branch
    * descends from it, they keep the first sync after the update from taking a document this

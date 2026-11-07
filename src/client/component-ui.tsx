@@ -1,5 +1,5 @@
 import { Component, createElement, type ComponentType, type ErrorInfo, type ReactNode } from 'react'
-import type { MemoryJsonValue } from '@tingfeng/dsh-tingfeng/contracts'
+import type { MemoryJsonValue } from 'dsh-tingfeng/contracts'
 
 /**
  * A component's own settings, on its page: keyed by the component's package
@@ -7,15 +7,15 @@ import type { MemoryJsonValue } from '@tingfeng/dsh-tingfeng/contracts'
  */
 export const MNEMON_COMPONENT_SETTINGS_SLOT = 'mnemon.component.settings' as const
 /**
- * The priority at which @tingfeng/dsh-tingfeng keeps the settings of a shipped component
+ * The priority at which dsh-tingfeng keeps the settings of a shipped component
  * that once had no settings of its own (today Memory Spaces). DSH renders, for
  * each key, the registration with the lowest priority, so the component's own
- * registration, at the default 0, replaces @tingfeng/dsh-tingfeng's while it lasts.
+ * registration, at the default 0, replaces dsh-tingfeng's while it lasts.
  *
  * Exporting this is a promise to those components, and a component may rely on
- * it alone: @tingfeng/dsh-tingfeng keeps their settings at this priority, so registering
+ * it alone: dsh-tingfeng keeps their settings at this priority, so registering
  * their own does not collide with it, and lends their settings `host` (see
- * {@link MemoryComponentSettingsProps.host}). @tingfeng/dsh-tingfeng 0.5.31 and earlier
+ * {@link MemoryComponentSettingsProps.host}). dsh-tingfeng 0.5.31 and earlier
  * export neither and draw those settings at the default priority.
  */
 export const MNEMON_COMPONENT_FALLBACK_PRIORITY = 100
@@ -47,15 +47,15 @@ export interface MemoryComponentSettingsProps {
   workspace?: { id: string; label?: string }
   /**
    * What the page lends the settings registered under the key of a shipped
-   * component whose settings @tingfeng/dsh-tingfeng used to draw (today Memory Spaces):
-   * the configuration keys and Host operations @tingfeng/dsh-tingfeng serves it. It goes
+   * component whose settings dsh-tingfeng used to draw (today Memory Spaces):
+   * the configuration keys and Host operations dsh-tingfeng serves it. It goes
    * with the key, not with who registered: settings under any other key
    * receive none.
    */
   host?: MemoryComponentHost
 }
 
-/** @tingfeng/dsh-tingfeng's configuration as a component's settings read it. */
+/** dsh-tingfeng's configuration as a component's settings read it. */
 export interface MemoryComponentConfigurationSnapshot {
   status: 'loading' | 'ready' | 'unavailable'
   /** The configuration keys the page shares with this component. */
@@ -67,7 +67,7 @@ export interface MemoryComponentConfigurationSnapshot {
 }
 
 /**
- * @tingfeng/dsh-tingfeng's configuration and Host operations, bound to one component and
+ * dsh-tingfeng's configuration and Host operations, bound to one component and
  * to the page's conversation and workspace, as Source pages get a scoped
  * management client: never the settings service or the transport itself.
  */
@@ -78,7 +78,7 @@ export interface MemoryComponentHost {
     /** Save one key the component owns, fenced by the revision the page read like every settings write. */
     set(key: string, value: MemoryJsonValue): Promise<void>
   }
-  /** The Host operations @tingfeng/dsh-tingfeng serves this component; absent while the page has no Host connection. */
+  /** The Host operations dsh-tingfeng serves this component; absent while the page has no Host connection. */
   operations?: {
     read(operation: string, input?: MemoryJsonValue): Promise<unknown>
     write(operation: string, input: MemoryJsonValue): Promise<unknown>
@@ -88,7 +88,7 @@ export interface MemoryComponentHost {
   /**
    * What the settings keep for as long as the page's client runs, one store per
    * component, conversation and workspace like the host itself. The settings
-   * can mount again under an open page: @tingfeng/dsh-tingfeng draws a shipped component's
+   * can mount again under an open page: dsh-tingfeng draws a shipped component's
    * settings until the component's own client registers them, so turning the
    * component on swaps one for the other. What the first mount kept here lets
    * the next start where it was.
@@ -114,7 +114,7 @@ export interface MemoryComponentStatusProps {
 
 export type MemoryComponentStatusComponent = (props: MemoryComponentStatusProps) => ReactNode
 
-/** Everything one component adds to @tingfeng/dsh-tingfeng's interface beyond its declaration. */
+/** Everything one component adds to dsh-tingfeng's interface beyond its declaration. */
 export interface MemoryComponentUIContribution {
   /** The npm package name the component's plugin declaration names. */
   packageName: string
@@ -134,7 +134,7 @@ export interface MemoryComponentUIContext {
 }
 
 /**
- * Register a component's interface into the regions @tingfeng/dsh-tingfeng declares, the
+ * Register a component's interface into the regions dsh-tingfeng declares, the
  * way shipped components do. Registration waits for each region to exist and
  * is released by the returned function.
  */
@@ -143,10 +143,10 @@ export function installMemoryComponentUI(ctx: MemoryComponentUIContext, contribu
 }
 
 /**
- * @tingfeng/dsh-tingfeng's own registration of a shipped component's interface, kept for
+ * dsh-tingfeng's own registration of a shipped component's interface, kept for
  * that component's versions that register none: at
  * MNEMON_COMPONENT_FALLBACK_PRIORITY, so the component's own replaces it. Not
- * part of `@tingfeng/dsh-tingfeng/client`.
+ * part of `dsh-tingfeng/client`.
  */
 export function installMemoryComponentFallbackUI(ctx: MemoryComponentUIContext, contribution: MemoryComponentUIContribution): () => void {
   return installRegions(ctx, contribution, { priority: MNEMON_COMPONENT_FALLBACK_PRIORITY })
@@ -211,7 +211,7 @@ class ContributionBoundary extends Component<{ packageName: string; children: Re
   override state = { failed: false }
   static getDerivedStateFromError(): { failed: boolean } { return { failed: true } }
   override componentDidCatch(error: unknown, info: ErrorInfo): void {
-    console.error(`@tingfeng/dsh-tingfeng: the interface ${this.props.packageName} contributed failed`, error, info.componentStack)
+    console.error(`dsh-tingfeng: the interface ${this.props.packageName} contributed failed`, error, info.componentStack)
   }
   override render(): ReactNode { return this.state.failed ? null : this.props.children }
 }

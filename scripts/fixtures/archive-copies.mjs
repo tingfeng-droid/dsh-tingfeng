@@ -1,5 +1,5 @@
 import { realpathSync } from 'node:fs'
-import { MemoryCompositionRunner } from '@tingfeng/dsh-tingfeng/testing'
+import { MemoryCompositionRunner } from 'dsh-tingfeng/testing'
 import * as runtimePlugin from 'dsh-tingfeng-source-runtime'
 import * as spacesPlugin from 'dsh-tingfeng-source-memory-spaces'
 import * as strategyPlugin from 'dsh-tingfeng-strategy-default-three-tier'

@@ -26,7 +26,7 @@ const configPath = join(profileDir, 'cordis.yml')
 const settings = process.argv[3] === 'settings'
 const isolated = process.argv.includes('--isolated')
 const otherBundle = process.argv.includes('--other-bundle')
-const selected = isolated ? (otherBundle ? ['fixture-other'] : []) : ['@tingfeng/dsh-tingfeng']
+const selected = isolated ? (otherBundle ? ['fixture-other'] : []) : ['dsh-tingfeng']
 const modules = isolated ? join(temporary, 'profiles/.generations/starter/node_modules') : join(profileDir, 'node_modules')
 const profile = { name: 'fixture', dir: profileDir, patchPath, installAnchor, cwd: temporary, home: temporary,
   startedBundles: selected, overlays: [], telemetryDisabledEnv: '1' }
@@ -35,16 +35,16 @@ let ctx
 try {
   await mkdir(profileDir, { recursive: true })
   const manifest = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'))
-  const names = ['@tingfeng/dsh-tingfeng', ...Object.keys(manifest.dependencies).filter(name => name.startsWith('dsh-tingfeng-'))]
+  const names = ['dsh-tingfeng', ...Object.keys(manifest.dependencies).filter(name => name.startsWith('dsh-tingfeng-'))]
   assert.equal(names.length, 19)
   for (const name of names) {
     const directory = join(modules, name)
     await mkdir(directory, { recursive: true })
     await writeFile(join(directory, 'package.json'), JSON.stringify({ name, version: '0.0.0', type: 'module', main: './index.js',
-      ...(name === '@tingfeng/dsh-tingfeng' ? { dependencies: manifest.dependencies, exports: { '.': './index.js', './starter': './starter.js', './bundle': './bundle.js' }, dsh: { bundle: { patch: './cordis.patch.yml' } } } : {}) }))
+      ...(name === 'dsh-tingfeng' ? { dependencies: manifest.dependencies, exports: { '.': './index.js', './starter': './starter.js', './bundle': './bundle.js' }, dsh: { bundle: { patch: './cordis.patch.yml' } } } : {}) }))
     await writeFile(join(directory, 'index.js'), `
 export const name = ${JSON.stringify(name)}
-export const inject = ${JSON.stringify(name === '@tingfeng/dsh-tingfeng' || name.startsWith('dsh-tingfeng-provider-') ? [] : ['mnemonMemory'])}
+export const inject = ${JSON.stringify(name === 'dsh-tingfeng' || name.startsWith('dsh-tingfeng-provider-') ? [] : ['mnemonMemory'])}
 export async function apply(ctx, config) {
   const state = ctx.root.bundleFixture
   ctx.effect(() => {
@@ -52,7 +52,7 @@ export async function apply(ctx, config) {
     return () => { const count = state.active.get(name) - 1; if (count) state.active.set(name, count); else state.active.delete(name) }
   })
   state.configs.set(name, config)
-  if (name === '@tingfeng/dsh-tingfeng') ctx.provide('mnemonMemory', {})
+  if (name === 'dsh-tingfeng') ctx.provide('mnemonMemory', {})
   if (name === 'dsh-tingfeng-source-memory-spaces') for (const provider of config.providers) await ctx.plugin(await import(provider.use)).await()
 }
 `)
@@ -63,7 +63,7 @@ export async function apply(ctx, config) {
       source = source.replaceAll(`'${name}'`, JSON.stringify(pathToFileURL(runtimeRequire.resolve(name)).href))
     }
     source = source.replace('../package.json', './package.json').replace('./starter-resolution.ts', './starter-resolution.js')
-    await writeFile(join(modules, '@tingfeng/dsh-tingfeng', filename.replace('.ts', '.js')), ts.transpile(source, { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext }))
+    await writeFile(join(modules, 'dsh-tingfeng', filename.replace('.ts', '.js')), ts.transpile(source, { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext }))
   }
   if (otherBundle) {
     const other = join(modules, 'fixture-other')
@@ -79,11 +79,11 @@ export async function apply(ctx, config) {
   // ENOENT naming the *target*, which reads like a missing source package.
   await mkdir(join(profileDir, 'node_modules/@tingfeng'), { recursive: true })
   if (isolated) {
-    await symlink(join(modules, '@tingfeng/dsh-tingfeng'), join(profileDir, 'node_modules/@tingfeng/dsh-tingfeng'), process.platform === 'win32' ? 'junction' : 'dir')
+    await symlink(join(modules, 'dsh-tingfeng'), join(profileDir, 'node_modules/dsh-tingfeng'), process.platform === 'win32' ? 'junction' : 'dir')
   }
   if (otherBundle) await symlink(join(modules, 'fixture-other'), join(profileDir, 'node_modules/fixture-other'), process.platform === 'win32' ? 'junction' : 'dir')
-  await writeFile(join(profileDir, 'node_modules/@tingfeng/dsh-tingfeng/cordis.patch.yml'), await readFile(join(root, 'cordis.patch.yml')))
-  await writeFile(join(profileDir, 'package.json'), JSON.stringify({ private: true, dependencies: { '@tingfeng/dsh-tingfeng': '0.0.0', ...(otherBundle ? { 'fixture-other': '1.0.0' } : {}) }, dsh: { profile: { bundles: selected } } }))
+  await writeFile(join(profileDir, 'node_modules/dsh-tingfeng/cordis.patch.yml'), await readFile(join(root, 'cordis.patch.yml')))
+  await writeFile(join(profileDir, 'package.json'), JSON.stringify({ private: true, dependencies: { 'dsh-tingfeng': '0.0.0', ...(otherBundle ? { 'fixture-other': '1.0.0' } : {}) }, dsh: { profile: { bundles: selected } } }))
   // Keep the profile's Connection container independent from the Starter.
   await writeFile(configPath, '- id: connection\n  name: cordis:group\n  group: true\n  config: []\n')
   const retained = '# Operator comment\n- id: mnemon\n  config:\n    timeoutMs: 4321\n- id: mnemon-strategy-auto-capture\n  disabled: false\n- id: mnemon-source-documents\n  disabled: true\n'
@@ -102,7 +102,7 @@ export async function apply(ctx, config) {
     // Quoted, because a bare scalar starting with `@` is a reserved indicator in
     // YAML and the host's parser rejects the whole patch list with
     // "bad indentation of a mapping entry" at the line carrying the name.
-    await writeFile(patchPath, '- id: mnemon-bundle\n  name: "@tingfeng/dsh-tingfeng/bundle"\n  disabled: false\n' + retained)
+    await writeFile(patchPath, '- id: mnemon-bundle\n  name: "dsh-tingfeng/bundle"\n  disabled: false\n' + retained)
   }
   const ConfigEditor = settings ? (await load('@deepseek-ai/dsh-config-editor')).default : undefined
   let Manager
@@ -140,7 +140,7 @@ export async function apply(ctx, config) {
   }
   const assertEnabled = () => {
     assertActive(enabledNames)
-    assert.equal(state.configs.get('@tingfeng/dsh-tingfeng').timeoutMs, 4321)
+    assert.equal(state.configs.get('dsh-tingfeng').timeoutMs, 4321)
   }
   const assertRetained = async () => {
     const saved = await readFile(patchPath, 'utf8')
@@ -160,7 +160,7 @@ export async function apply(ctx, config) {
       assert.equal((await ctx.pluginManager.setBundleEnabled('fixture-other', false)).application, 'applied')
       assert.equal(ctx.get('otherFixture'), undefined)
     }
-    const result = await ctx.pluginManager.setBundleEnabled('@tingfeng/dsh-tingfeng', true)
+    const result = await ctx.pluginManager.setBundleEnabled('dsh-tingfeng', true)
     assert.equal(result.application, 'applied', JSON.stringify(result))
     if (otherBundle) {
       // A host that recomputes the routes from the selected bundles can drop a
@@ -177,18 +177,18 @@ export async function apply(ctx, config) {
   if (settings) {
     const core = [...ctx.loader.entries()].find(entry => entry.options.id === 'mnemon')
     await ctx.configEditor.edit(core, current => ({ ...current, skills: { evolution: true } }))
-    assert.equal(state.configs.get('@tingfeng/dsh-tingfeng').skills.evolution, true)
+    assert.equal(state.configs.get('dsh-tingfeng').skills.evolution, true)
     const rows = flatten(app.composeEntries([patches()]))
     for (const id of ['mnemon-bundle', 'mnemon']) assert.equal(rows.filter(row => row.id === id).length, 1)
     assert.equal(rows.find(row => row.id === 'mnemon').config.skills.evolution, true)
     await stop(); await start()
     assertEnabled()
-    assert.equal(state.configs.get('@tingfeng/dsh-tingfeng').skills.evolution, true)
+    assert.equal(state.configs.get('dsh-tingfeng').skills.evolution, true)
     console.log('Config editor saved and reloaded Skills evolution with unique bundle/core IDs (#470).')
   }
   if (Manager) {
     const manager = ctx.pluginManager
-    const components = (await manager.listBundles()).find(bundle => bundle.name === '@tingfeng/dsh-tingfeng').rows
+    const components = (await manager.listBundles()).find(bundle => bundle.name === 'dsh-tingfeng').rows
     const plugins = await manager.listPlugins()
     // Native groups are lifecycle containers, deliberately absent from the
     // manager's inventory. Strict mode reproduces DSH 0.2.0's bundle-list mismatch
@@ -201,7 +201,7 @@ export async function apply(ctx, config) {
       assert.deepEqual(components.filter(row => !plugins.some(plugin => plugin.entryId === row.entryId)), [],
         'Every advertised bundle component must be addressable by the published manager')
     }
-    const core = plugins.find(entry => entry.moduleName === '@tingfeng/dsh-tingfeng')
+    const core = plugins.find(entry => entry.moduleName === 'dsh-tingfeng')
     assert.equal(core.patchId, 'mnemon')
     for (const name of ['dsh-tingfeng-source-runtime', 'dsh-tingfeng-source-memory-spaces', 'dsh-tingfeng-strategy-auto-capture']) {
       const component = plugins.find(entry => entry.moduleName === name)
@@ -223,19 +223,19 @@ export async function apply(ctx, config) {
     assert.equal(state.active.size, 0, 'An independent Source toggle cannot bypass the disabled core')
     await stop(); await start()
     assert.equal(state.active.size, 0, 'The disabled core must survive restart')
-    const restartedCore = (await ctx.pluginManager.listPlugins()).find(entry => entry.moduleName === '@tingfeng/dsh-tingfeng')
+    const restartedCore = (await ctx.pluginManager.listPlugins()).find(entry => entry.moduleName === 'dsh-tingfeng')
     assert.equal((await ctx.pluginManager.setPluginEnabled(restartedCore.entryId, true)).application, 'applied')
     assertEnabled()
     await stop(); await start(); assertEnabled()
     for (const enabled of [false, true, false]) {
-      assert.equal((await ctx.pluginManager.setBundleEnabled('@tingfeng/dsh-tingfeng', enabled)).application, 'applied')
+      assert.equal((await ctx.pluginManager.setBundleEnabled('dsh-tingfeng', enabled)).application, 'applied')
       if (enabled) assertEnabled()
       else assert.equal(state.active.size, 0)
       await assertRetained()
     }
     await stop(); await start()
     assert.equal(state.active.size, 0, 'The deselected bundle must survive restart')
-    assert.equal((await ctx.pluginManager.setBundleEnabled('@tingfeng/dsh-tingfeng', true)).application, 'applied')
+    assert.equal((await ctx.pluginManager.setBundleEnabled('dsh-tingfeng', true)).application, 'applied')
     assertEnabled()
     await stop(); await start(); assertEnabled()
   }
@@ -253,7 +253,7 @@ export async function apply(ctx, config) {
   const loaded = app.loadProfileDirectory('dsh', profileDir, installAnchor)
   const schema = (await app.generateConfigSchema(loaded, [...loaded.layers.map(layer => layer.patches), loaded.patches], installAnchor))['x-cordis']
   const bundle = schema.entries.find(entry => entry.id === 'mnemon-bundle')
-  assert.equal(bundle?.name, '@tingfeng/dsh-tingfeng/bundle')
+  assert.equal(bundle?.name, 'dsh-tingfeng/bundle')
   assert.deepEqual(schema.diagnostics.filter(item => item.level === 'error'), [{ level: 'error', path: bundle.path,
     message: 'unrecognized Loader tree carrier; use cordis:group or cordis:include for native child collection' }])
   console.log(JSON.stringify({ dsh, packages: names.length,

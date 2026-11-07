@@ -1,8 +1,8 @@
-import { defineMemoryStrategy, memoryInputText, memoryViewExtensionValues } from '@tingfeng/dsh-tingfeng/extension-sdk'
+import { defineMemoryStrategy, memoryInputText, memoryViewExtensionValues } from 'dsh-tingfeng/extension-sdk'
 import {
   ANY_MEMORY_SOURCE_ROLE, COMPOSABLE_MEMORY_API_VERSION, MEMORY_VIEW_EXTENSION_SLOTS,
   type MemoryAvailableSource, type MemoryJsonValue, type MemoryStrategyDefinition, type MemoryViewExtensionValues, type MemoryViewSpec,
-} from '@tingfeng/dsh-tingfeng/contracts'
+} from 'dsh-tingfeng/contracts'
 
 export const GENERAL_STRATEGY_TYPE_ID = 'general'
 

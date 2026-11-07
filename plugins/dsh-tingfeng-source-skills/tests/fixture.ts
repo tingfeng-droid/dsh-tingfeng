@@ -1,6 +1,6 @@
 import type { Context } from '@deepseek-ai/cordis'
-import { defineMemoryStrategy, installMemory } from '@tingfeng/dsh-tingfeng/extension-sdk'
-import { ANY_MEMORY_SOURCE_ROLE, COMPOSABLE_MEMORY_API_VERSION } from '@tingfeng/dsh-tingfeng/contracts'
+import { defineMemoryStrategy, installMemory } from 'dsh-tingfeng/extension-sdk'
+import { ANY_MEMORY_SOURCE_ROLE, COMPOSABLE_MEMORY_API_VERSION } from 'dsh-tingfeng/contracts'
 
 /** A Strategy that admits every available Source, so a test sees what a View would take. */
 export const strategy = {

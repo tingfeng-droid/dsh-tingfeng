@@ -46,7 +46,7 @@ function manifest(path: string): PackageManifest | undefined {
 }
 
 const PACKAGE_MANIFEST = [new URL('../package.json', import.meta.url), new URL('../../package.json', import.meta.url)]
-  .map(url => fileURLToPath(url)).map(manifest).find(value => value?.name === '@tingfeng/dsh-tingfeng')
+  .map(url => fileURLToPath(url)).map(manifest).find(value => value?.name === 'dsh-tingfeng')
 function dshCommand(): DshCommand | undefined {
   const script = process.argv[1]
   if (script !== undefined && existsSync(script)) {
@@ -147,8 +147,8 @@ export class MemoryPluginInstallation {
         const value = raw as PackageManifest
         if (value.name !== packageName || typeof value.version !== 'string' || parseSemver(value.version) === undefined) throw new Error('Registry returned a mismatched package identity or version')
         if (!safeBundlePatch(value.dsh?.bundle?.patch)) throw new Error('Package does not declare a safe DSH bundle patch')
-        const peer = value.peerDependencies?.['@tingfeng/dsh-tingfeng']
-        if (typeof peer !== 'string' || peer.trim() === '') throw new Error('Package does not declare its @tingfeng/dsh-tingfeng peer compatibility')
+        const peer = value.peerDependencies?.['dsh-tingfeng']
+        if (typeof peer !== 'string' || peer.trim() === '') throw new Error('Package does not declare its dsh-tingfeng peer compatibility')
         return { packageName, version: value.version, kind, mnemonPeerRange: peer,
           ...(typeof value.description === 'string' && value.description.trim() !== '' ? { description: value.description.slice(0, 500) } : {}),
           installed: installed(profileFrom(this.ctx), packageName) }

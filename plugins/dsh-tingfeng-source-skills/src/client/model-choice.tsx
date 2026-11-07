@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import type { FieldOption, TaskAgentModelCatalog } from '@tingfeng/dsh-tingfeng/client'
+import type { FieldOption, TaskAgentModelCatalog } from 'dsh-tingfeng/client'
 import type { DraftPreferencesView, ModelRoute } from '../contracts.ts'
 import { useT, type SkillsTranslate } from './presentation.ts'
 import type { SkillsPageContext } from './ui.tsx'

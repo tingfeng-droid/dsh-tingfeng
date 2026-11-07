@@ -208,8 +208,8 @@ export class HindsightProvider extends HttpMemoryProvider implements MemoryProvi
       json: {
         items: [{
           content: request.content,
-          context: request.category ?? '@tingfeng/dsh-tingfeng',
-          metadata: { source: '@tingfeng/dsh-tingfeng' },
+          context: request.category ?? 'dsh-tingfeng',
+          metadata: { source: 'dsh-tingfeng' },
           ...(request.tags === undefined ? {} : { tags: request.tags }),
           ...(request.entities === undefined ? {} : { entities: request.entities.map(text => ({ text })) }),
         }],
@@ -232,7 +232,7 @@ export class HindsightProvider extends HttpMemoryProvider implements MemoryProvi
     await this.request(body, `${this.bankPath(connection)}/memories/${encodeURIComponent(id)}`, {
       method: 'PATCH',
       headers: this.headers(connection),
-      json: { state: 'invalidated', reason: 'Forgotten from @tingfeng/dsh-tingfeng' },
+      json: { state: 'invalidated', reason: 'Forgotten from dsh-tingfeng' },
       signal,
     })
     return { action: 'invalidated', provider: this.id, id }

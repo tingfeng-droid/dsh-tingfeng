@@ -17,7 +17,7 @@ Every capability of dsh-mnemon may be extended: Sources, main Strategies, enhanc
 | A component's own settings, on its page | `mnemon.component.settings` | keyed by package name | `plugins.bundle.config` (DSH's row pages render what was registered there, since a child slot has one declaring entry) | new |
 | A component's card on the Status page | `mnemon.component.status` | keyed by package name | `shell.overlay`, `conversation.view` | new |
 
-`installMemoryComponentUI(ctx, { packageName, settings?, status? })` in `@tingfeng/dsh-tingfeng/client` registers a component's contributions, beside the existing `installMemorySourceUI`. Owner props carry only what the host knows about the component (its declaration view, writability, language); a registrant injects its own services through its registration, as DSH slots already allow.
+`installMemoryComponentUI(ctx, { packageName, settings?, status? })` in `dsh-tingfeng/client` registers a component's contributions, beside the existing `installMemorySourceUI`. Owner props carry only what the host knows about the component (its declaration view, writability, language); a registrant injects its own services through its registration, as DSH slots already allow.
 
 ## A component's page
 

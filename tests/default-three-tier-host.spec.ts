@@ -1,7 +1,7 @@
 import type { Context } from '@deepseek-ai/cordis'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { defineMemorySource, installMemory } from '@tingfeng/dsh-tingfeng/extension-sdk'
-import { COMPOSABLE_MEMORY_API_VERSION } from '@tingfeng/dsh-tingfeng/contracts'
+import { defineMemorySource, installMemory } from 'dsh-tingfeng/extension-sdk'
+import { COMPOSABLE_MEMORY_API_VERSION } from 'dsh-tingfeng/contracts'
 import type { DocumentMutationResult } from 'dsh-tingfeng-source-documents/contracts'
 import type { HostAgent, HostContextShape, ToolDefinition } from '../src/host/dsh.ts'
 import { agentScope } from '../src/host/runtime.ts'
@@ -167,7 +167,7 @@ describe('default three-tier Host presentation and shared execution', () => {
     const firstEntry = order === 'named-first' ? 'named' : 'generic'
     const firstArgs = firstEntry === 'named' ? { query: 'protocol-token' } : { routeId: route.id, input: { query: 'protocol-token' } }
     const meta = registered.get(firstEntry === 'named' ? 'mnemon_document_search' : 'mnemon_view_route')!.output.presentationMeta!(firstArgs, first)
-    expect(meta).toMatchObject({ schema: '@tingfeng/dsh-tingfeng.activity/v1', kind: 'read', operationId: firstEntry === 'named' ? 'search' : 'view-route',
+    expect(meta).toMatchObject({ schema: 'dsh-tingfeng.activity/v1', kind: 'read', operationId: firstEntry === 'named' ? 'search' : 'view-route',
       items: [{ id: expect.any(String), title: 'Protocol record', excerpt: expect.stringContaining('protocol-token') }] })
     if (firstEntry === 'generic') expect(meta).toMatchObject({ reference: route.id })
     const second = await execute(order === 'named-first' ? 'generic' : 'named')

@@ -122,7 +122,7 @@ describe('legacy Session copy repair', () => {
     expect(after).toHaveLength(before.length)
     for (const [index, row] of before.entries()) {
       if (row.type.startsWith('tool/ptc-dispatch')) {
-        expect(after[index]).toEqual({ type: '@tingfeng/dsh-tingfeng/recovered-idle-probe', seq: row.seq, time: row.time, ignorable: true,
+        expect(after[index]).toEqual({ type: 'dsh-tingfeng/recovered-idle-probe', seq: row.seq, time: row.time, ignorable: true,
           data: { originalType: row.type, originalData: row.data } })
       } else expect(after[index]).toEqual(row)
     }

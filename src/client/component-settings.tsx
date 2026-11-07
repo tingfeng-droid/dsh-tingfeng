@@ -19,12 +19,12 @@ import { PanelActions, useLive, useScope, useStaged, WriteFailure } from './sett
 import { SKILLS_PACKAGE, SkillsSettings } from './skills-settings.tsx'
 import { TaskAgentModelRows, useTaskAgentModel } from './task-agent-model.tsx'
 
-/** The packages whose own settings @tingfeng/dsh-tingfeng supplies, through the same region an installed component uses. */
+/** The packages whose own settings dsh-tingfeng supplies, through the same region an installed component uses. */
 export const RUNTIME_PACKAGE = 'dsh-tingfeng-source-runtime'
 export const MEMORY_SPACES_PACKAGE = 'dsh-tingfeng-source-memory-spaces'
 export const THREE_TIER_PACKAGE = 'dsh-tingfeng-strategy-default-three-tier'
 
-/** What a shipped component's settings read and write: @tingfeng/dsh-tingfeng's own settings and Host connection. */
+/** What a shipped component's settings read and write: dsh-tingfeng's own settings and Host connection. */
 export interface ShippedSettingsServices {
   scope: ClientSettingsScope<Config>
   /** 技能管理's own group of settings. */
@@ -34,7 +34,7 @@ export interface ShippedSettingsServices {
 }
 
 /**
- * Register the settings @tingfeng/dsh-tingfeng keeps for its shipped components, the way
+ * Register the settings dsh-tingfeng keeps for its shipped components, the way
  * an installed component registers its own: Runtime Memory carries where its
  * user profile lives and its capacities, the Layered strategy the background tasks it drives.
  * Memory Spaces brings its Providers and embedding itself. Its settings show

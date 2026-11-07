@@ -2,7 +2,7 @@ import { MEMORY_TOOLS, type JsonValue, type MemoryActivityItem, type MemoryActiv
 import { mutationResultCommitted } from './receipts.ts'
 import { truncate } from '../sdk/input.ts'
 
-export const MNEMON_ACTIVITY_SCHEMA = '@tingfeng/dsh-tingfeng.activity/v1' as const
+export const MNEMON_ACTIVITY_SCHEMA = 'dsh-tingfeng.activity/v1' as const
 
 interface ActivityMetaBase {
   schema: typeof MNEMON_ACTIVITY_SCHEMA

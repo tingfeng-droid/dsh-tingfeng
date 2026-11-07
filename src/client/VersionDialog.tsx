@@ -136,14 +136,14 @@ export function VersionDialog(props: {
     setError(null)
     setResult(null)
     // DSH swaps in the new client once the Starter's files change; that client reopens this dialog from the record.
-    if (component.id === '@tingfeng/dsh-tingfeng') recordStarterUpdate({ from: component.current, to: component.latest })
+    if (component.id === 'dsh-tingfeng') recordStarterUpdate({ from: component.current, to: component.latest })
     try {
       const next = await props.client.updateVersion(component.id)
       setResult(next)
       await check()
       props.onRefreshStatus()
     } catch (reason) {
-      if (component.id === '@tingfeng/dsh-tingfeng') clearStarterUpdate()
+      if (component.id === 'dsh-tingfeng') clearStarterUpdate()
       setError(message(reason))
     } finally {
       setUpdating(null)
@@ -159,12 +159,12 @@ export function VersionDialog(props: {
   // The update's own reply went to the client DSH replaced. The Host keeps how it ended; a Host
   // from before it kept that leaves only its pending restart to go by.
   const resumed = props.resumedUpdate
-  const starter = snapshot?.components.find(component => component.id === '@tingfeng/dsh-tingfeng')
-  const outcome = result === null && error === null && resumed !== undefined && snapshot?.lastUpdate?.component === '@tingfeng/dsh-tingfeng'
+  const starter = snapshot?.components.find(component => component.id === 'dsh-tingfeng')
+  const outcome = result === null && error === null && resumed !== undefined && snapshot?.lastUpdate?.component === 'dsh-tingfeng'
     && Date.parse(snapshot.lastUpdate.at) >= resumed.at - 60_000 ? snapshot.lastUpdate : undefined
   const resumedResult: VersionUpdateResult | null = outcome !== undefined ? outcome.result ?? null
     : result === null && resumed !== undefined && snapshot?.lastUpdate === undefined && starter?.restartRequired === true && (resumed.to === undefined || starter.current === resumed.to)
-      ? { component: '@tingfeng/dsh-tingfeng', updated: true, restartRequired: true, ...(resumed.from === undefined ? {} : { previousVersion: resumed.from }), ...(starter.current === undefined ? {} : { currentVersion: starter.current }) }
+      ? { component: 'dsh-tingfeng', updated: true, restartRequired: true, ...(resumed.from === undefined ? {} : { previousVersion: resumed.from }), ...(starter.current === undefined ? {} : { currentVersion: starter.current }) }
       : null
   const shownResult = result ?? resumedResult
   const shownError = error ?? outcome?.error ?? null
@@ -191,12 +191,12 @@ export function VersionDialog(props: {
           <header><div><strong>{component.name}</strong><span>{versionModeLabel(t, component.installMode, component.id === 'mnemon')}</span></div><em data-state={state}>{t(`versions.${state}`)}</em></header>
           <div className={css.versionNumbers}><div><small>{t('versions.installed')}</small><code>{component.current ?? '—'}</code></div><span>→</span><div><small>{t('versions.latest')}</small><code>{component.latest ?? '—'}</code></div></div>
           {component.id === 'mnemon' && component.executablePath !== undefined && <small className={css.versionLocation} title={component.executablePath}><span>{t('versions.executable')}</span><code>{component.executablePath}</code></small>}
-          {component.id === '@tingfeng/dsh-tingfeng' && component.installPath !== undefined && <small className={css.versionLocation} title={component.installPath}><span>{dshInstallLabel(t, component)}</span><code>{component.installPath}</code></small>}
+          {component.id === 'dsh-tingfeng' && component.installPath !== undefined && <small className={css.versionLocation} title={component.installPath}><span>{dshInstallLabel(t, component)}</span><code>{component.installPath}</code></small>}
           {component.restartRequired && <p className={css.versionNotice} role="status">{t('versions.restartRequired')}</p>}
           {component.checkError !== undefined && <p className={css.versionNotice}>{t('versions.latestUnavailable')}</p>}
           <footer><p>{versionHint(t, component)}</p>{updateButton(component)}</footer>
           {component.id === 'mnemon' && <NpmGuidance component={component} />}
-          {component.id === '@tingfeng/dsh-tingfeng' && packages.length > 0 && <div className={css.versionPackages}>
+          {component.id === 'dsh-tingfeng' && packages.length > 0 && <div className={css.versionPackages}>
             <button type="button" className={css.versionPackagesToggle} aria-expanded={packagesOpen} aria-controls="mnemon-version-packages" onClick={() => setPackagesOpen(open => !open)}>
               <span aria-hidden="true">{packagesOpen ? '▾' : '▸'}</span><strong>{t('versions.packages', { count: packages.length })}</strong><small>{outdated > 0 ? t('versions.packagesOutdated', { count: outdated }) : t(packagesOpen ? 'versions.packagesHide' : 'versions.packagesDetail')}</small>
             </button>

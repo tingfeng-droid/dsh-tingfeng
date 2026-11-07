@@ -16,58 +16,58 @@ importers:
         version: 3.18.5
       dsh-tingfeng-provider-byterover:
         specifier: file:./plugins/dsh-tingfeng-provider-byterover
-        version: file:plugins/dsh-tingfeng-provider-byterover(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)(react@18.3.1))
+        version: file:plugins/dsh-tingfeng-provider-byterover(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)(react@18.3.1))
       dsh-tingfeng-provider-hindsight:
         specifier: file:./plugins/dsh-tingfeng-provider-hindsight
-        version: file:plugins/dsh-tingfeng-provider-hindsight(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)(react@18.3.1))
+        version: file:plugins/dsh-tingfeng-provider-hindsight(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)(react@18.3.1))
       dsh-tingfeng-provider-holographic:
         specifier: file:./plugins/dsh-tingfeng-provider-holographic
-        version: file:plugins/dsh-tingfeng-provider-holographic(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)(react@18.3.1))
+        version: file:plugins/dsh-tingfeng-provider-holographic(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)(react@18.3.1))
       dsh-tingfeng-provider-honcho:
         specifier: file:./plugins/dsh-tingfeng-provider-honcho
-        version: file:plugins/dsh-tingfeng-provider-honcho(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)(react@18.3.1))
+        version: file:plugins/dsh-tingfeng-provider-honcho(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)(react@18.3.1))
       dsh-tingfeng-provider-mem0:
         specifier: file:./plugins/dsh-tingfeng-provider-mem0
-        version: file:plugins/dsh-tingfeng-provider-mem0(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)(react@18.3.1))
+        version: file:plugins/dsh-tingfeng-provider-mem0(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)(react@18.3.1))
       dsh-tingfeng-provider-mnemon-native:
         specifier: file:./plugins/dsh-tingfeng-provider-mnemon-native
-        version: file:plugins/dsh-tingfeng-provider-mnemon-native(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)(react@18.3.1))
+        version: file:plugins/dsh-tingfeng-provider-mnemon-native(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)(react@18.3.1))
       dsh-tingfeng-provider-openviking:
         specifier: file:./plugins/dsh-tingfeng-provider-openviking
-        version: file:plugins/dsh-tingfeng-provider-openviking(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)(react@18.3.1))
+        version: file:plugins/dsh-tingfeng-provider-openviking(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)(react@18.3.1))
       dsh-tingfeng-provider-retaindb:
         specifier: file:./plugins/dsh-tingfeng-provider-retaindb
-        version: file:plugins/dsh-tingfeng-provider-retaindb(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)(react@18.3.1))
+        version: file:plugins/dsh-tingfeng-provider-retaindb(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)(react@18.3.1))
       dsh-tingfeng-provider-supermemory:
         specifier: file:./plugins/dsh-tingfeng-provider-supermemory
-        version: file:plugins/dsh-tingfeng-provider-supermemory(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)(react@18.3.1))
+        version: file:plugins/dsh-tingfeng-provider-supermemory(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)(react@18.3.1))
       dsh-tingfeng-source-documents:
         specifier: file:./plugins/dsh-tingfeng-source-documents
-        version: file:plugins/dsh-tingfeng-source-documents(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)(react@18.3.1)
+        version: file:plugins/dsh-tingfeng-source-documents(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)(react@18.3.1)
       dsh-tingfeng-source-memory-spaces:
         specifier: file:./plugins/dsh-tingfeng-source-memory-spaces
-        version: file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)(react@18.3.1)
+        version: file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)(react@18.3.1)
       dsh-tingfeng-source-runtime:
         specifier: file:./plugins/dsh-tingfeng-source-runtime
-        version: file:plugins/dsh-tingfeng-source-runtime(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)(react@18.3.1)
+        version: file:plugins/dsh-tingfeng-source-runtime(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)(react@18.3.1)
       dsh-tingfeng-source-skills:
         specifier: file:./plugins/dsh-tingfeng-source-skills
-        version: file:plugins/dsh-tingfeng-source-skills(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)(react@18.3.1)
+        version: file:plugins/dsh-tingfeng-source-skills(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)(react@18.3.1)
       dsh-tingfeng-strategy-auto-capture:
         specifier: file:./plugins/dsh-tingfeng-strategy-auto-capture
-        version: file:plugins/dsh-tingfeng-strategy-auto-capture(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)
+        version: file:plugins/dsh-tingfeng-strategy-auto-capture(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)
       dsh-tingfeng-strategy-default-three-tier:
         specifier: file:./plugins/dsh-tingfeng-strategy-default-three-tier
-        version: file:plugins/dsh-tingfeng-strategy-default-three-tier(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)
+        version: file:plugins/dsh-tingfeng-strategy-default-three-tier(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)
       dsh-tingfeng-strategy-general:
         specifier: file:./plugins/dsh-tingfeng-strategy-general
-        version: file:plugins/dsh-tingfeng-strategy-general(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)
+        version: file:plugins/dsh-tingfeng-strategy-general(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)
       dsh-tingfeng-strategy-light-context:
         specifier: file:./plugins/dsh-tingfeng-strategy-light-context
-        version: file:plugins/dsh-tingfeng-strategy-light-context(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)
+        version: file:plugins/dsh-tingfeng-strategy-light-context(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)
       dsh-tingfeng-strategy-scoped:
         specifier: file:./plugins/dsh-tingfeng-strategy-scoped
-        version: file:plugins/dsh-tingfeng-strategy-scoped(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)
+        version: file:plugins/dsh-tingfeng-strategy-scoped(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)
       fflate:
         specifier: ^0.8.3
         version: 0.8.3
@@ -514,9 +514,6 @@ importers:
       '@testing-library/react':
         specifier: ^16.3.0
         version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@18.3.7(@types/react@18.3.31))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@tingfeng/dsh-tingfeng':
-        specifier: workspace:*
-        version: link:../..
       '@types/node':
         specifier: ^22.0.0
         version: 22.20.1
@@ -535,6 +532,9 @@ importers:
       diff:
         specifier: ^9.0.0
         version: 9.0.0
+      dsh-tingfeng:
+        specifier: workspace:*
+        version: link:../..
       immer:
         specifier: ^10.1.1
         version: 10.2.0
@@ -632,9 +632,6 @@ importers:
       '@testing-library/react':
         specifier: ^16.3.0
         version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@18.3.7(@types/react@18.3.31))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@tingfeng/dsh-tingfeng':
-        specifier: workspace:*
-        version: link:../..
       '@types/node':
         specifier: ^22.0.0
         version: 22.20.1
@@ -653,6 +650,9 @@ importers:
       diff:
         specifier: ^9.0.0
         version: 9.0.0
+      dsh-tingfeng:
+        specifier: workspace:*
+        version: link:../..
       dsh-tingfeng-provider-byterover:
         specifier: workspace:*
         version: link:../dsh-tingfeng-provider-byterover
@@ -777,9 +777,6 @@ importers:
       '@testing-library/react':
         specifier: ^16.3.0
         version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@18.3.7(@types/react@18.3.31))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@tingfeng/dsh-tingfeng':
-        specifier: workspace:*
-        version: link:../..
       '@types/node':
         specifier: ^22.0.0
         version: 22.20.1
@@ -798,6 +795,9 @@ importers:
       diff:
         specifier: ^9.0.0
         version: 9.0.0
+      dsh-tingfeng:
+        specifier: workspace:*
+        version: link:../..
       immer:
         specifier: ^10.1.1
         version: 10.2.0
@@ -898,9 +898,6 @@ importers:
       '@testing-library/react':
         specifier: ^16.3.0
         version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@18.3.7(@types/react@18.3.31))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@tingfeng/dsh-tingfeng':
-        specifier: workspace:*
-        version: link:../..
       '@types/node':
         specifier: ^22.0.0
         version: 22.20.1
@@ -919,6 +916,9 @@ importers:
       diff:
         specifier: ^9.0.0
         version: 9.0.0
+      dsh-tingfeng:
+        specifier: workspace:*
+        version: link:../..
       immer:
         specifier: ^10.1.1
         version: 10.2.0
@@ -995,12 +995,12 @@ importers:
         specifier: ^4.0.1
         version: 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
     devDependencies:
-      '@tingfeng/dsh-tingfeng':
-        specifier: workspace:*
-        version: link:../..
       '@types/node':
         specifier: ^22.0.0
         version: 22.20.1
+      dsh-tingfeng:
+        specifier: workspace:*
+        version: link:../..
       dsh-tingfeng-strategy-default-three-tier:
         specifier: workspace:*
         version: link:../dsh-tingfeng-strategy-default-three-tier
@@ -1020,12 +1020,12 @@ importers:
         specifier: ^4.0.1
         version: 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
     devDependencies:
-      '@tingfeng/dsh-tingfeng':
-        specifier: workspace:*
-        version: link:../..
       '@types/node':
         specifier: ^22.0.0
         version: 22.20.1
+      dsh-tingfeng:
+        specifier: workspace:*
+        version: link:../..
       tsdown:
         specifier: ^0.22.0
         version: 0.22.14(@arethetypeswrong/core@0.18.5)(publint@0.3.23)(typescript@5.9.3)
@@ -1042,12 +1042,12 @@ importers:
         specifier: ^4.0.1
         version: 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
     devDependencies:
-      '@tingfeng/dsh-tingfeng':
-        specifier: workspace:*
-        version: link:../..
       '@types/node':
         specifier: ^22.0.0
         version: 22.20.1
+      dsh-tingfeng:
+        specifier: workspace:*
+        version: link:../..
       tsdown:
         specifier: ^0.22.0
         version: 0.22.14(@arethetypeswrong/core@0.18.5)(publint@0.3.23)(typescript@5.9.3)
@@ -1064,12 +1064,12 @@ importers:
         specifier: ^4.0.1
         version: 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
     devDependencies:
-      '@tingfeng/dsh-tingfeng':
-        specifier: workspace:*
-        version: link:../..
       '@types/node':
         specifier: ^22.0.0
         version: 22.20.1
+      dsh-tingfeng:
+        specifier: workspace:*
+        version: link:../..
       dsh-tingfeng-strategy-default-three-tier:
         specifier: workspace:*
         version: link:../dsh-tingfeng-strategy-default-three-tier
@@ -1089,12 +1089,12 @@ importers:
         specifier: ^4.0.1
         version: 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
     devDependencies:
-      '@tingfeng/dsh-tingfeng':
-        specifier: workspace:*
-        version: link:../..
       '@types/node':
         specifier: ^22.0.0
         version: 22.20.1
+      dsh-tingfeng:
+        specifier: workspace:*
+        version: link:../..
       dsh-tingfeng-strategy-default-three-tier:
         specifier: workspace:*
         version: link:../dsh-tingfeng-strategy-default-three-tier
@@ -5495,7 +5495,7 @@ packages:
     engines: {node: '>=20'}
     peerDependencies:
       '@deepseek-ai/cordis': ^4.0.1
-      '@tingfeng/dsh-tingfeng': 0.5.41-ours.6
+      dsh-tingfeng: ^0.6.0
       react: ^18.2.0
     peerDependenciesMeta:
       react:
@@ -5506,7 +5506,7 @@ packages:
     engines: {node: '>=20'}
     peerDependencies:
       '@deepseek-ai/cordis': ^4.0.1
-      '@tingfeng/dsh-tingfeng': 0.5.41-ours.6
+      dsh-tingfeng: ^0.6.0
       react: ^18.2.0
     peerDependenciesMeta:
       react:
@@ -5517,7 +5517,7 @@ packages:
     engines: {node: '>=20'}
     peerDependencies:
       '@deepseek-ai/cordis': ^4.0.1
-      '@tingfeng/dsh-tingfeng': 0.5.41-ours.6
+      dsh-tingfeng: ^0.6.0
       react: ^18.2.0
     peerDependenciesMeta:
       react:
@@ -5528,7 +5528,7 @@ packages:
     engines: {node: '>=20'}
     peerDependencies:
       '@deepseek-ai/cordis': ^4.0.1
-      '@tingfeng/dsh-tingfeng': 0.5.41-ours.6
+      dsh-tingfeng: ^0.6.0
       react: ^18.2.0
     peerDependenciesMeta:
       react:
@@ -5539,35 +5539,35 @@ packages:
     engines: {node: '>=20'}
     peerDependencies:
       '@deepseek-ai/cordis': ^4.0.1
-      '@tingfeng/dsh-tingfeng': 0.5.41-ours.6
+      dsh-tingfeng: ^0.6.0
 
   dsh-tingfeng-strategy-default-three-tier@file:plugins/dsh-tingfeng-strategy-default-three-tier:
     resolution: {directory: plugins/dsh-tingfeng-strategy-default-three-tier, type: directory}
     engines: {node: '>=20'}
     peerDependencies:
       '@deepseek-ai/cordis': ^4.0.1
-      '@tingfeng/dsh-tingfeng': 0.5.41-ours.6
+      dsh-tingfeng: ^0.6.0
 
   dsh-tingfeng-strategy-general@file:plugins/dsh-tingfeng-strategy-general:
     resolution: {directory: plugins/dsh-tingfeng-strategy-general, type: directory}
     engines: {node: '>=20'}
     peerDependencies:
       '@deepseek-ai/cordis': ^4.0.1
-      '@tingfeng/dsh-tingfeng': 0.5.41-ours.6
+      dsh-tingfeng: ^0.6.0
 
   dsh-tingfeng-strategy-light-context@file:plugins/dsh-tingfeng-strategy-light-context:
     resolution: {directory: plugins/dsh-tingfeng-strategy-light-context, type: directory}
     engines: {node: '>=20'}
     peerDependencies:
       '@deepseek-ai/cordis': ^4.0.1
-      '@tingfeng/dsh-tingfeng': 0.5.41-ours.6
+      dsh-tingfeng: ^0.6.0
 
   dsh-tingfeng-strategy-scoped@file:plugins/dsh-tingfeng-strategy-scoped:
     resolution: {directory: plugins/dsh-tingfeng-strategy-scoped, type: directory}
     engines: {node: '>=20'}
     peerDependencies:
       '@deepseek-ai/cordis': ^4.0.1
-      '@tingfeng/dsh-tingfeng': 0.5.41-ours.6
+      dsh-tingfeng: ^0.6.0
 
   dts-resolver@3.0.0:
     resolution: {integrity: sha512-1T1f+z+4tl9XD+m+0HBgWoL/nm0bOIffyWaUuUSBlFg/86IWvfx+wjNaO/ybU0AJzG9/Mi5hBUgGV6zCmWEN7Q==}
@@ -12393,109 +12393,109 @@ snapshots:
 
   dom-accessibility-api@0.5.16: {}
 
-  dsh-tingfeng-provider-byterover@file:plugins/dsh-tingfeng-provider-byterover(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)(react@18.3.1)):
+  dsh-tingfeng-provider-byterover@file:plugins/dsh-tingfeng-provider-byterover(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)(react@18.3.1)):
     dependencies:
       '@deepseek-ai/cordis': 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
-      dsh-tingfeng-source-memory-spaces: file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)(react@18.3.1)
+      dsh-tingfeng-source-memory-spaces: file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)(react@18.3.1)
 
-  dsh-tingfeng-provider-hindsight@file:plugins/dsh-tingfeng-provider-hindsight(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)(react@18.3.1)):
+  dsh-tingfeng-provider-hindsight@file:plugins/dsh-tingfeng-provider-hindsight(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)(react@18.3.1)):
     dependencies:
       '@deepseek-ai/cordis': 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
-      dsh-tingfeng-source-memory-spaces: file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)(react@18.3.1)
+      dsh-tingfeng-source-memory-spaces: file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)(react@18.3.1)
 
-  dsh-tingfeng-provider-holographic@file:plugins/dsh-tingfeng-provider-holographic(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)(react@18.3.1)):
+  dsh-tingfeng-provider-holographic@file:plugins/dsh-tingfeng-provider-holographic(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)(react@18.3.1)):
     dependencies:
       '@deepseek-ai/cordis': 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
-      dsh-tingfeng-source-memory-spaces: file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)(react@18.3.1)
+      dsh-tingfeng-source-memory-spaces: file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)(react@18.3.1)
 
-  dsh-tingfeng-provider-honcho@file:plugins/dsh-tingfeng-provider-honcho(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)(react@18.3.1)):
+  dsh-tingfeng-provider-honcho@file:plugins/dsh-tingfeng-provider-honcho(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)(react@18.3.1)):
     dependencies:
       '@deepseek-ai/cordis': 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
-      dsh-tingfeng-source-memory-spaces: file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)(react@18.3.1)
+      dsh-tingfeng-source-memory-spaces: file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)(react@18.3.1)
 
-  dsh-tingfeng-provider-mem0@file:plugins/dsh-tingfeng-provider-mem0(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)(react@18.3.1)):
+  dsh-tingfeng-provider-mem0@file:plugins/dsh-tingfeng-provider-mem0(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)(react@18.3.1)):
     dependencies:
       '@deepseek-ai/cordis': 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
-      dsh-tingfeng-source-memory-spaces: file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)(react@18.3.1)
+      dsh-tingfeng-source-memory-spaces: file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)(react@18.3.1)
 
-  dsh-tingfeng-provider-mnemon-native@file:plugins/dsh-tingfeng-provider-mnemon-native(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)(react@18.3.1)):
+  dsh-tingfeng-provider-mnemon-native@file:plugins/dsh-tingfeng-provider-mnemon-native(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)(react@18.3.1)):
     dependencies:
       '@deepseek-ai/cordis': 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
-      dsh-tingfeng-source-memory-spaces: file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)(react@18.3.1)
+      dsh-tingfeng-source-memory-spaces: file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)(react@18.3.1)
 
-  dsh-tingfeng-provider-openviking@file:plugins/dsh-tingfeng-provider-openviking(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)(react@18.3.1)):
+  dsh-tingfeng-provider-openviking@file:plugins/dsh-tingfeng-provider-openviking(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)(react@18.3.1)):
     dependencies:
       '@deepseek-ai/cordis': 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
-      dsh-tingfeng-source-memory-spaces: file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)(react@18.3.1)
+      dsh-tingfeng-source-memory-spaces: file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)(react@18.3.1)
 
-  dsh-tingfeng-provider-retaindb@file:plugins/dsh-tingfeng-provider-retaindb(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)(react@18.3.1)):
+  dsh-tingfeng-provider-retaindb@file:plugins/dsh-tingfeng-provider-retaindb(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)(react@18.3.1)):
     dependencies:
       '@deepseek-ai/cordis': 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
-      dsh-tingfeng-source-memory-spaces: file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)(react@18.3.1)
+      dsh-tingfeng-source-memory-spaces: file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)(react@18.3.1)
 
-  dsh-tingfeng-provider-supermemory@file:plugins/dsh-tingfeng-provider-supermemory(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)(react@18.3.1)):
+  dsh-tingfeng-provider-supermemory@file:plugins/dsh-tingfeng-provider-supermemory(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)(react@18.3.1)):
     dependencies:
       '@deepseek-ai/cordis': 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
-      dsh-tingfeng-source-memory-spaces: file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)(react@18.3.1)
+      dsh-tingfeng-source-memory-spaces: file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)(react@18.3.1)
 
-  dsh-tingfeng-source-documents@file:plugins/dsh-tingfeng-source-documents(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)(react@18.3.1):
+  dsh-tingfeng-source-documents@file:plugins/dsh-tingfeng-source-documents(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)(react@18.3.1):
     dependencies:
       '@deepseek-ai/cordis': 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
       '@deepseek-ai/schemastery': 3.18.5
-      '@tingfeng/dsh-tingfeng': link:.
+      dsh-tingfeng: link:.
       markdown-to-jsx: 7.7.17(react@18.3.1)
     optionalDependencies:
       react: 18.3.1
 
-  dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)(react@18.3.1):
+  dsh-tingfeng-source-memory-spaces@file:plugins/dsh-tingfeng-source-memory-spaces(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)(react@18.3.1):
     dependencies:
       '@deepseek-ai/cordis': 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
       '@deepseek-ai/schemastery': 3.18.5
-      '@tingfeng/dsh-tingfeng': link:.
+      dsh-tingfeng: link:.
     optionalDependencies:
       react: 18.3.1
 
-  dsh-tingfeng-source-runtime@file:plugins/dsh-tingfeng-source-runtime(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)(react@18.3.1):
+  dsh-tingfeng-source-runtime@file:plugins/dsh-tingfeng-source-runtime(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)(react@18.3.1):
     dependencies:
       '@deepseek-ai/cordis': 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
       '@deepseek-ai/schemastery': 3.18.5
-      '@tingfeng/dsh-tingfeng': link:.
+      dsh-tingfeng: link:.
     optionalDependencies:
       react: 18.3.1
 
-  dsh-tingfeng-source-skills@file:plugins/dsh-tingfeng-source-skills(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+)(react@18.3.1):
+  dsh-tingfeng-source-skills@file:plugins/dsh-tingfeng-source-skills(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+)(react@18.3.1):
     dependencies:
       '@deepseek-ai/cordis': 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
-      '@tingfeng/dsh-tingfeng': link:.
+      dsh-tingfeng: link:.
       markdown-to-jsx: 7.7.17(react@18.3.1)
       yaml: 2.9.0
     optionalDependencies:
       react: 18.3.1
 
-  dsh-tingfeng-strategy-auto-capture@file:plugins/dsh-tingfeng-strategy-auto-capture(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+):
+  dsh-tingfeng-strategy-auto-capture@file:plugins/dsh-tingfeng-strategy-auto-capture(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+):
     dependencies:
       '@deepseek-ai/cordis': 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
-      '@tingfeng/dsh-tingfeng': link:.
+      dsh-tingfeng: link:.
 
-  dsh-tingfeng-strategy-default-three-tier@file:plugins/dsh-tingfeng-strategy-default-three-tier(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+):
+  dsh-tingfeng-strategy-default-three-tier@file:plugins/dsh-tingfeng-strategy-default-three-tier(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+):
     dependencies:
       '@deepseek-ai/cordis': 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
-      '@tingfeng/dsh-tingfeng': link:.
+      dsh-tingfeng: link:.
 
-  dsh-tingfeng-strategy-general@file:plugins/dsh-tingfeng-strategy-general(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+):
+  dsh-tingfeng-strategy-general@file:plugins/dsh-tingfeng-strategy-general(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+):
     dependencies:
       '@deepseek-ai/cordis': 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
-      '@tingfeng/dsh-tingfeng': link:.
+      dsh-tingfeng: link:.
 
-  dsh-tingfeng-strategy-light-context@file:plugins/dsh-tingfeng-strategy-light-context(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+):
+  dsh-tingfeng-strategy-light-context@file:plugins/dsh-tingfeng-strategy-light-context(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+):
     dependencies:
       '@deepseek-ai/cordis': 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
-      '@tingfeng/dsh-tingfeng': link:.
+      dsh-tingfeng: link:.
 
-  dsh-tingfeng-strategy-scoped@file:plugins/dsh-tingfeng-strategy-scoped(@deepseek-ai/cordis@4.0.5)(@tingfeng/dsh-tingfeng@+):
+  dsh-tingfeng-strategy-scoped@file:plugins/dsh-tingfeng-strategy-scoped(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng@+):
     dependencies:
       '@deepseek-ai/cordis': 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
-      '@tingfeng/dsh-tingfeng': link:.
+      dsh-tingfeng: link:.
 
   dts-resolver@3.0.0: {}
 

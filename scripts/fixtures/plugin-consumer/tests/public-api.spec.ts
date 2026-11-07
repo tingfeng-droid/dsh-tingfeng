@@ -4,19 +4,19 @@ import { existsSync, mkdirSync, mkdtempSync, readdirSync, realpathSync, rmSync, 
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, expectTypeOf, it } from 'vitest'
-import * as core from '@tingfeng/dsh-tingfeng/core'
-import * as sdk from '@tingfeng/dsh-tingfeng/extension-sdk'
-import type { MnemonMemoryService, MemorySourceRuntime } from '@tingfeng/dsh-tingfeng/extension-sdk'
-import { MemoryCompositionRunner, type MemoryTestTurn } from '@tingfeng/dsh-tingfeng/testing'
+import * as core from 'dsh-tingfeng/core'
+import * as sdk from 'dsh-tingfeng/extension-sdk'
+import type { MnemonMemoryService, MemorySourceRuntime } from 'dsh-tingfeng/extension-sdk'
+import { MemoryCompositionRunner, type MemoryTestTurn } from 'dsh-tingfeng/testing'
 import * as providerSdk from 'dsh-tingfeng-source-memory-spaces/provider-sdk'
 import { resolveEmbedding, resolvePersistenceStrategy, resolveRecallQuality } from 'dsh-tingfeng-source-memory-spaces'
 import { createMemorySpaceProviderFixture, mountMemorySpaceProvider } from 'dsh-tingfeng-source-memory-spaces/testing'
 import provider, { canonicalMemorySpace, LegacyHttpProvider } from '../lib/external-provider.js'
 import { memoryPlugin, memoryStrategyConfiguration } from '../lib/external-strategy-extension.js'
 // @ts-expect-error The installed SDK must not expose Core's engine.
-import type { MemoryRuntime } from '@tingfeng/dsh-tingfeng/extension-sdk'
+import type { MemoryRuntime } from 'dsh-tingfeng/extension-sdk'
 // @ts-expect-error Installed records are not public author contracts.
-import type { InstalledMemorySource } from '@tingfeng/dsh-tingfeng/contracts'
+import type { InstalledMemorySource } from 'dsh-tingfeng/contracts'
 // @ts-expect-error The Provider SDK must not expose its Source's private host.
 import type { PrivateMemorySpaceProviderHost } from 'dsh-tingfeng-source-memory-spaces/provider-sdk'
 
@@ -44,8 +44,8 @@ describe('published author API', () => {
     expect(resolvePersistenceStrategy({ mode: 'manual', rules: { allowedProviderIds: [] } }).rules.allowedProviderIds).toEqual(['mnemon-native'])
   })
   it('compiles and consumes an optional Strategy editor against packed public SDKs', () => {
-    expect(memoryPlugin).toMatchObject({ apiVersion: '@tingfeng/dsh-tingfeng/plugin/v1', roles: ['strategy-extension'], requires: ['strategy.default-three-tier'] })
-    expect(memoryStrategyConfiguration.apiVersion).toBe('@tingfeng/dsh-tingfeng/strategy-configuration/v1')
+    expect(memoryPlugin).toMatchObject({ apiVersion: 'dsh-tingfeng/plugin/v1', roles: ['strategy-extension'], requires: ['strategy.default-three-tier'] })
+    expect(memoryStrategyConfiguration.apiVersion).toBe('dsh-tingfeng/strategy-configuration/v1')
     expect(memoryStrategyConfiguration.label.en).toBe('External budget')
     expect(memoryStrategyConfiguration.create({})).toMatchObject({
       plugin: memoryPlugin,

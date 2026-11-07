@@ -32,10 +32,10 @@ function store<T>(value: T) {
   return { getSnapshot: () => value, subscribe: () => () => {} }
 }
 
-const pkg: PluginPackageRef = { name: '@tingfeng/dsh-tingfeng', installed: true, availability: 'profile', official: false, enabled: true, rows: [{ rowId: 'mnemon', moduleName: '@tingfeng/dsh-tingfeng', enabled: true }] }
+const pkg: PluginPackageRef = { name: 'dsh-tingfeng', installed: true, availability: 'profile', official: false, enabled: true, rows: [{ rowId: 'mnemon', moduleName: 'dsh-tingfeng', enabled: true }] }
 const bundle = (overrides: Partial<PluginPackageRef> = {}): PluginsSubject => ({ kind: 'bundle', pkg: { ...pkg, ...overrides } })
 
-describe('@tingfeng/dsh-tingfeng page under DSH Plugins', () => {
+describe('dsh-tingfeng page under DSH Plugins', () => {
   it('renders the configuration only for the page view the Plugins page asks for', () => {
     const props = {
       scope: settingsScope<Config>({ status: 'ready', value: {}, writable: true, mode: 'host' }),
@@ -79,7 +79,7 @@ describe('@tingfeng/dsh-tingfeng page under DSH Plugins', () => {
     expect(screen.getByText('No component settings')).toBeTruthy()
   })
 
-  it('offers the memory workspace from the @tingfeng/dsh-tingfeng page only while a placement can show it', () => {
+  it('offers the memory workspace from the dsh-tingfeng page only while a placement can show it', () => {
     const workspace = new MnemonActionSeat()
     const { rerender } = render(<MnemonPluginActions subject={bundle()} workspace={workspace} t={translateEn} />)
     expect(screen.queryByRole('button')).toBeNull()
@@ -110,7 +110,7 @@ describe('@tingfeng/dsh-tingfeng page under DSH Plugins', () => {
     const componentList = new MnemonComponentListSeat()
     const listener = vi.fn()
     componentList.subscribe(listener)
-    const groupRows = [{ rowId: 'mnemon-bundle', moduleName: '@tingfeng/dsh-tingfeng/bundle', enabled: false }, ...pkg.rows]
+    const groupRows = [{ rowId: 'mnemon-bundle', moduleName: 'dsh-tingfeng/bundle', enabled: false }, ...pkg.rows]
     const grouped = bundle({ rows: groupRows })
     // DSH 0.2.0 lists the grouping row, always off; DSH 0.2.1 lists only the components.
     const { rerender, unmount } = render(<MnemonPluginActions subject={grouped} workspace={workspace} componentList={componentList} t={translateEn} />)

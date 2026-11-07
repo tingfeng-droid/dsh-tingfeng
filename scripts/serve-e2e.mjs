@@ -39,7 +39,7 @@ import { seedSkillsScroll } from './fixtures/skills-scroll.mjs'
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const flags = new Set(process.argv.slice(2))
 let betterSidebarRoot
-// Test-only plugins linked into the profile beside @tingfeng/dsh-tingfeng, for example a shell fixture.
+// Test-only plugins linked into the profile beside dsh-tingfeng, for example a shell fixture.
 const extraPlugins = []
 let electronExecutable
 let trustedHost

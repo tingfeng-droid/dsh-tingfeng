@@ -1,7 +1,7 @@
 import { homedir } from 'node:os'
 import { isAbsolute, join } from 'node:path'
-import { COMPOSABLE_MEMORY_API_VERSION, type MemoryJsonValue, type MemorySourceDefinition, type MemorySourceFacts } from '@tingfeng/dsh-tingfeng/contracts'
-import { defineMemorySource, memoryInputRecord as record, memoryInputStringArray as stringArray, memoryInputText as text } from '@tingfeng/dsh-tingfeng/extension-sdk'
+import { COMPOSABLE_MEMORY_API_VERSION, type MemoryJsonValue, type MemorySourceDefinition, type MemorySourceFacts } from 'dsh-tingfeng/contracts'
+import { defineMemorySource, memoryInputRecord as record, memoryInputStringArray as stringArray, memoryInputText as text } from 'dsh-tingfeng/extension-sdk'
 import { EVOLUTION_SIGNALS, SKILL_ROOT_KINDS, type CaseResult, type EvolutionSignal, type ModelRoute, type ReviewRecordInput, type RunTarget, type SkillRootKind, type SkillsPolicy, type TrajectoryStep } from './contracts.ts'
 import { SkillsService, type CaseInput } from './service.ts'
 

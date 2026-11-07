@@ -29,7 +29,7 @@ describe('public Source plugin composition', () => {
     ])
     expect(view.projection[0]?.text).toContain('Pinned runtime context')
     expect(view.routes.map(route => route.sourceRouteId)).toEqual(expect.arrayContaining(['search', 'recall', 'inspect']))
-    expect(view.readGrants.map(grant => grant.schema)).toEqual(['@tingfeng/dsh-tingfeng.documents/v1', '@tingfeng/dsh-tingfeng.memory-spaces/v1'])
+    expect(view.readGrants.map(grant => grant.schema)).toEqual(['dsh-tingfeng.documents/v1', 'dsh-tingfeng.memory-spaces/v1'])
     expect(JSON.stringify(view)).not.toContain('apiKey')
   })
 

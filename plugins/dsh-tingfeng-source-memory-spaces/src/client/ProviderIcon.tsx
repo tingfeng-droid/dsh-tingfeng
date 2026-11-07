@@ -1,6 +1,6 @@
 import type { JSX } from 'react'
 import type { MemoryProviderIcon, MemoryProviderId } from '../contracts.ts'
-import { MnemonLogo } from '@tingfeng/dsh-tingfeng/client'
+import { MnemonLogo } from 'dsh-tingfeng/client'
 export interface ProviderIconProps {
   providerId: MemoryProviderId
   icon?: MemoryProviderIcon | undefined

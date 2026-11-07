@@ -174,7 +174,7 @@ describe('MnemonWorkbench', () => {
       checkedAt: '2026-08-15T03:00:00.000Z',
       components: [
         { id: 'mnemon', name: 'Mnemon CLI', executablePath: '/usr/local/bin/mnemon', current: mnemonVersionUpdated ? '0.2.0' : '0.1.2', latest: '0.2.0', outdated: !mnemonVersionUpdated, installMode: 'homebrew', updateSupported: true, updateHint: 'brew' },
-        { id: '@tingfeng/dsh-tingfeng', name: '@tingfeng/dsh-tingfeng', installProfile: 'web', installPath: '/workspace/@tingfeng/dsh-tingfeng', current: '0.1.2', latest: '0.1.3', outdated: true, installMode: 'link', updateSupported: false, updateHint: 'link' },
+        { id: 'dsh-tingfeng', name: 'dsh-tingfeng', installProfile: 'web', installPath: '/workspace/dsh-tingfeng', current: '0.1.2', latest: '0.1.3', outdated: true, installMode: 'link', updateSupported: false, updateHint: 'link' },
       ],
     } })
     const versionResolvers: Array<(response: ReturnType<typeof versionResponse>) => void> = []
@@ -384,7 +384,7 @@ describe('MnemonWorkbench', () => {
   }
 
   it.each(['sidebar', 'builtin'] as const)('accepts scoped skin variables on the %s workspace without styling peer views', async surface => {
-    const selector = '[data-dsh-plugin="@tingfeng/dsh-tingfeng"][data-dsh-part="mnemon-view"]'
+    const selector = '[data-dsh-plugin="dsh-tingfeng"][data-dsh-part="mnemon-view"]'
     const skin = document.createElement('style')
     skin.textContent = `${selector} { --mn-bg: rgb(232, 241, 249); --mn-backdrop: rgb(217, 232, 245); --mn-surface: rgba(232, 241, 249, 0.74); }`
     document.head.append(skin)
@@ -773,12 +773,12 @@ describe('MnemonWorkbench', () => {
     expect(screen.getByText('/tmp/mnemon')).toBeTruthy()
   }, 10_000)
 
-  it('keeps a Native Provider failure out of the @tingfeng/dsh-tingfeng engine summary', async () => {
+  it('keeps a Native Provider failure out of the dsh-tingfeng engine summary', async () => {
     const { connection } = createConnection({ nativeUnhealthy: true })
     render(<MnemonWorkbench connection={connection} settingsScope={settingsScope} sessionId="session-1" />)
 
     const engineStatus = await screen.findByRole('region', { name: 'Mnemon 运行状态' })
-    expect(within(engineStatus).getByText('@tingfeng/dsh-tingfeng 0.1.2')).toBeTruthy()
+    expect(within(engineStatus).getByText('dsh-tingfeng 0.1.2')).toBeTruthy()
     expect(within(engineStatus).getByText('插件运行正常')).toBeTruthy()
     expect(screen.getByText('系统正常')).toBeTruthy()
     expect(screen.queryByText('Mnemon 不可用')).toBeNull()
@@ -872,7 +872,7 @@ describe('MnemonWorkbench', () => {
     const contents = document.getElementById(toggle.getAttribute('aria-controls')!)!
     expect(contents.contains(screen.getByRole('alert', { name: '空闲审查失败' }))).toBe(false)
     expect(contents.contains(screen.getByText(zh['status.reviewWatermarkPaused']))).toBe(false)
-    expect(contents.contains(screen.getByRole('status', { name: '@tingfeng/dsh-tingfeng 0.1.3 已安装' }))).toBe(false)
+    expect(contents.contains(screen.getByRole('status', { name: 'dsh-tingfeng 0.1.3 已安装' }))).toBe(false)
     expect(toggle.getAttribute('aria-expanded')).toBe('false')
   })
 
@@ -954,15 +954,15 @@ describe('MnemonWorkbench', () => {
     const { connection, call } = createConnection()
     render(<MnemonWorkbench connection={connection} settingsScope={settingsScope} sessionId="session-1" />)
 
-    await waitFor(() => expect(screen.getByText('@tingfeng/dsh-tingfeng 0.1.2')).toBeTruthy())
+    await waitFor(() => expect(screen.getByText('dsh-tingfeng 0.1.2')).toBeTruthy())
     fireEvent.click(await screen.findByRole('button', { name: '检查版本' }))
     const dialog = screen.getByRole('dialog', { name: '检查与更新版本' })
     await waitFor(() => expect(within(dialog).getByText('Mnemon CLI')).toBeTruthy())
     expect(within(dialog).getByText('/usr/local/bin/mnemon')).toBeTruthy()
-    expect(within(dialog).getByText('@tingfeng/dsh-tingfeng')).toBeTruthy()
+    expect(within(dialog).getByText('dsh-tingfeng')).toBeTruthy()
     expect(within(dialog).getByText('本地 Link')).toBeTruthy()
     expect(within(dialog).getByText('源码 · Profile web')).toBeTruthy()
-    expect(within(dialog).getByText('/workspace/@tingfeng/dsh-tingfeng')).toBeTruthy()
+    expect(within(dialog).getByText('/workspace/dsh-tingfeng')).toBeTruthy()
     expect(within(dialog).getByText(/请在源码目录拉取并构建/)).toBeTruthy()
     expect(within(dialog).getAllByRole('button', { name: '更新' })).toHaveLength(1)
 
@@ -977,12 +977,12 @@ describe('MnemonWorkbench', () => {
   it('says on every page which update waits for a DSH restart', async () => {
     const { connection } = createConnection({ restartPending: { running: '0.1.2', installed: '0.1.3' } })
     render(<MnemonWorkbench connection={connection} settingsScope={settingsScope} sessionId="session-1" />)
-    const reminder = await screen.findByRole('status', { name: '@tingfeng/dsh-tingfeng 0.1.3 已安装' })
+    const reminder = await screen.findByRole('status', { name: 'dsh-tingfeng 0.1.3 已安装' })
     expect(reminder.textContent).toContain('当前运行的仍是 0.1.2；重启 DSH 后生效，桌面版请完全退出后重新打开。')
     // The engine card names the version that runs.
-    expect(screen.getByText('@tingfeng/dsh-tingfeng 0.1.2')).toBeTruthy()
+    expect(screen.getByText('dsh-tingfeng 0.1.2')).toBeTruthy()
     await selectWorkspaceTab('运行时记忆')
-    expect(screen.getByRole('status', { name: '@tingfeng/dsh-tingfeng 0.1.3 已安装' })).toBeTruthy()
+    expect(screen.getByRole('status', { name: 'dsh-tingfeng 0.1.3 已安装' })).toBeTruthy()
   })
 
   it('names packages updated on their own until a restart, and stays quiet otherwise', async () => {
@@ -992,7 +992,7 @@ describe('MnemonWorkbench', () => {
     expect(reminder.textContent).toContain('重启 DSH 后生效')
     cleanup()
     render(<MnemonWorkbench connection={createConnection().connection} settingsScope={settingsScope} sessionId="session-1" />)
-    await waitFor(() => expect(screen.getByText('@tingfeng/dsh-tingfeng 0.1.2')).toBeTruthy())
+    await waitFor(() => expect(screen.getByText('dsh-tingfeng 0.1.2')).toBeTruthy())
     expect(screen.queryByText(/重启 DSH 后生效/u)).toBeNull()
   })
 
@@ -1019,7 +1019,7 @@ describe('MnemonWorkbench', () => {
     try {
       const { connection } = createConnection()
       render(<MnemonWorkbench connection={connection} settingsScope={settingsScope} sessionId="session-1" />)
-      await waitFor(() => expect(screen.getByText('@tingfeng/dsh-tingfeng 0.1.2')).toBeTruthy())
+      await waitFor(() => expect(screen.getByText('dsh-tingfeng 0.1.2')).toBeTruthy())
       await waitFor(() => expect(pendingStarterUpdate()).toBeUndefined())
       expect(screen.queryByRole('dialog', { name: '检查与更新版本' })).toBeNull()
     } finally {
@@ -1031,7 +1031,7 @@ describe('MnemonWorkbench', () => {
     const { connection, resolveVersions } = createConnection({ versionsDeferred: true })
     render(<MnemonWorkbench connection={connection} settingsScope={settingsScope} sessionId="session-1" />)
 
-    await waitFor(() => expect(screen.getByText('@tingfeng/dsh-tingfeng 0.1.2')).toBeTruthy())
+    await waitFor(() => expect(screen.getByText('dsh-tingfeng 0.1.2')).toBeTruthy())
     const trigger = screen.getByRole('button', { name: '检查版本' })
     trigger.focus()
     fireEvent.click(trigger)
@@ -1210,7 +1210,7 @@ describe('MnemonWorkbench', () => {
     expect(screen.queryByRole('dialog', { name: '编辑运行时记忆' })).toBeNull()
     fireEvent.click(within(runtimeList).getByRole('button', { name: '移除' }))
     const runtimeRemoveDialog = screen.getByRole('dialog', { name: '移除运行时记忆？' })
-    expect(within(runtimeRemoveDialog).getByText(/不再随每轮上下文加载/)).toBeTruthy()
+    expect(within(runtimeRemoveDialog).getByText(/将不再于对话开始时加载/)).toBeTruthy()
     const runtimeRemoveCancel = within(runtimeRemoveDialog).getAllByRole('button', { name: '取消' }).at(-1)
     if (runtimeRemoveCancel === undefined) throw new Error('runtime remove cancel button missing')
     expect(runtimeRemoveCancel.closest('footer')?.parentElement).toBe(runtimeRemoveDialog)
@@ -1378,7 +1378,7 @@ describe('MnemonWorkbench', () => {
     fireEvent.click(await screen.findByRole('tab', { name: '状态' }))
     expect(await screen.findByRole('heading', { name: '系统状态' })).toBeTruthy()
     expect(screen.getAllByRole('status', { name: '检查中…' })).toHaveLength(1)
-    expect(screen.getByText('@tingfeng/dsh-tingfeng 0.1.2')).toBeTruthy()
+    expect(screen.getByText('dsh-tingfeng 0.1.2')).toBeTruthy()
     expect(screen.queryByText('连接需要检查')).toBeNull()
   })
 

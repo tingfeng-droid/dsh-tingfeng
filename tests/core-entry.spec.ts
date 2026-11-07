@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 import * as core from "../src/core/plugin.ts"
 import { COMPOSABLE_MEMORY_API_VERSION } from "../src/core/contracts/index.ts"
 import { defineMemorySource, defineMemoryStrategy, installMemory } from "../src/sdk/index.ts"
-import { MemoryCompositionRunner } from '@tingfeng/dsh-tingfeng/testing'
+import { MemoryCompositionRunner } from 'dsh-tingfeng/testing'
 
 describe('Source-neutral Core entry', () => {
   it('mounts on plain Cordis without a DSH default service or built-in contribution', async () => {

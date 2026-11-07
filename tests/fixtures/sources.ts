@@ -1,7 +1,7 @@
 import type { Context } from '@deepseek-ai/cordis'
-import { defineMemoryStrategy, installMemory } from '@tingfeng/dsh-tingfeng/extension-sdk'
-import { COMPOSABLE_MEMORY_API_VERSION } from '@tingfeng/dsh-tingfeng/contracts'
-import { MemoryCompositionRunner } from '@tingfeng/dsh-tingfeng/testing'
+import { defineMemoryStrategy, installMemory } from 'dsh-tingfeng/extension-sdk'
+import { COMPOSABLE_MEMORY_API_VERSION } from 'dsh-tingfeng/contracts'
+import { MemoryCompositionRunner } from 'dsh-tingfeng/testing'
 import * as runtimePlugin from 'dsh-tingfeng-source-runtime'
 import * as documentsPlugin from 'dsh-tingfeng-source-documents'
 

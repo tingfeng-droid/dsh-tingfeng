@@ -25,7 +25,7 @@ describe('what the configuration lends a shipped component\'s settings', () => {
     expect(mutate).toHaveBeenCalledTimes(1)
   })
 
-  it('lends nothing to a component whose settings @tingfeng/dsh-tingfeng never drew', () => {
+  it('lends nothing to a component whose settings dsh-tingfeng never drew', () => {
     const hosts = createComponentHosts({ scope: settingsScope<Config>(ready({})) })
     expect(hosts(RUNTIME_PACKAGE)).toBeUndefined()
     expect(hosts('@acme/memory-notes')).toBeUndefined()

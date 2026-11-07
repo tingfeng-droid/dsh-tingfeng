@@ -1,5 +1,5 @@
 {
-  "description": "The export names of dsh-mnemon@0.5.31 lib/client.js, the @tingfeng/dsh-tingfeng/client a Memory Spaces client loads beside that release.",
+  "description": "The export names of dsh-mnemon@0.5.31 lib/client.js, the dsh-tingfeng/client a Memory Spaces client loads beside that release.",
   "exports": [
     "EmptyState",
     "I18nContext",

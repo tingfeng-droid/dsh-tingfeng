@@ -64,7 +64,7 @@ async function profile() {
 
 const registryManifest = (name = 'dsh-tingfeng-strategy-focus') => ({
   name, version: '0.5.0-beta.4', description: 'A bounded test Strategy.',
-  peerDependencies: { '@tingfeng/dsh-tingfeng': '^0.5.0-beta.1' }, dsh: { bundle: { patch: './cordis.patch.yml' } },
+  peerDependencies: { 'dsh-tingfeng': '^0.5.0-beta.1' }, dsh: { bundle: { patch: './cordis.patch.yml' } },
 })
 
 describe('DSH-native Memory plugin installation', () => {

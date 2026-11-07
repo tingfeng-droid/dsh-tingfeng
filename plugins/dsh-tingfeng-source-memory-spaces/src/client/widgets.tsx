@@ -6,7 +6,7 @@ import type { Insight, MemorySpaceProvider, MemorySpaceView, MemoryProviderConfi
 import { ProviderIcon } from './ProviderIcon.tsx'
 import { providerSummary } from './provider-presentation.ts'
 import { ProviderField } from './provider-field.tsx'
-import { type MnemonKey, type MnemonTranslate, appearanceClass, SidebarModal } from '@tingfeng/dsh-tingfeng/client'
+import { type MnemonKey, type MnemonTranslate, appearanceClass, SidebarModal } from 'dsh-tingfeng/client'
 
 export type ProviderDrafts = Partial<Record<MemoryProviderId, MemoryProviderConnection>>
 
@@ -38,7 +38,7 @@ export function readyFirst(providers: readonly MemoryProviderDescriptor[]): Memo
   return [...providers].sort((left, right) => Number(left.serviceConfigured === false) - Number(right.serviceConfigured === false))
 }
 
-/** Why a provider cannot be chosen: Mnemon Native needs its CLI, the others a service configured on the @tingfeng/dsh-tingfeng page under Plugins. */
+/** Why a provider cannot be chosen: Mnemon Native needs its CLI, the others a service configured on the dsh-tingfeng page under Plugins. */
 export function providerUnavailableKey(provider: MemoryProviderDescriptor): 'overview.nativeCliRequired' | 'overview.providerServiceRequired' {
   return provider.origin === 'native' ? 'overview.nativeCliRequired' : 'overview.providerServiceRequired'
 }

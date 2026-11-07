@@ -51,19 +51,25 @@ describe('documentation checks', () => {
     expect(fixture({ 'README.md': '[web](https://example.invalid/x#y) [mail](mailto:a@example.invalid)' }).failures).toEqual([])
   })
   it('checks current repository URLs used in npm READMEs without rewriting historical links', () => {
-    const report = fixture({ 'README.md': '[ok](https://github.com/omdsh-dev/dsh-tingfeng/blob/main/docs/a.md#one) [missing](https://github.com/omdsh-dev/dsh-tingfeng/tree/main/absent) [history](https://github.com/omdsh-dev/dsh-tingfeng/blob/v0.4.0/old.md)', 'docs/a.md': '# One' })
+    const report = fixture({ 'README.md': '[ok](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/a.md#one) [missing](https://github.com/tingfeng-droid/dsh-tingfeng/tree/main/absent) [history](https://github.com/tingfeng-droid/dsh-tingfeng/blob/v0.4.0/old.md)', 'docs/a.md': '# One' })
     expect(report.localLinks).toBe(2)
-    expect(report.failures).toEqual(['README.md:1: missing https://github.com/omdsh-dev/dsh-tingfeng/tree/main/absent'])
+    expect(report.failures).toEqual(['README.md:1: missing https://github.com/tingfeng-droid/dsh-tingfeng/tree/main/absent'])
   })
   it.each([['README.md', 'en'], ['README.zh-CN.md', 'zh-CN']])('retains the centered %s header, seven badges and localized diagram', (file, language) => {
     const readme = readFileSync(new URL(`../${file}`, import.meta.url), 'utf8')
-    const header = readme.split('\n## ')[0]
-    expect(header).toMatch(/^<h1 align="center">@tingfeng\/dsh-tingfeng<\/h1>/u)
+    // The centered block no longer opens the file: an `## Upstream & License`
+    // section states the fork and its MIT notice before the badges, so slicing at
+    // the first `## ` leaves only the `<h1>`. The section titles are localized
+    // (`## Why …` vs `## 为什么…`), so cut before the *second* heading instead of
+    // matching a title.
+    const sections = readme.split('\n## ')
+    const header = sections.slice(0, 2).join('\n## ')
+    expect(header).toMatch(/^<h1 align="center">dsh-tingfeng<\/h1>/u)
     expect([...header.matchAll(/<p align="center">/gu)]).toHaveLength(6)
     const images = [...header.matchAll(/<img\b[^>]*\bsrc="([^"]+)"/gu)].map(match => new URL(match[1].replaceAll('&amp;', '&')))
     const badges = images.filter(url => ['img.shields.io', 'dshfind.com'].includes(url.hostname))
     expect(badges).toHaveLength(7)
-    expect(badges.map(url => url.pathname)).toEqual(expect.arrayContaining(['/npm/v/@tingfeng/dsh-tingfeng', '/npm/dt/@tingfeng/dsh-tingfeng', '/github/v/release/omdsh-dev/@tingfeng/dsh-tingfeng', '/github/stars/omdsh-dev/@tingfeng/dsh-tingfeng', '/badge/License-MIT-yellow.svg']))
+    expect(badges.map(url => url.pathname)).toEqual(expect.arrayContaining(['/npm/v/dsh-tingfeng', '/npm/dt/dsh-tingfeng', '/github/v/release/tingfeng-droid/dsh-tingfeng', '/github/stars/tingfeng-droid/dsh-tingfeng', '/badge/License-MIT-yellow.svg']))
     const catalog = badges.filter(url => url.hostname === 'dshfind.com')
     expect(catalog.map(url => url.searchParams.get('lang'))).toEqual([language === 'en' ? 'en' : 'zh', language === 'en' ? 'en' : 'zh'])
     expect(catalog.some(url => url.searchParams.get('metric') === 'downloads')).toBe(true)

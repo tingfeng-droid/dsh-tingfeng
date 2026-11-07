@@ -1,8 +1,8 @@
 import type { Context } from '@deepseek-ai/cordis'
 import { describe, expect, it, vi } from 'vitest'
-import { defineMemorySource, installMemory, createMemoryMutationReceipt } from '@tingfeng/dsh-tingfeng/extension-sdk'
-import { COMPOSABLE_MEMORY_API_VERSION } from '@tingfeng/dsh-tingfeng/contracts'
-import { MemoryCompositionRunner } from '@tingfeng/dsh-tingfeng/testing'
+import { defineMemorySource, installMemory, createMemoryMutationReceipt } from 'dsh-tingfeng/extension-sdk'
+import { COMPOSABLE_MEMORY_API_VERSION } from 'dsh-tingfeng/contracts'
+import { MemoryCompositionRunner } from 'dsh-tingfeng/testing'
 import * as base from 'dsh-tingfeng-strategy-default-three-tier'
 import * as plugin from '../src/index.ts'
 

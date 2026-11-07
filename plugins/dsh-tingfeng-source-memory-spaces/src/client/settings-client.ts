@@ -1,8 +1,8 @@
-import type { MemoryComponentHost } from '@tingfeng/dsh-tingfeng/client'
+import type { MemoryComponentHost } from 'dsh-tingfeng/client'
 import type { MemoryProviderServiceCatalog, MemoryProviderServiceView, MnemonEmbeddingFill, MnemonEmbeddingStatus, UpdateMemoryProviderServiceRequest } from '../contracts.ts'
 
 /**
- * What these settings ask of the Host, through the operations @tingfeng/dsh-tingfeng
+ * What these settings ask of the Host, through the operations dsh-tingfeng
  * serves Memory Spaces on its configuration page.
  */
 export interface MemorySpacesSettingsClient {

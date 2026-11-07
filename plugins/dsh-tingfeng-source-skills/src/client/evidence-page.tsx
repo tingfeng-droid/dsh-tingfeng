@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type JSX, type ReactNode } from 'react'
 import { Button, Tag } from '@deepseek-ai/dsh-client-ui-primitives'
-import { SelectField } from '@tingfeng/dsh-tingfeng/client'
+import { SelectField } from 'dsh-tingfeng/client'
 import type { Trajectory, TrajectorySummary } from '../contracts.ts'
 import { css, relative, stamp, useT } from './presentation.ts'
 import { Busy, Clamp, Confirm, Empty, MoreMenu, SignalTag, StepTimeline } from './shared.tsx'

@@ -1,5 +1,5 @@
 import type { Context } from '@deepseek-ai/cordis'
-import { defineMemoryPlugin, installMemory, defineMemoryStrategyConfiguration } from '@tingfeng/dsh-tingfeng/extension-sdk'
+import { defineMemoryPlugin, installMemory, defineMemoryStrategyConfiguration } from 'dsh-tingfeng/extension-sdk'
 import { defineThreeTierExtension } from 'dsh-tingfeng-strategy-default-three-tier/extension-sdk'
 
 export const name = 'dsh-tingfeng-strategy-external-budget'

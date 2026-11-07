@@ -1,5 +1,5 @@
 import type { JSX, ReactNode } from 'react'
-import type { MemoryJsonValue } from '@tingfeng/dsh-tingfeng/contracts'
+import type { MemoryJsonValue } from 'dsh-tingfeng/contracts'
 import type { MnemonSourceManagementClient } from './source-contracts.ts'
 import { I18nContext, LocaleContext } from './page-kit.tsx'
 import { translateEn, translateZh } from './locales.ts'

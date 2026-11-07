@@ -10,7 +10,7 @@ import { message } from './page-kit.tsx'
  * for their group's Apply. No group joins another group's save.
  */
 
-// Typed by shape: `@tingfeng/dsh-tingfeng/client` exports this module, and declarations that
+// Typed by shape: `dsh-tingfeng/client` exports this module, and declarations that
 // reach the Host protocol bring the SDK's cordis Context augmentation into the
 // client's types, which splits Context in a plugin's standalone typecheck.
 export function useScope<S>(scope: { getSnapshot(): S; subscribe(listener: () => void): () => void }): S {

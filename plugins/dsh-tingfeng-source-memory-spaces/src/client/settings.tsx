@@ -4,8 +4,8 @@ import { Button, IconChevronDownOutlineRegular } from '@deepseek-ai/dsh-client-u
 import {
   Callout, installMemoryComponentUI, MemorySourcePageFrame, memorySettingsStyles, message, PanelActions, SelectField, ToggleRow, useLive, useStaged, WriteFailure,
   type MemoryComponentHost, type MemoryComponentSettingsProps, type MemoryComponentUIContext,
-} from '@tingfeng/dsh-tingfeng/client'
-import type { MemoryJsonValue } from '@tingfeng/dsh-tingfeng/contracts'
+} from 'dsh-tingfeng/client'
+import type { MemoryJsonValue } from 'dsh-tingfeng/contracts'
 import { DEFAULT_EMBEDDING_ENDPOINT, DEFAULT_EMBEDDING_MODEL, DEFAULT_EMBEDDING_PROTOCOL, MNEMON_EMBEDDING_PROTOCOLS, NATIVE_PROVIDER_ID, type MnemonEmbeddingConfig, type MnemonEmbeddingFill, type MnemonEmbeddingSpaceStatus, type MnemonEmbeddingStatus } from '../contracts.ts'
 import { ProviderIcon } from './ProviderIcon.tsx'
 import { ProviderSettingsSection } from './provider-settings.tsx'
@@ -15,9 +15,9 @@ import { memorySpacesSettingsClient } from './settings-client.ts'
 const PACKAGE_NAME = 'dsh-tingfeng-source-memory-spaces'
 
 /**
- * Whether @tingfeng/dsh-tingfeng yields the settings it keeps for Memory Spaces to these.
+ * Whether dsh-tingfeng yields the settings it keeps for Memory Spaces to these.
  * One that exports the priority it keeps them at promises both that they do
- * not collide with these and that it lends these `host`. @tingfeng/dsh-tingfeng 0.5.31 and
+ * not collide with these and that it lends these `host`. dsh-tingfeng 0.5.31 and
  * earlier draw them itself and lend nothing, so registering them there would
  * show a second, unworkable copy.
  */
@@ -31,7 +31,7 @@ export function installMemorySpacesSettings(ctx: MemoryComponentUIContext & { lo
   return installMemoryComponentUI(ctx, { packageName: PACKAGE_NAME, settings: props => <MemorySpacesSettings {...props} {...(locale === undefined ? {} : { locale })} /> })
 }
 
-/** The configuration keys these settings read, as @tingfeng/dsh-tingfeng lends them. */
+/** The configuration keys these settings read, as dsh-tingfeng lends them. */
 interface SpacesConfiguration {
   embedding?: MnemonEmbeddingConfig
   storageScope?: string
@@ -107,8 +107,8 @@ function embeddingValue(enabled: boolean, draft: EmbeddingDraft): MemoryJsonValu
 /**
  * Memory Spaces' own settings: the Providers that store its spaces, Mnemon
  * Native first with the embedding runtime only Native reads. They need what
- * @tingfeng/dsh-tingfeng lends them; without it they show nothing. With DSH's language
- * service they translate as @tingfeng/dsh-tingfeng drew them, through its language chain.
+ * dsh-tingfeng lends them; without it they show nothing. With DSH's language
+ * service they translate as dsh-tingfeng drew them, through its language chain.
  */
 export function MemorySpacesSettings(props: MemoryComponentSettingsProps & { locale?: DshLocale | undefined }): ReactNode {
   if (props.host === undefined) return null
@@ -138,7 +138,7 @@ const RETAINED_CLI = 'status-summary'
 
 function SpacesSettings({ page, host }: { page: MemoryComponentSettingsProps; host: MemoryComponentHost }): JSX.Element {
   const t = useT()
-  // Read where it is drawn: a @tingfeng/dsh-tingfeng without this export (0.5.31) never draws these settings, and this
+  // Read where it is drawn: a dsh-tingfeng without this export (0.5.31) never draws these settings, and this
   // bundle's pages must still load beside it.
   const css = memorySettingsStyles
   const { configuration, retained } = host
@@ -199,7 +199,7 @@ function SpacesSettings({ page, host }: { page: MemoryComponentSettingsProps; ho
       reason => { setFill({ ...target, state: 'failed', error: message(reason) }); test() },
     )
   }
-  // As @tingfeng/dsh-tingfeng's isWorkspaceStorageScope, which lives in its Host protocol, outside its public client.
+  // As dsh-tingfeng's isWorkspaceStorageScope, which lives in its Host protocol, outside its public client.
   const activeScope = value?.storageScope === 'workspace' || value?.storageScope === 'workspaces' ? 'workspace' : 'global'
   const readOnly = value?.writeEnabled === false
   const disabled = !page.writable || snapshot.status === 'loading' || !snapshot.writable

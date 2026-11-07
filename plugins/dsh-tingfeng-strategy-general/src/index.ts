@@ -1,5 +1,5 @@
 import type { Context } from '@deepseek-ai/cordis'
-import { defineMemoryPlugin, defineMemoryStrategyConfiguration, installMemory } from '@tingfeng/dsh-tingfeng/extension-sdk'
+import { defineMemoryPlugin, defineMemoryStrategyConfiguration, installMemory } from 'dsh-tingfeng/extension-sdk'
 import { createGeneralStrategy, GENERAL_STRATEGY_TYPE_ID, GENERAL_VIEW_STRATEGY, type GeneralStrategyConfig } from './strategy.ts'
 
 export type Config = GeneralStrategyConfig

@@ -20,7 +20,7 @@ export type MemoryContributionListener = (snapshot: MemoryContributionSnapshot) 
  * Scope-local definition registry behind ctx.mnemonMemory.
  *
  * It owns definitions only. Runtime objects are created and drained by a
- * generation host attached by @tingfeng/dsh-tingfeng core.
+ * generation host attached by dsh-tingfeng core.
  */
 export class MemoryContributionRegistry {
   private readonly sources = new Map<string, InstalledMemorySource>()

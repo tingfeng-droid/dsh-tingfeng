@@ -19,7 +19,7 @@ const child = (overrides: Partial<VersionPackageStatus> = {}): VersionPackageSta
   current: '0.5.2', expectedVersion: '0.5.2', latest: '0.5.3', outdated: true, installMode: 'npm', updateSupported: true, updateHint: 'pnpm', ...overrides,
 })
 const starter = (packages: VersionPackageStatus[]): VersionComponentStatus => ({
-  id: '@tingfeng/dsh-tingfeng', name: '@tingfeng/dsh-tingfeng', current: '0.5.2', latest: '0.5.2', outdated: false, installMode: 'npm', updateSupported: true, updateHint: 'pnpm', packages,
+  id: 'dsh-tingfeng', name: 'dsh-tingfeng', current: '0.5.2', latest: '0.5.2', outdated: false, installMode: 'npm', updateSupported: true, updateHint: 'pnpm', packages,
 })
 
 function fixture(components: VersionComponentStatus[], options: { writable?: boolean; english?: boolean; resumedUpdate?: StarterUpdateRecord; lastUpdate?: VersionStatus['lastUpdate'] } = {}) {
@@ -134,8 +134,8 @@ describe('version maintenance', () => {
     expect(await screen.findByText('由当前 DSH Profile 管理；用 DSH 自己的插件安装方式更新，完成后重启 DSH。')).toBeTruthy()
     expect(screen.queryByText(/找不到 pnpm/u)).toBeNull()
     fireEvent.click(await screen.findByRole('button', { name: '更新' }))
-    await waitFor(() => expect(f.updateVersion).toHaveBeenCalledWith('@tingfeng/dsh-tingfeng'))
-    expect((await screen.findAllByText('请重启 DSH 以加载新的 @tingfeng/dsh-tingfeng 插件代码；桌面版请完全退出后重新打开。')).length).toBeGreaterThan(0)
+    await waitFor(() => expect(f.updateVersion).toHaveBeenCalledWith('dsh-tingfeng'))
+    expect((await screen.findAllByText('请重启 DSH 以加载新的 dsh-tingfeng 插件代码；桌面版请完全退出后重新打开。')).length).toBeGreaterThan(0)
   })
 
   it('shows update failures, restores controls, and prevents duplicate clicks while updating', async () => {
@@ -154,7 +154,7 @@ describe('version maintenance', () => {
 })
 
 describe('a Starter update across DSH\'s client swap', () => {
-  const restartNotice = '请重启 DSH 以加载新的 @tingfeng/dsh-tingfeng 插件代码；桌面版请完全退出后重新打开。'
+  const restartNotice = '请重启 DSH 以加载新的 dsh-tingfeng 插件代码；桌面版请完全退出后重新打开。'
   const outdatedStarter = (): VersionComponentStatus => ({ ...starter([]), latest: '0.5.3', outdated: true, updateHint: 'dsh' })
 
   it('records the update it starts, keeps the record for the swapped-in client, and forgets it once closed', async () => {
@@ -163,8 +163,8 @@ describe('a Starter update across DSH\'s client swap', () => {
     f.updateVersion.mockImplementation(async () => await new Promise(resolve => { finish = resolve }))
     fireEvent.click(await screen.findByRole('button', { name: '更新' }))
     expect(pendingStarterUpdate()).toMatchObject({ from: '0.5.2', to: '0.5.3' })
-    await act(async () => { finish({ component: '@tingfeng/dsh-tingfeng', previousVersion: '0.5.2', currentVersion: '0.5.3', updated: true, restartRequired: true }) })
-    expect(await screen.findByText('@tingfeng/dsh-tingfeng 已更新')).toBeTruthy()
+    await act(async () => { finish({ component: 'dsh-tingfeng', previousVersion: '0.5.2', currentVersion: '0.5.3', updated: true, restartRequired: true }) })
+    expect(await screen.findByText('dsh-tingfeng 已更新')).toBeTruthy()
     // DSH may swap the client in after this reply; the record lets that client reopen the dialog.
     expect(pendingStarterUpdate()).toMatchObject({ to: '0.5.3' })
     fireEvent.click(screen.getAllByRole('button', { name: '关闭' }).at(-1)!)
@@ -174,7 +174,7 @@ describe('a Starter update across DSH\'s client swap', () => {
 
   it('forgets the record when the update fails, and never records a CLI update', async () => {
     const f = fixture([cli(), outdatedStarter()])
-    f.updateVersion.mockRejectedValueOnce(new Error('DSH could not install @tingfeng/dsh-tingfeng@0.5.3: operation-error'))
+    f.updateVersion.mockRejectedValueOnce(new Error('DSH could not install dsh-tingfeng@0.5.3: operation-error'))
     fireEvent.click((await screen.findAllByRole('button', { name: '更新' }))[1]!)
     expect(await screen.findByRole('alert')).toBeTruthy()
     expect(pendingStarterUpdate()).toBeUndefined()
@@ -186,7 +186,7 @@ describe('a Starter update across DSH\'s client swap', () => {
   it('reopened by the swapped-in client, shows the outcome the Host reports without updating again', async () => {
     recordStarterUpdate({ from: '0.5.2', to: '0.5.3' })
     const f = fixture([{ ...starter([]), current: '0.5.3', latest: '0.5.3', restartRequired: true, updateHint: 'dsh' }], { resumedUpdate: pendingStarterUpdate()! })
-    expect(await screen.findByText('@tingfeng/dsh-tingfeng 已更新')).toBeTruthy()
+    expect(await screen.findByText('dsh-tingfeng 已更新')).toBeTruthy()
     expect(screen.getAllByText(restartNotice).length).toBeGreaterThan(0)
     expect(screen.queryByRole('button', { name: '更新' })).toBeNull()
     expect(f.updateVersion).not.toHaveBeenCalled()
@@ -194,26 +194,26 @@ describe('a Starter update across DSH\'s client swap', () => {
 
   it('shows the update the Host reports it finished', async () => {
     recordStarterUpdate({ from: '0.5.2', to: '0.5.3' })
-    const lastUpdate = { at: new Date().toISOString(), component: '@tingfeng/dsh-tingfeng' as const, result: { component: '@tingfeng/dsh-tingfeng' as const, updated: true, previousVersion: '0.5.2', currentVersion: '0.5.3', restartRequired: true } }
+    const lastUpdate = { at: new Date().toISOString(), component: 'dsh-tingfeng' as const, result: { component: 'dsh-tingfeng' as const, updated: true, previousVersion: '0.5.2', currentVersion: '0.5.3', restartRequired: true } }
     const f = fixture([{ ...starter([]), current: '0.5.3', latest: '0.5.3', restartRequired: true, updateHint: 'dsh' }], { resumedUpdate: pendingStarterUpdate()!, lastUpdate })
-    expect(await screen.findByText('@tingfeng/dsh-tingfeng 已更新')).toBeTruthy()
+    expect(await screen.findByText('dsh-tingfeng 已更新')).toBeTruthy()
     expect(screen.getAllByText(restartNotice).length).toBeGreaterThan(0)
     expect(f.updateVersion).not.toHaveBeenCalled()
   })
 
   it('shows the failure the Host reports, even when files the install left suggest otherwise', async () => {
     recordStarterUpdate({ from: '0.5.2', to: '0.5.3' })
-    const reason = 'DSH could not install @tingfeng/dsh-tingfeng@0.5.3: incompatible-version (requires @deepseek-ai/dsh ^0.3.0; this DSH is 0.2.0-rc.2)'
-    fixture([outdatedStarter()], { resumedUpdate: pendingStarterUpdate()!, lastUpdate: { at: new Date().toISOString(), component: '@tingfeng/dsh-tingfeng', error: reason } })
+    const reason = 'DSH could not install dsh-tingfeng@0.5.3: incompatible-version (requires @deepseek-ai/dsh ^0.3.0; this DSH is 0.2.0-rc.2)'
+    fixture([outdatedStarter()], { resumedUpdate: pendingStarterUpdate()!, lastUpdate: { at: new Date().toISOString(), component: 'dsh-tingfeng', error: reason } })
     expect(await screen.findByText(reason)).toBeTruthy()
     expect(screen.getByText('版本操作失败')).toBeTruthy()
-    expect(screen.queryByText('@tingfeng/dsh-tingfeng 已更新')).toBeNull()
+    expect(screen.queryByText('dsh-tingfeng 已更新')).toBeNull()
   })
 
   it('ignores an outcome from before the update this page started', async () => {
     recordStarterUpdate({ from: '0.5.2', to: '0.5.3' })
     const earlier = new Date(Date.now() - 10 * 60_000).toISOString()
-    fixture([outdatedStarter()], { resumedUpdate: pendingStarterUpdate()!, lastUpdate: { at: earlier, component: '@tingfeng/dsh-tingfeng', error: 'an older failure' } })
+    fixture([outdatedStarter()], { resumedUpdate: pendingStarterUpdate()!, lastUpdate: { at: earlier, component: 'dsh-tingfeng', error: 'an older failure' } })
     expect(await screen.findByRole('button', { name: '更新' })).toBeTruthy()
     expect(screen.queryByText('an older failure')).toBeNull()
   })
@@ -223,7 +223,7 @@ describe('a Starter update across DSH\'s client swap', () => {
     // The update failed after DSH swapped the client in: nothing waits for a restart.
     fixture([outdatedStarter()], { resumedUpdate: pendingStarterUpdate()! })
     expect(await screen.findByRole('button', { name: '更新' })).toBeTruthy()
-    expect(screen.queryByText('@tingfeng/dsh-tingfeng 已更新')).toBeNull()
+    expect(screen.queryByText('dsh-tingfeng 已更新')).toBeNull()
   })
 
   it('reopens the Memory System once it can open, only for a fresh record', () => {

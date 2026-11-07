@@ -1,10 +1,10 @@
-import type { MemoryJsonValue } from '@tingfeng/dsh-tingfeng/contracts'
+import type { MemoryJsonValue } from 'dsh-tingfeng/contracts'
 import type { ClientConnectionHandle, ClientSettingsScope, ClientSettingsSnapshot, Config, MNEMON_READ_CHANNEL, MNEMON_WRITE_CHANNEL, MnemonRpcEndpoint } from '../host/protocol.ts'
 import { MnemonClient } from './api.ts'
 import type { MnemonChangeSignal } from './change-signal.ts'
 import type { MemoryComponentConfigurationSnapshot, MemoryComponentHost } from './component-ui.tsx'
 
-/** What @tingfeng/dsh-tingfeng serves a shipped component whose settings it used to draw itself. */
+/** What dsh-tingfeng serves a shipped component whose settings it used to draw itself. */
 interface Lent {
   /** Configuration keys its settings read. */
   reads: readonly string[]
@@ -61,7 +61,7 @@ function configurationOf(scope: ClientSettingsScope<Config>, lent: Lent): Memory
     },
     subscribe: listener => scope.subscribe(listener),
     async set(key: string, value: MemoryJsonValue) {
-      if (!lent.owns.includes(key)) throw new Error(`@tingfeng/dsh-tingfeng does not lend this component the setting ${key}`)
+      if (!lent.owns.includes(key)) throw new Error(`dsh-tingfeng does not lend this component the setting ${key}`)
       await scope.mutate([{ op: 'set', path: [key], value }])
     },
   }
@@ -95,14 +95,14 @@ export function createComponentHosts(services: ComponentHostServices): Component
     const client = connection === undefined ? undefined : new MnemonClient(connection, sessionId, workspaceId)
     const call = (mode: 'read' | 'write', names: Lent['read'] | Lent['write'], operation: string, input: MemoryJsonValue | undefined): Promise<unknown> => {
       const endpoint = names.find(name => name === operation)
-      if (endpoint === undefined) return Promise.reject(new Error(`@tingfeng/dsh-tingfeng does not serve this component the ${mode} operation ${operation}`))
+      if (endpoint === undefined) return Promise.reject(new Error(`dsh-tingfeng does not serve this component the ${mode} operation ${operation}`))
       if (input !== undefined && (typeof input !== 'object' || input === null || Array.isArray(input))) return Promise.reject(new Error(`${operation} takes an object`))
       const named = SCOPE_FIELDS.filter(field => input !== undefined && Object.hasOwn(input, field))
       if (named.length > 0) return Promise.reject(new Error(`${operation} runs in the page's conversation and workspace; it takes no ${named.join(' or ')}`))
       return client!.componentOperation(mode, endpoint, input ?? {})
     }
     // A read the settings start while the same one is under way joins it, as when the
-    // component's own settings replace @tingfeng/dsh-tingfeng's while those still load. Only one started
+    // component's own settings replace dsh-tingfeng's while those still load. Only one started
     // at the configuration's current revision: an older one answers for a configuration that
     // has since changed, such as another storage scope.
     const reading = new Map<string, Promise<unknown>>()

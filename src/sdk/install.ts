@@ -40,5 +40,5 @@ export function installMemory(ctx: Context, contribution: MemoryInstallContribut
   const entryId = stableEntryId(ctx, options.instanceId)
   ctx.effect(() => ctx.mnemonMemory.installContributions(contribution, {
     ...options, instanceId: entryId,
-  }), `@tingfeng/dsh-tingfeng: install ${entryId}`)
+  }), `dsh-tingfeng: install ${entryId}`)
 }

@@ -53,7 +53,7 @@ describe('component package metadata', () => {
 
   it('tells a shipped component from an installed one by the Starter rows', () => {
     for (const { packageName } of STARTER_COMPONENT_ROWS) expect(isShipped({ packageName } as MemoryPluginEntryView), packageName).toBe(true)
-    for (const packageName of ['dsh-tingfeng-strategy-focus', 'dsh-tingfeng-provider-mem0', '@tingfeng/dsh-tingfeng']) {
+    for (const packageName of ['dsh-tingfeng-strategy-focus', 'dsh-tingfeng-provider-mem0', 'dsh-tingfeng']) {
       expect(isShipped({ packageName } as MemoryPluginEntryView), packageName).toBe(false)
     }
   })

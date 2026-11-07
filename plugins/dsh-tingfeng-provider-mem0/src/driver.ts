@@ -123,7 +123,7 @@ export class Mem0Provider extends HttpMemoryProvider implements MemoryProviderAd
         agent_id: String(connection.agentId) === '*' ? 'dsh' : String(connection.agentId),
         ...(mode === 'self-hosted' ? { infer: false } : {}),
         metadata: {
-          source: '@tingfeng/dsh-tingfeng',
+          source: 'dsh-tingfeng',
           ...(request.category === undefined ? {} : { category: request.category }),
           ...(request.importance === undefined ? {} : { importance: request.importance }),
           ...(request.tags === undefined ? {} : { tags: request.tags }),

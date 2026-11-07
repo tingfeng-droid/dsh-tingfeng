@@ -1,6 +1,6 @@
 import { useEffect, useState, type JSX } from 'react'
 import { Button, Tag } from '@deepseek-ai/dsh-client-ui-primitives'
-import { SelectField, SidebarModal } from '@tingfeng/dsh-tingfeng/client'
+import { SelectField, SidebarModal } from 'dsh-tingfeng/client'
 import type { SkillRootKind, TrashEntry, TrashRestoreInput, TrashRestorePreview } from '../contracts.ts'
 import { css, errorText, stamp, useT } from './presentation.ts'
 import { Busy, Confirm, Empty, Field, SkillIcon } from './shared.tsx'

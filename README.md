@@ -1,4 +1,4 @@
-<h1 align="center">dsh-mnemon</h1>
+<h1 align="center">dsh-tingfeng</h1>
 
 ## Upstream & License
 
@@ -12,8 +12,8 @@ Thanks to the upstream author for the original work.
 <p align="center"><strong>English</strong> · <a href="https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/README.zh-CN.md">简体中文</a></p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/dsh-mnemon"><img alt="npm version" src="https://img.shields.io/npm/v/dsh-mnemon?label=npm" /></a>
-  <a href="https://www.npmjs.com/package/dsh-mnemon"><img alt="npm downloads" src="https://img.shields.io/npm/dt/dsh-mnemon?label=downloads%20total" /></a>
+  <a href="https://www.npmjs.com/package/dsh-tingfeng"><img alt="npm version" src="https://img.shields.io/npm/v/dsh-tingfeng?label=npm" /></a>
+  <a href="https://www.npmjs.com/package/dsh-tingfeng"><img alt="npm downloads" src="https://img.shields.io/npm/dt/dsh-tingfeng?label=downloads%20total" /></a>
   <a href="https://github.com/tingfeng-droid/dsh-tingfeng/releases/latest"><img alt="GitHub release" src="https://img.shields.io/github/v/release/tingfeng-droid/dsh-tingfeng" /></a>
   <a href="https://github.com/tingfeng-droid/dsh-tingfeng"><img alt="GitHub stars" src="https://img.shields.io/github/stars/tingfeng-droid/dsh-tingfeng" /></a>
   <a href="https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg" /></a>
@@ -37,9 +37,9 @@ Thanks to the upstream author for the original work.
   <a href="https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/en/development/extensions.md">Build a plugin</a>
 </p>
 
-## Why dsh-mnemon
+## Why dsh-tingfeng
 
-An Agent that starts every session from scratch keeps asking what it was already told. Putting everything into one memory store is no better: it either floods each turn or misses what matters. dsh-mnemon gives DeepSeek Harness memory that is layered, visible and composable, and skills that improve with use.
+An Agent that starts every session from scratch keeps asking what it was already told. Putting everything into one memory store is no better: it either floods each turn or misses what matters. dsh-tingfeng gives DeepSeek Harness memory that is layered, visible and composable, and skills that improve with use.
 
 - **The right memory for each turn.** Preferences and working facts stay in context. Project documents and long-term evidence are searched only when a question needs them.
 - **You can see what a turn used.** Under each reply, the turn memory bar lists the documents and memories the turn read and wrote, and one click opens each in the Memory System. The Memory System shows everything that is stored and lets you edit it.
@@ -68,7 +68,7 @@ These recordings come from a real WebUI with the live DeepSeek model answering, 
 **Compose memory on the Plugins page.** One main strategy, its memory sources and optional enhancements, each switch applying at once. Every component has its own page, and storage, backup and interface settings live here too.
 
 <p align="center">
-  <a href="https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/en/guides/ui-guide.md#on-the-plugins-page"><img src="https://raw.githubusercontent.com/tingfeng-droid/dsh-tingfeng/main/docs/assets/webui-v0.5.32/en/plugins.gif" alt="DSH's Plugins page, then dsh-mnemon's page: memory composition, the main strategy menu, the Layered strategy's and Memory Spaces' pages, then storage and interface" width="880" /></a>
+  <a href="https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/en/guides/ui-guide.md#on-the-plugins-page"><img src="https://raw.githubusercontent.com/tingfeng-droid/dsh-tingfeng/main/docs/assets/webui-v0.5.32/en/plugins.gif" alt="DSH's Plugins page, then dsh-tingfeng's page: memory composition, the main strategy menu, the Layered strategy's and Memory Spaces' pages, then storage and interface" width="880" /></a>
 </p>
 
 Every step is explained in the [UI guide](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/en/guides/ui-guide.md); all screens, recordings and the capture environment are in the [v0.5.32 gallery](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/assets/webui-v0.5.32/README.md).
@@ -97,7 +97,7 @@ The default **Layered strategy** keeps runtime memory resident and reads the oth
 - **Install.** The market searches skills.sh's open index and reads any GitHub repository, any site publishing an Agent Skills discovery index, and curated catalogs; every install is previewed, with security reviews where they exist.
 - **In the conversation.** A line under each turn names the skills it used and what its review suggested, each one click from its page.
 
-Self-evolution stays off until you turn it on under **Plugins → dsh-mnemon → Skills**. The [Skills guide](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/en/guides/skills.md) walks through every screen.
+Self-evolution stays off until you turn it on under **Plugins → dsh-tingfeng → Skills**. The [Skills guide](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/en/guides/skills.md) walks through every screen.
 
 ## Quick start
 
@@ -111,16 +111,16 @@ npx @deepseek-ai/dsh web
 ```
 
 <p align="center">
-  <a href="https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/en/guides/installation.md"><img src="https://raw.githubusercontent.com/tingfeng-droid/dsh-tingfeng/main/docs/assets/install-v0.5.19/en/install.gif" alt="On the Plugins page: Add plugin, type dsh-mnemon, Install, Enable now; the Memory System appears in the sidebar" width="880" /></a>
+  <a href="https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/en/guides/installation.md"><img src="https://raw.githubusercontent.com/tingfeng-droid/dsh-tingfeng/main/docs/assets/install-v0.5.19/en/install.gif" alt="On the Plugins page: Add plugin, type dsh-tingfeng, Install, Enable now; the Memory System appears in the sidebar" width="880" /></a>
 </p>
 
-1. In the page that opens, click **Plugins → Add plugin**, type `dsh-mnemon`, click **Install**, then **Enable now**.
+1. In the page that opens, click **Plugins → Add plugin**, type `dsh-tingfeng`, click **Install**, then **Enable now**.
 2. Open **Memory System** in the sidebar. **Status** shows each memory component and Provider.
 3. Tell a conversation something to remember. The turn memory bar under the reply lists what the turn read and wrote, and the brain mark saves a reply to memory.
 4. For Memory Spaces, install the Mnemon CLI for Mnemon Native with `npm install --global @mnemon-dev/mnemon`, or enable another Provider on the Memory Spaces page.
-5. Choose the main strategy and enhancements under **Plugins → dsh-mnemon**.
+5. Choose the main strategy and enhancements under **Plugins → dsh-tingfeng**.
 
-dsh-mnemon supports published DSH `0.2.2-rc.1` and retains support for the `0.2.1` RC line and `0.2.0-rc.2`. RC1 requires Node.js >=24.9.0; older Hosts follow their own Node.js requirements. The same package serves the desktop app's Plugins page, `dsh plugin --profile web add dsh-mnemon` on the command line, and Headless with `dsh plugin --profile headless add dsh-mnemon`; older hosts keep the release [compatibility and upgrades](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/en/reference/compatibility.md) names for them. [Getting started](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/en/guides/getting-started.md) continues from here, and [compatibility and upgrades](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/en/reference/compatibility.md) covers existing installations.
+dsh-tingfeng supports published DSH `0.2.2-rc.1` and retains support for the `0.2.1` RC line and `0.2.0-rc.2`. RC1 requires Node.js >=24.9.0; older Hosts follow their own Node.js requirements. The same package serves the desktop app's Plugins page, `dsh plugin --profile web add dsh-tingfeng` on the command line, and Headless with `dsh plugin --profile headless add dsh-tingfeng`; older hosts keep the release [compatibility and upgrades](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/en/reference/compatibility.md) names for them. [Getting started](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/en/guides/getting-started.md) continues from here, and [compatibility and upgrades](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/en/reference/compatibility.md) covers existing installations.
 
 ## How it works
 
@@ -152,7 +152,7 @@ Memory Spaces Providers: [Mnemon Native](https://github.com/tingfeng-droid/dsh-t
 
 ## Build your own
 
-Define a Source or Strategy with `@tingfeng/dsh-tingfeng/extension-sdk`, add an enhancement through the standard slots, or write a Memory Spaces driver with `dsh-tingfeng-source-memory-spaces/provider-sdk`. A component can also add its own settings and Status card to the pages dsh-mnemon shows. Your repository owns its manifest, dependencies, tests and build; DSH installs and mounts it, and choosing it as the main strategy is a separate decision.
+Define a Source or Strategy with `dsh-tingfeng/extension-sdk`, add an enhancement through the standard slots, or write a Memory Spaces driver with `dsh-tingfeng-source-memory-spaces/provider-sdk`. A component can also add its own settings and Status card to the pages dsh-tingfeng shows. Your repository owns its manifest, dependencies, tests and build; DSH installs and mounts it, and choosing it as the main strategy is a separate decision.
 
 Start with the [plugin author guide](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/en/development/extensions.md). Discuss new capabilities and Providers in an Issue before a pull request; see [CONTRIBUTING](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/CONTRIBUTING.md).
 

@@ -6,7 +6,7 @@ import { MEMORY_SPACE_DESCRIPTION_MAX_LENGTH, MEMORY_SPACE_NAME_MAX_LENGTH, NATI
 import type { MemorySpacesPageClient } from './api.ts'
 import { ProviderIcon } from './ProviderIcon.tsx'
 import { providerSummary } from './provider-presentation.ts'
-import { appearanceClass, useLocale, humanBytes, message, PageHeader, SidebarModal, EmptyState } from '@tingfeng/dsh-tingfeng/client'
+import { appearanceClass, useLocale, humanBytes, message, PageHeader, SidebarModal, EmptyState } from 'dsh-tingfeng/client'
 import { MemoryProviderBadge, ProviderMemoryFields, ReadSourcePanel, categoryLabel, mergeProviderDefaults, nativeSpaceProvider, providerDraftComplete, providerUnavailableKey, readyFirst, readyProviderId, type ProviderDrafts } from './widgets.tsx'
 import { MemoryGraph, enrichMultiSpaceGraph, graphKindLabel, graphNodeKey, graphNodeKind } from './memory-graph.tsx'
 
@@ -482,7 +482,7 @@ export function OverviewPage(props: { client: MemorySpacesPageClient; active?: b
 }
 
 /** The rediscovery a person last dismissed on this browser, so the same news is not shown twice. */
-const REDISCOVERY_SEEN_KEY = '@tingfeng/dsh-tingfeng.memory-spaces.rediscovery-seen'
+const REDISCOVERY_SEEN_KEY = 'dsh-tingfeng.memory-spaces.rediscovery-seen'
 /** How often an open page looks again while the Host asks the Providers. */
 const REDISCOVERY_POLL_MS = 2_000
 

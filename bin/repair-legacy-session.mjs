@@ -684,7 +684,7 @@ async function repairIdleProbeSession(entries, original, compressed, input, outp
     }
   }
   const text = entries.map(entry => recovered.has(entry)
-    ? JSON.stringify({ type: '@tingfeng/dsh-tingfeng/recovered-idle-probe', seq: entry.row.seq, time: entry.row.time, ignorable: true,
+    ? JSON.stringify({ type: 'dsh-tingfeng/recovered-idle-probe', seq: entry.row.seq, time: entry.row.time, ignorable: true,
       data: { originalType: entry.row.type, originalData: entry.row.data } }) + '\n'
     : entry.line).join('')
   const plain = Buffer.from(text)

@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [{ ...clientCssPlugin(false), enforce: 'pre' } as never],
   resolve: {
     alias: Object.entries({
-      '@tingfeng/dsh-tingfeng/client': fileURLToPath(new URL('./src/client/extension-sdk.ts', import.meta.url)),
+      'dsh-tingfeng/client': fileURLToPath(new URL('./src/client/extension-sdk.ts', import.meta.url)),
       'dsh-tingfeng-source-runtime/client': fileURLToPath(new URL('./plugins/dsh-tingfeng-source-runtime/src/client.ts', import.meta.url)),
       'dsh-tingfeng-source-documents/client': fileURLToPath(new URL('./plugins/dsh-tingfeng-source-documents/src/client.ts', import.meta.url)),
       'dsh-tingfeng-source-memory-spaces/client': fileURLToPath(new URL('./plugins/dsh-tingfeng-source-memory-spaces/src/client.ts', import.meta.url)),
@@ -15,9 +15,9 @@ export default defineConfig({
       'dsh-tingfeng-source-memory-spaces/native-cli': fileURLToPath(new URL('./plugins/dsh-tingfeng-source-memory-spaces/src/native-cli.ts', import.meta.url)),
       'dsh-tingfeng-source-memory-spaces/space-identity': fileURLToPath(new URL('./plugins/dsh-tingfeng-source-memory-spaces/src/space-identity.ts', import.meta.url)),
       'dsh-tingfeng-source-memory-spaces/provider-sdk': fileURLToPath(new URL('./plugins/dsh-tingfeng-source-memory-spaces/src/provider-sdk.ts', import.meta.url)),
-      '@tingfeng/dsh-tingfeng/extension-sdk': fileURLToPath(new URL('./src/sdk/index.ts', import.meta.url)),
-      '@tingfeng/dsh-tingfeng/contracts': fileURLToPath(new URL('./src/core/contracts/index.ts', import.meta.url)),
-      '@tingfeng/dsh-tingfeng/testing': fileURLToPath(new URL('./src/sdk/testing.ts', import.meta.url)),
+      'dsh-tingfeng/extension-sdk': fileURLToPath(new URL('./src/sdk/index.ts', import.meta.url)),
+      'dsh-tingfeng/contracts': fileURLToPath(new URL('./src/core/contracts/index.ts', import.meta.url)),
+      'dsh-tingfeng/testing': fileURLToPath(new URL('./src/sdk/testing.ts', import.meta.url)),
       'dsh-tingfeng-source-runtime/contracts': fileURLToPath(new URL('./plugins/dsh-tingfeng-source-runtime/src/contracts.ts', import.meta.url)),
       'dsh-tingfeng-source-documents/contracts': fileURLToPath(new URL('./plugins/dsh-tingfeng-source-documents/src/contracts.ts', import.meta.url)),
       'dsh-tingfeng-source-memory-spaces/contracts': fileURLToPath(new URL('./plugins/dsh-tingfeng-source-memory-spaces/src/contracts.ts', import.meta.url)),

@@ -2,7 +2,7 @@ import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, wr
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { MemoryCompositionRunner } from '@tingfeng/dsh-tingfeng/testing'
+import { MemoryCompositionRunner } from 'dsh-tingfeng/testing'
 import * as skillsPlugin from 'dsh-tingfeng-source-skills'
 import * as generalStrategy from 'dsh-tingfeng-strategy-general'
 import type { BacktestRun, EvalCase, EvidencePack, SkillCatalog, SkillDraft, SkillSuggestion, Trajectory } from 'dsh-tingfeng-source-skills/contracts'
@@ -19,7 +19,7 @@ function turn(events: HostSessionEvent[], number: number, user: string, tools: A
   const push = (type: string, data: Record<string, unknown>) => events.push({ type, seq: events.length, time: Date.UTC(2026, 9, 21, 8, number), data })
   push('turn/start', { turn: number })
   push('user/message', { id: `u${number}`, role: 'user', content: [{ type: 'text', text: user }], source: { kind: 'user' } })
-  push('user/message', { id: `m${number}`, role: 'user', content: [{ type: 'text', text: '[MNEMON] reminder' }], source: { kind: 'plugin:@tingfeng/dsh-tingfeng' } })
+  push('user/message', { id: `m${number}`, role: 'user', content: [{ type: 'text', text: '[MNEMON] reminder' }], source: { kind: 'plugin:dsh-tingfeng' } })
   tools.forEach((tool, index) => {
     const callId = `c${number}-${index}`
     push('tool/call', { turn: number, step: 1, callId, name: tool.name, arguments: JSON.stringify(tool.args) })

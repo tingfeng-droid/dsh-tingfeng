@@ -81,7 +81,7 @@ function fixture(options: { writable?: boolean; failApply?: boolean; failRefresh
         configured: false,
         config: {
           branch: 'mnemon-sync', subdir: 'mnemon/', hasToken: false, credentialSource: 'none' as const,
-          authorName: '@tingfeng/dsh-tingfeng sync', authorEmail: 'mnemon@localhost',
+          authorName: 'dsh-tingfeng sync', authorEmail: 'mnemon@localhost',
         },
         configPath: '/root/.mnemon/state/sync-git.json', mirrorPath: '/root/.mnemon/state/sync/git',
         git: { available: true, required: '2.20' }, remote: { reachable: false, branchExists: false },
@@ -204,7 +204,7 @@ describe('Memory enhancement settings', () => {
     expect((screen.getByLabelText('分支') as HTMLInputElement).value).toBe('mnemon-sync')
     expect((screen.getByLabelText('仓库内目录') as HTMLInputElement).value).toBe('mnemon/')
     expect((within(screen.getByRole('radiogroup', { name: '提交者' })).getByRole('radio', { name: '默认' }) as HTMLInputElement).checked).toBe(true)
-    expect(screen.getByText('优先使用本机 Git 身份；没有配置时以 @tingfeng/dsh-tingfeng sync <mnemon@localhost> 提交')).toBeTruthy()
+    expect(screen.getByText('优先使用本机 Git 身份；没有配置时以 dsh-tingfeng sync <mnemon@localhost> 提交')).toBeTruthy()
     cleanup()
 
     const signedIn = fixture({ github: { available: true, signedIn: true, writable: true, login: 'octocat' } })
@@ -251,7 +251,7 @@ describe('Memory enhancement settings', () => {
         ok: true as const,
         value: {
           enabled: false, configured: false,
-          config: { branch: 'mnemon-sync', subdir: 'mnemon/', hasToken: false, credentialSource: 'none' as const, authorName: '@tingfeng/dsh-tingfeng sync', authorEmail: 'mnemon@localhost' },
+          config: { branch: 'mnemon-sync', subdir: 'mnemon/', hasToken: false, credentialSource: 'none' as const, authorName: 'dsh-tingfeng sync', authorEmail: 'mnemon@localhost' },
           configPath: '/root/.mnemon/state/sync-git.json', mirrorPath: '/root/.mnemon/state/sync/git',
           git: { available: false, required: '2.20' }, remote: { reachable: false, branchExists: false },
         },

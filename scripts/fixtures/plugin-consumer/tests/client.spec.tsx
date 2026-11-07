@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { loadMemoryClientArtifact, MemoryCompositionRunner } from '@tingfeng/dsh-tingfeng/testing'
+import { loadMemoryClientArtifact, MemoryCompositionRunner } from 'dsh-tingfeng/testing'
 import * as runtime from 'dsh-tingfeng-source-runtime'
 import * as focus from '../lib/external-strategy.js'
 
@@ -16,8 +16,8 @@ const dependencies = {
   'react-dom': await vi.importActual('react-dom'),
   '@deepseek-ai/dsh-client-ui-primitives': await vi.importActual('@deepseek-ai/dsh-client-ui-primitives'),
 }
-const core = loadMemoryClientArtifact<typeof import('@tingfeng/dsh-tingfeng/client')>(require.resolve('@tingfeng/dsh-tingfeng/client'), dependencies)
-const sourceDependencies = { ...dependencies, '@tingfeng/dsh-tingfeng/client': core, 'markdown-to-jsx': require('markdown-to-jsx') }
+const core = loadMemoryClientArtifact<typeof import('dsh-tingfeng/client')>(require.resolve('dsh-tingfeng/client'), dependencies)
+const sourceDependencies = { ...dependencies, 'dsh-tingfeng/client': core, 'markdown-to-jsx': require('markdown-to-jsx') }
 const runtimeClient = loadMemoryClientArtifact<typeof import('dsh-tingfeng-source-runtime/client')>(require.resolve('dsh-tingfeng-source-runtime/client'), sourceDependencies)
 const documentsClient = loadMemoryClientArtifact<typeof import('dsh-tingfeng-source-documents/client')>(require.resolve('dsh-tingfeng-source-documents/client'), sourceDependencies)
 const spacesClient = loadMemoryClientArtifact<typeof import('dsh-tingfeng-source-memory-spaces/client')>(require.resolve('dsh-tingfeng-source-memory-spaces/client'), sourceDependencies)
@@ -33,7 +33,7 @@ describe('compiled Source clients with compiled Core and no source aliases', () 
       memorySidebarStyles: Object.fromEntries(Object.entries(core.memorySidebarStyles).filter(([key]) => !key.startsWith('runtime'))),
     }
     const owned = loadMemoryClientArtifact<typeof import('dsh-tingfeng-source-runtime/client')>(require.resolve('dsh-tingfeng-source-runtime/client'), {
-      ...sourceDependencies, '@tingfeng/dsh-tingfeng/client': oldKit,
+      ...sourceDependencies, 'dsh-tingfeng/client': oldKit,
     })
     try {
       await runner.mount(focus, { instanceId: 'focus', config: { sourceKeys: ['source:work'], mode: 'eager' } })
