@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto'
 import { stat } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import type { ResolvedConfig } from './config.ts'
+import type { ResolvedColdLibHintConfig } from './protocol.ts'
 import type {
   CreateHostAgentOptions,
   HostAgent,
@@ -30,7 +31,7 @@ import type { PreparedMemoryPlacement } from 'dsh-tingfeng-source-memory-spaces/
 import type { MemoryWake } from "../core/contracts/index.ts"
 import { agentScope, type MnemonAgentRuntimeSource } from './runtime.ts'
 import { createPluginMessage, MNEMON_PLUGIN_SOURCE } from './plugin-message.ts'
-import { coldLibHintText, matchColdLibHint } from './coldlib-hint.ts'
+import { coldLibHintText, matchColdLibHint, resolveColdLibHint } from './coldlib-hint.ts'
 import type { SkillEvolution } from './skill-evolution.ts'
 import { IdleReviewWatermarkStore } from './idle-review-watermark.ts'
 
@@ -265,6 +266,8 @@ class MnemonAgentLifecycle {
   private lastAt: string | undefined
   private lastError: string | undefined
   private composedTurn: { turn: number; typeId: string; idleReview: boolean; directory?: string } | undefined
+  private coldLibHintSource: ResolvedConfig['coldLibHint'] | undefined
+  private coldLibHintCache: ResolvedColdLibHintConfig | undefined
 
   constructor(
     readonly agent: HostAgent,
@@ -464,10 +467,16 @@ class MnemonAgentLifecycle {
     // turn's user text differs; the per-turn cost is a handful of regex tests).
     // Reminder-only — appended after the snapshot, never blocks or rewrites.
     if (payload.step === 1 && !this.coldLibHintTurns.has(payload.turn)) {
-      const domains = matchColdLibHint(decision.messages
-        .filter(message => message.source.kind === 'user' && !isMnemonMessageSource(message.source))
-        .map(message => userMessageText(message))
-        .join('\n'))
+      // The keyword table comes from configuration, so a machine that works a
+      // different set of domains carries its own list instead of blocking every
+      // push from its sibling. See `coldLibHint` in the profile patch.
+      const coldLibHint = this.coldLibHintMatcher()
+      const domains = coldLibHint.enabled
+        ? matchColdLibHint(decision.messages
+          .filter(message => message.source.kind === 'user' && !isMnemonMessageSource(message.source))
+          .map(message => userMessageText(message))
+          .join('\n'), coldLibHint.rules, coldLibHint.exclusions)
+        : []
       if (domains.length > 0) {
         this.coldLibHintTurns.add(payload.turn)
         const hint = createPluginMessage(coldLibHintText(domains), 'instructions')
@@ -617,7 +626,22 @@ class MnemonAgentLifecycle {
     } catch (error) { this.pauseWatermark(error); return false }
   }
 
+  /**
+   * The compiled keyword table, rebuilt when the config object changes. The
+   * regexes are compiled once rather than per turn: this runs on step 1 of every
+   * turn, and a table of a few dozen patterns is not worth rebuilding there.
+   * @returns the matcher table for the current configuration.
+   */
+  private coldLibHintMatcher(): ResolvedColdLibHintConfig {
+    if (this.coldLibHintCache === undefined || this.coldLibHintSource !== this.config.coldLibHint) {
+      this.coldLibHintSource = this.config.coldLibHint
+      this.coldLibHintCache = resolveColdLibHint(this.config.coldLibHint)
+    }
+    return this.coldLibHintCache
+  }
+
   configurationChanged(): void {
+    this.coldLibHintCache = undefined
     const policy = this.reviewPolicy()
     if (policy !== this.observedReviewPolicy) {
       this.cancelIdleReview(true)

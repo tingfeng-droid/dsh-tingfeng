@@ -327,6 +327,59 @@ export interface Config {
    * asking the Host anything: a disabled block must not run a single Git command.
    */
   syncEnabled?: boolean
+  /**
+   * Cold-library keyword reminder. The keyword table ships with defaults, but a
+   * profile may replace it: which domains exist is a property of ONE machine's
+   * work, not of this package. A desktop with a GPU and NTFS disks needs the
+   * wallpaper and mount entries; an office machine without either needs neither,
+   * and keeping one shared table means every push between them overwrites the
+   * other's domains.
+   */
+  coldLibHint?: ColdLibHintConfig
+}
+
+/** One domain of the cold-library reminder, as a profile declares it. */
+export interface ColdLibHintRuleConfig {
+  /** Short tag surfaced in the reminder text. */
+  domain: string
+  /**
+   * Regular-expression source (no slashes, no flags) matching the user phrasing
+   * that acts on this domain. Stored as a string because a profile config file
+   * can only hold text; the engine compiles it once per resolution.
+   */
+  keywords: string
+  /** Regex flags, e.g. `iu`. Defaults to `u`. */
+  flags?: string
+}
+
+export interface ColdLibHintConfig {
+  /** Defaults to on: the reminder is cheap and never blocks anything. */
+  enabled: boolean
+  /**
+   * Replace the built-in keyword table. `null` (an omitted field) keeps the
+   * defaults; an empty array disables every rule while leaving the switch
+   * available. The schema keeps all three states apart, which is why this is
+   * nullable rather than optional.
+   */
+  rules: ColdLibHintRuleConfig[] | null
+  /**
+   * Replace the built-in exclusion list. An exclusion suppresses only the
+   * SENTENCE it appears in, so a long message that both discusses a domain and
+   * asks to act on it still triggers.
+   */
+  exclusions: string[] | null
+}
+
+/** One compiled matcher: the regex the engine actually tests. */
+export interface ResolvedColdLibHintRule {
+  domain: string
+  pattern: RegExp
+}
+
+export interface ResolvedColdLibHintConfig {
+  enabled: boolean
+  rules: ResolvedColdLibHintRule[]
+  exclusions: RegExp[]
 }
 
 export interface TaskAgentModelConfig {
@@ -391,6 +444,13 @@ export interface ResolvedConfig {
   persistenceStrategy: ResolvedMemoryPersistenceStrategy
   taskAgentModel: ResolvedTaskAgentModelConfig
   syncEnabled: boolean
+  /**
+   * Kept in CONFIG shape, not compiled: this type is also fed back as input
+   * (resolved configs spread into `resolveConfig` in tests and live reload), so
+   * a compiled form here would make the two shapes diverge. Compilation happens
+   * once in `resolveColdLibHint`, at the engine that matches text.
+   */
+  coldLibHint: ColdLibHintConfig
 }
 
 export interface ResolvedInteractionConfig {

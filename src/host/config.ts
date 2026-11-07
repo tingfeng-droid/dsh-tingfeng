@@ -29,6 +29,8 @@ import {
   MNEMON_EMBEDDING_PROTOCOLS,
 } from './config-values.ts'
 import type {
+  ColdLibHintConfig,
+  ColdLibHintRuleConfig,
   Config as SharedConfig,
   CustomPackConfig as SharedCustomPackConfig,
   InteractionConfig as SharedInteractionConfig,
@@ -155,6 +157,27 @@ const IdleReviewSchema = z.object({
   maxTokens: z.number().step(1).min(128).max(131_072).default(DEFAULT_IDLE_REVIEW.maxTokens),
 })
 
+/**
+ * One keyword table entry as a profile config file can hold it: a regex source
+ * plus flags, both strings. Compiled on resolution, so a mistyped pattern is a
+ * dropped rule rather than a failed startup.
+ */
+const ColdLibHintRuleSchema: z<ColdLibHintRuleConfig> = z.object({
+  domain: z.string(),
+  keywords: z.string(),
+  flags: z.string().default('u'),
+})
+
+const ColdLibHintSchema: z<ColdLibHintConfig> = z.object({
+  enabled: z.boolean().default(true),
+  // `null` keeps the built-in table; `[]` means no rules at all; an array
+  // replaces it. Three states, so the field cannot default to an array: this
+  // schema fills a missing array with `[]`, which would erase the difference
+  // between "not configured" and "configured empty".
+  rules: z.union([z.array(ColdLibHintRuleSchema), z.const(null)]).default(null),
+  exclusions: z.union([z.array(z.string()), z.const(null)]).default(null),
+})
+
 const MemoryParticipationModeSchema = z.union(['off', 'manual', 'automatic'] as const)
 const MemoryLayerConfigSchema = z.object({
   enabled: z.boolean(),
@@ -246,6 +269,9 @@ export const Config: z<Config> = z.object({
   // Git sync is off until a user switches it on: the block stays a title and a
   // switch, and nothing about Git is probed while it is off.
   syncEnabled: z.boolean().default(false),
+  // Which domains this machine works is a property of the machine, not of the
+  // package, so the keyword table is configuration with built-in defaults.
+  coldLibHint: ColdLibHintSchema,
 })
 
 export function resolveInteractionConfig(config: InteractionConfig = {}): ResolvedInteractionConfig {
@@ -413,5 +439,12 @@ export function resolveConfig(config: Config = {}): ResolvedConfig {
     persistenceStrategy: resolvePersistenceStrategy(config.persistenceStrategy),
     taskAgentModel: resolveTaskAgentModel(config.taskAgentModel),
     syncEnabled: config.syncEnabled ?? false,
+    // Normalized here so a config that skipped the schema (a resolved config
+    // spread back in, a test fixture) still yields a complete block.
+    coldLibHint: {
+      enabled: config.coldLibHint?.enabled ?? true,
+      rules: config.coldLibHint?.rules ?? null,
+      exclusions: config.coldLibHint?.exclusions ?? null,
+    },
   }
 }
