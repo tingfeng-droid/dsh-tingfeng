@@ -3,7 +3,11 @@ import { RUNTIME_MEMORY_PROTOCOL, ROUTING_GUIDANCE, THREE_TIER_REMINDERS } from 
 
 describe('default three-tier instructions', () => {
   it('owns the unchanged runtime write protocol, separate from Source snapshots', () => {
-    expect(Buffer.byteLength(RUNTIME_MEMORY_PROTOCOL, 'utf8')).toBe(3_990)
+    // 4,154 bytes after 7c9fa21 moved the wording patch into the source layer;
+    // that commit changed the protocol text but not this assertion. Keep this in
+    // lockstep with the text: the point is to catch an accidental reword, so a
+    // deliberate edit must update both together.
+    expect(Buffer.byteLength(RUNTIME_MEMORY_PROTOCOL, 'utf8')).toBe(4_154)
     expect(RUNTIME_MEMORY_PROTOCOL).toContain('Manage hot memory exclusively with mnemon_runtime_memory')
     expect(RUNTIME_MEMORY_PROTOCOL).toContain('Use action="add" only for a new independent fact')
     expect(RUNTIME_MEMORY_PROTOCOL).toContain('Use action="replace" with a short unique old_text')

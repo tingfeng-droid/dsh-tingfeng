@@ -63,8 +63,25 @@ describe('standalone plugin repository boundary', () => {
     const configuration = JSON.parse(readFileSync(join(directory, 'tsconfig.json'), 'utf8'))
     expect(configuration.extends).toBeUndefined()
     expect(configuration.compilerOptions.paths).toBeUndefined()
+    // Only `dependencies` and `peerDependencies` reach an installer, so only they
+    // must carry real ranges. pnpm's `workspace:` protocol is the correct way to
+    // link sibling packages inside this repository, and nested devDependencies are
+    // stripped at pack time by `withoutWorkspaceDevLinks` (see scripts/release.mjs),
+    // which is what keeps npm from rejecting the tarball with EUNSUPPORTEDPROTOCOL.
+    // Asserting on devDependencies here rejected the repository's own layout.
+    const published = { ...manifest.dependencies, ...manifest.peerDependencies }
+    for (const [dependency, version] of Object.entries(published)) {
+      expect(version, `${name} publishable dependency ${dependency}`).not.toMatch(/^(?:workspace:|file:|link:|\.\.?\/)/u)
+    }
+    // A workspace range in devDependencies is fine, but must be one the packer
+    // knows how to strip; anything else would ship a protocol npm cannot parse.
+    for (const [dependency, version] of Object.entries(manifest.devDependencies ?? {})) {
+      if (!String(version).startsWith('workspace:')) continue
+      expect(dependency, `${name} devDependency ${dependency} must be a sibling package`).toMatch(/^(?:@tingfeng\/dsh-tingfeng|dsh-tingfeng-)/u)
+    }
+    // Imports may be satisfied by any of the three fields; this set answers
+    // "is this specifier declared at all", not "will it be published".
     const dependencies = { ...manifest.dependencies, ...manifest.peerDependencies, ...manifest.devDependencies }
-    for (const version of Object.values(dependencies)) expect(version).not.toMatch(/^(?:workspace:|file:|link:|\.\.?\/)/u)
     const provider = name.startsWith('dsh-tingfeng-provider-')
     expect(manifest.peerDependencies[provider ? 'dsh-tingfeng-source-memory-spaces' : '@tingfeng/dsh-tingfeng']).toBeTruthy()
     if (provider) expect(manifest.peerDependencies['@tingfeng/dsh-tingfeng']).toBeUndefined()

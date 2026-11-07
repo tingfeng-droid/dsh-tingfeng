@@ -58,7 +58,7 @@ describe('documentation checks', () => {
   it.each([['README.md', 'en'], ['README.zh-CN.md', 'zh-CN']])('retains the centered %s header, seven badges and localized diagram', (file, language) => {
     const readme = readFileSync(new URL(`../${file}`, import.meta.url), 'utf8')
     const header = readme.split('\n## ')[0]
-    expect(header).toMatch(/^<h1 align="center">@tingfeng/dsh-tingfeng<\/h1>/u)
+    expect(header).toMatch(/^<h1 align="center">@tingfeng\/dsh-tingfeng<\/h1>/u)
     expect([...header.matchAll(/<p align="center">/gu)]).toHaveLength(6)
     const images = [...header.matchAll(/<img\b[^>]*\bsrc="([^"]+)"/gu)].map(match => new URL(match[1].replaceAll('&amp;', '&')))
     const badges = images.filter(url => ['img.shields.io', 'dshfind.com'].includes(url.hostname))

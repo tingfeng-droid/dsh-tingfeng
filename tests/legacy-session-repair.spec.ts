@@ -941,7 +941,7 @@ describe('legacy Session copy repair', () => {
     const root = await directory()
     const input = join(root, 'input')
     const output = join(root, 'output')
-    const keys = ['"kind": "plugin"', '"plugin":"@tingfeng/dsh-tingfeng"', '"form":"recall"']
+    const keys = ['"kind": "plugin"', '"plugin":"dsh-mnemon"', '"form":"recall"']
     keys.splice(position === 'first' ? 0 : position === 'middle' ? 1 : 3, 0, '"summary" : "Memory View snapshot"')
     const row = '  { "type":"user/message", "seq":9007199254740993, "data":{"source":{ ' + keys.join(',  ') + ' }, "content":[{"text":"\\\"summary\\\": {} [] \\u4e2d", "n":1.2300e+42}]}}\r\n'
     const text = fixture.split('\n')[0] + '\r\n' + row
@@ -954,7 +954,7 @@ describe('legacy Session copy repair', () => {
 
   it('leaves clean, unrelated and unknown metadata byte-identical', async () => {
     const root = await directory()
-    for (const [index, text] of [expected, fixture.replaceAll('@tingfeng/dsh-tingfeng', 'other-plugin'), fixture.replaceAll('summary', 'differentField'), fixture.replaceAll('Memory View snapshot', 'unrecognized summary').replaceAll('Optional memory recall and remember reminder', 'another summary'), fixture.replaceAll('"form":"recall"', '"form":"notice"').replaceAll('"form":"instructions"', '"form":"notice"')].entries()) {
+    for (const [index, text] of [expected, fixture.replaceAll('"plugin":"dsh-mnemon"', '"plugin":"other-plugin"'), fixture.replaceAll('summary', 'differentField'), fixture.replaceAll('Memory View snapshot', 'unrecognized summary').replaceAll('Optional memory recall and remember reminder', 'another summary'), fixture.replaceAll('"form":"recall"', '"form":"notice"').replaceAll('"form":"instructions"', '"form":"notice"')].entries()) {
       const input = join(root, `${index}.jsonl`)
       const output = join(root, `${index}-copy.jsonl`)
       await writeFile(input, text)
@@ -992,7 +992,7 @@ describe('legacy Session copy repair', () => {
     fixture.replace(/"createdAt":\d+/, '"createdAt":-1'),
     fixture.slice(0, -1),
     fixture + '{invalid}\n',
-    fixture.replace('"plugin":"@tingfeng/dsh-tingfeng"', '"plugin":"other","plugin":"@tingfeng/dsh-tingfeng"'),
+    fixture.replace('"plugin":"dsh-mnemon"', '"plugin":"other","plugin":"dsh-mnemon"'),
     Buffer.concat([Buffer.from(fixture), Buffer.from([0xff, 0x0a])]),
   ])('refuses invalid or ambiguous input without publishing output (%#)', async text => {
     const root = await directory()

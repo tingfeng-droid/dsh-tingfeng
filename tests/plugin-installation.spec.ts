@@ -86,7 +86,7 @@ describe('DSH-native Memory plugin installation', () => {
       description: 'A bounded test Strategy.', mnemonPeerRange: '^0.5.0-beta.1', installed: false,
     })
     expect(fetchPackage).toHaveBeenCalledWith('dsh-tingfeng-strategy-focus', 'beta')
-    await expect(manager.inspect('file:../plugin')).rejects.toThrow('exact @tingfeng/dsh-tingfeng')
+    await expect(manager.inspect('file:../plugin')).rejects.toThrow('Use an exact dsh-tingfeng-source-* or dsh-tingfeng-strategy-* package name')
   })
 
   it('rejects packages that cannot join the DSH bundle stack', async () => {

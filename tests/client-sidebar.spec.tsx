@@ -171,7 +171,7 @@ describe('Mnemon canonical workspace launcher', () => {
     memoryTab.addEventListener('click', clicked)
     currentDispose = mountFallbackEntry(context() as never, t as never, new MnemonWorkspaceController())
 
-    const entry = document.querySelector<HTMLButtonElement>('[data-dsh-tingfeng-entry]')!
+    const entry = document.querySelector<HTMLButtonElement>('[data-dsh-mnemon-entry]')!
     expect(entry.previousElementSibling?.hasAttribute('data-dsh-ssh-entry')).toBe(true)
     fireEvent.click(entry)
     expect(clicked).not.toHaveBeenCalled()
@@ -187,7 +187,7 @@ describe('Mnemon canonical workspace launcher', () => {
     const newSession = sidebar.querySelector('button.newSession')!
     sidebar.querySelector('.logoRow')!.after(newSession)
     currentDispose = mountFallbackEntry(context() as never, t as never, new MnemonWorkspaceController())
-    const entry = document.querySelector<HTMLButtonElement>('[data-dsh-tingfeng-entry]')!
+    const entry = document.querySelector<HTMLButtonElement>('[data-dsh-mnemon-entry]')!
     // ORCA LINK applies its hidden New Session artwork to this exact selector.
     const artworkTargets = sidebar.querySelectorAll(":scope > :first-child > button:not([data-dsh-part='sidebar-entry'])")
     expect([...artworkTargets]).toContain(newSession)
@@ -241,7 +241,7 @@ describe('Mnemon canonical workspace launcher', () => {
       t={t as never} renderSlot={() => null} controller={controller}
     />)
     expect(document.querySelector('[data-testid="mnemon-canonical-content"]')).toBeNull()
-    fireEvent.click(document.querySelector('[data-dsh-tingfeng-entry]')!)
+    fireEvent.click(document.querySelector('[data-dsh-mnemon-entry]')!)
     await waitFor(() => expect(view.getByText('no-session')).not.toBeNull())
     expect(column.inert).toBe(true)
     expect(document.querySelector<HTMLElement>('[data-dsh-tingfeng-view]')?.style.width).toBe('1000px')
@@ -300,7 +300,7 @@ describe('Mnemon canonical workspace launcher', () => {
       localeRuntime={ctx.locale as never} sourcePageDirectory={sourcePageDirectory}
       navigation={{ open: () => controller.open(), close: () => controller.close() }} t={t as never} renderSlot={() => null} controller={controller}
     />)
-    const entry = document.querySelector('[data-dsh-tingfeng-entry]')!
+    const entry = document.querySelector('[data-dsh-mnemon-entry]')!
     fireEvent.click(entry)
     const content = await view.findByTestId('mnemon-canonical-content')
     expect(content.getAttribute('data-active')).toBe('true')
@@ -344,7 +344,7 @@ describe('Mnemon canonical workspace launcher', () => {
   it.each(['taskboard', 'ssh'] as const)('returns in one click after %s takes over without an activation announcement', name => {
     const panel = mountSiblingPanel(name, false)
     currentDispose = mountFallbackEntry(context() as never, key => String(key), new MnemonWorkspaceController())
-    const entry = document.querySelector<HTMLButtonElement>('[data-dsh-tingfeng-entry]')!
+    const entry = document.querySelector<HTMLButtonElement>('[data-dsh-mnemon-entry]')!
 
     fireEvent.click(entry)
     fireEvent.click(panel.entry)
@@ -363,7 +363,7 @@ describe('Mnemon canonical workspace launcher', () => {
 
   it('reclaims a hidden workspace even before DOM-state synchronization has run', () => {
     currentDispose = mountFallbackEntry(context() as never, key => String(key), new MnemonWorkspaceController())
-    const entry = document.querySelector<HTMLButtonElement>('[data-dsh-tingfeng-entry]')!
+    const entry = document.querySelector<HTMLButtonElement>('[data-dsh-mnemon-entry]')!
     fireEvent.click(entry)
     document.documentElement.removeAttribute('data-dsh-tingfeng-active')
     document.documentElement.setAttribute('data-dsh-taskboard-active', '')
@@ -376,7 +376,7 @@ describe('Mnemon canonical workspace launcher', () => {
 
   it.each(['taskboard', 'ssh'] as const)('synchronizes its entry when %s takes over programmatically without an event', async name => {
     currentDispose = mountFallbackEntry(context() as never, key => String(key), new MnemonWorkspaceController())
-    const entry = document.querySelector<HTMLButtonElement>('[data-dsh-tingfeng-entry]')!
+    const entry = document.querySelector<HTMLButtonElement>('[data-dsh-mnemon-entry]')!
     fireEvent.click(entry)
     document.documentElement.setAttribute(`data-dsh-${name}-active`, '')
 
@@ -390,7 +390,7 @@ describe('Mnemon canonical workspace launcher', () => {
   it('treats the sidebar entry as navigation and retains an already active workspace', () => {
     const controller = new MnemonWorkspaceController()
     currentDispose = mountFallbackEntry(context() as never, key => String(key), controller)
-    const entry = document.querySelector<HTMLButtonElement>('[data-dsh-tingfeng-entry]')!
+    const entry = document.querySelector<HTMLButtonElement>('[data-dsh-mnemon-entry]')!
     expect(entry.hasAttribute('aria-current')).toBe(false)
     fireEvent.click(entry)
     fireEvent.click(entry)
@@ -409,7 +409,7 @@ describe('Mnemon canonical workspace launcher', () => {
     const board = mountSiblingPanel('taskboard')
     const ssh = mountSiblingPanel('ssh')
     if (!mnemonFirst) mount()
-    const entry = document.querySelector<HTMLButtonElement>('[data-dsh-tingfeng-entry]')!
+    const entry = document.querySelector<HTMLButtonElement>('[data-dsh-mnemon-entry]')!
     fireEvent.click(entry)
     for (let round = 0; round < 3; round += 1) {
       for (const panel of [board, ssh]) {
@@ -430,11 +430,11 @@ describe('Mnemon canonical workspace launcher', () => {
 
   it('self-heals its sidebar launcher after a React-style row replacement', async () => {
     currentDispose = mountFallbackEntry(context() as never, t as never, new MnemonWorkspaceController())
-    document.querySelector('[data-dsh-tingfeng-entry]')?.remove()
-    await waitFor(() => expect(document.querySelector('[data-dsh-tingfeng-entry]')).not.toBeNull())
+    document.querySelector('[data-dsh-mnemon-entry]')?.remove()
+    await waitFor(() => expect(document.querySelector('[data-dsh-mnemon-entry]')).not.toBeNull())
     currentDispose()
     currentDispose = undefined
-    expect(document.querySelector('[data-dsh-tingfeng-entry]')).toBeNull()
+    expect(document.querySelector('[data-dsh-mnemon-entry]')).toBeNull()
   })
 
   it('mounts beside a nested DSH Desktop new-session row without using a foreign anchor', async () => {
@@ -453,18 +453,18 @@ describe('Mnemon canonical workspace launcher', () => {
 
     currentDispose = mountFallbackEntry(context() as never, t as never, new MnemonWorkspaceController())
 
-    const entry = document.querySelector<HTMLButtonElement>('[data-dsh-tingfeng-entry]')!
+    const entry = document.querySelector<HTMLButtonElement>('[data-dsh-mnemon-entry]')!
     expect(entry.parentElement).toBe(panelArea)
     expect(entry.nextElementSibling).toBe(slot)
 
     entry.remove()
-    await waitFor(() => expect(document.querySelector('[data-dsh-tingfeng-entry]')?.parentElement).toBe(panelArea))
+    await waitFor(() => expect(document.querySelector('[data-dsh-mnemon-entry]')?.parentElement).toBe(panelArea))
   })
 
   it('mounts the launcher in the DSH advanced frame without replacing conversation content', () => {
     renderShell(true)
     currentDispose = mountFallbackEntry(context() as never, t as never, new MnemonWorkspaceController())
-    const entry = document.querySelector<HTMLButtonElement>('[data-dsh-tingfeng-entry]')!
+    const entry = document.querySelector<HTMLButtonElement>('[data-dsh-mnemon-entry]')!
     fireEvent.click(entry)
     expect(document.querySelector('[role="tab"][aria-selected="true"]')?.textContent).toBe('Chat')
     expect(entry.dataset.active).toBe('true')
@@ -545,10 +545,10 @@ describe('Mnemon canonical workspace launcher', () => {
     const locale = { getSnapshot: () => snapshot, subscribe: (listener: () => void) => { listeners.add(listener); return () => listeners.delete(listener) } }
     const translate = (key: string) => key === 'tab.label' ? active === 'zh' ? '记忆系统' : 'Memory System' : key
     currentDispose = mountFallbackEntry(context(locale) as never, translate as never, new MnemonWorkspaceController())
-    expect(document.querySelector('[data-dsh-tingfeng-entry]')?.textContent).toBe('记忆系统')
+    expect(document.querySelector('[data-dsh-mnemon-entry]')?.textContent).toBe('记忆系统')
     active = 'en'
     snapshot = { active, locales: [] as const, revision: 1 }
     for (const listener of listeners) listener()
-    await waitFor(() => expect(document.querySelector('[data-dsh-tingfeng-entry]')?.textContent).toBe('Memory System'))
+    await waitFor(() => expect(document.querySelector('[data-dsh-mnemon-entry]')?.textContent).toBe('Memory System'))
   })
 })

@@ -357,7 +357,7 @@ describe('selective, channel-safe official release', () => {
     const workflow = await readFile(join(root, '.github/workflows/publish.yml'), 'utf8')
     const verifier = await readFile(join(root, 'scripts/verify-plugin-artifacts.mjs'), 'utf8')
     // Both install that release on the pinned DSH first, so a move of the DSH baseline moves them together.
-    const published = /--upgrade-from @tingfeng/dsh-tingfeng@(\d+\.\d+\.\d+)/u.exec(workflow)?.[1]
+    const published = /--upgrade-from @tingfeng\/dsh-tingfeng@(\d+\.\d+\.\d+)/u.exec(workflow)?.[1]
     const verified = /const upgradeBase = '(\d+\.\d+\.\d+)'/u.exec(verifier)?.[1]
     expect(verified).toMatch(/^\d+\.\d+\.\d+$/u)
     expect(published).toBe(verified)

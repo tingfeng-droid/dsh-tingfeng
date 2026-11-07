@@ -53,7 +53,7 @@ export default defineConfig({
     coverage: { enabled: false },
     server: {
       deps: {
-        inline: ['@deepseek-ai/dsh-client-ui-primitives'],
+        inline: ['@deepseek-ai/dsh-client-ui-primitives', /dsh-tingfeng-source-/, /dsh-tingfeng-strategy-/, /dsh-tingfeng-provider-/],
       },
     },
   },

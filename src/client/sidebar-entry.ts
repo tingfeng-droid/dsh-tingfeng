@@ -3,7 +3,12 @@ import css from './MnemonWorkspace.module.css'
 import type { MnemonWorkspaceController } from './workspace-controller.ts'
 import { createMemoryIcon } from './memory-icon.tsx'
 
-const FAMILY_SELECTOR = '[data-dsh-taskboard-entry], [data-dsh-ssh-entry], [data-dsh-tingfeng-entry]'
+// `createEntry` stamps `data-dsh-mnemon-entry`, so the family selector has to
+// match that name. Listing a stale `data-dsh-tingfeng-entry` here looked
+// harmless but silently dropped this plugin's own entry out of the family:
+// `placeEntry` then treated the previous sibling as the anchor and the entry
+// landed in the wrong slot, which is visible as a duplicated or misplaced row.
+const FAMILY_SELECTOR = '[data-dsh-taskboard-entry], [data-dsh-ssh-entry], [data-dsh-mnemon-entry]'
 
 function sidebarRoot(): HTMLElement | undefined {
   const column = document.querySelector<HTMLElement>('[data-pane="sidebar"], [class*="sidebarCol"], .dshDesktopUpstreamSidebar')

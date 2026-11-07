@@ -27,8 +27,13 @@ function generation() {
     mkdirSync(dirname(target), { recursive: true })
     symlinkSync(join(root, 'node_modules', name), target, 'junction')
   }
-  mkdirSync(join(profile, 'node_modules'), { recursive: true })
-  symlinkSync(packageRoot, join(profile, 'node_modules/@tingfeng/dsh-tingfeng'), 'junction')
+  // The scoped directory must exist before the link can be created: a symlink's
+  // parent is not created by `symlinkSync`, and `'junction'` is only special on
+  // Windows — on POSIX the target is resolved literally, so a missing
+  // `node_modules/@tingfeng` fails with ENOENT instead of a clearer error.
+  const linked = join(profile, 'node_modules/@tingfeng/dsh-tingfeng')
+  mkdirSync(dirname(linked), { recursive: true })
+  symlinkSync(packageRoot, linked, 'junction')
   return { directory, profile }
 }
 

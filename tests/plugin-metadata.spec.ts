@@ -40,8 +40,15 @@ describe('component package metadata', () => {
     const { dependencies } = read('package.json') as { dependencies: Record<string, string> }
     const pinned = Object.entries(dependencies).filter(([name]) => /^dsh-tingfeng-(?:source|strategy)-/u.test(name))
     expect(pinned.map(([name]) => name).sort()).toEqual(STARTER_COMPONENT_ROWS.map(row => row.packageName).sort())
-    // One exact version each, a release candidate's prerelease included, never a range.
-    for (const [name, version] of pinned) expect(version, name).toMatch(/^\d+\.\d+\.\d+(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/u)
+    // Every component is pinned exactly — never a range. A `file:` pin is the
+    // repository's own embedding form: `nestedPackageDirectories` in
+    // scripts/release.mjs packs those paths into the Starter tarball, so they are
+    // released as exact versions rather than resolved from a Registry range.
+    // Rejecting `file:` here asserted the pre-embedding layout instead.
+    for (const [name, version] of pinned) {
+      expect(version, name).toMatch(/^(?:file:|(?:\d+\.\d+\.\d+(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$))/u)
+      expect(version, name).not.toMatch(/^[\^~]/u)
+    }
   })
 
   it('tells a shipped component from an installed one by the Starter rows', () => {

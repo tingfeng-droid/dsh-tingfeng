@@ -232,7 +232,7 @@ describe('the built Memory Spaces client beside @tingfeng/dsh-tingfeng 0.5.31', 
     if (!existsSync(path)) throw new Error(`Build ${entry} first`)
     return path
   }
-  const names = (require('./fixtures/dsh-tingfeng-client-0.5.31-exports.json') as { exports: string[] }).exports
+  const names = (require('./fixtures/dsh-mnemon-client-0.5.31-exports.json') as { exports: string[] }).exports
 
   async function load() {
     const react = { react: await import('react'), 'react/jsx-runtime': await import('react/jsx-runtime'), 'react-dom': await import('react-dom'),

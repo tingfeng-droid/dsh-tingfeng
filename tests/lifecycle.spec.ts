@@ -6,6 +6,7 @@ import { createRequire } from 'node:module'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { assertReleasedPayloadSemantics } from '@deepseek-ai/dsh-session-format-v0-to-v1'
+import { MNEMON_PLUGIN_SOURCE } from '../src/host/plugin-message.ts'
 import { MemoryExecutions } from '../src/host/memory-executions.ts'
 import { resolveConfig } from "../src/host/config.ts"
 import type {
@@ -268,8 +269,8 @@ describe('Mnemon DSH lifecycle integration', () => {
     const value = fixture(resolveConfig({ recallMode: 'guided', writebackMode: 'guided' }))
     const decision = await value.preStep([userMessage()], 1)
     if (decision.kind !== 'enter') throw new Error('unexpected rejection')
-    const messages = decision.messages.filter(message => message.source.kind === '@tingfeng/dsh-tingfeng')
-    expect(messages.map(message => message.source.form)).toEqual(['instructions', 'recall'])
+    const messages = decision.messages.filter(message => message.source.kind === MNEMON_PLUGIN_SOURCE)
+    expect(messages.map(message => message.source.form)).toEqual(['instructions', 'snapshot'])
     for (const message of messages) {
       expect(message.source).not.toHaveProperty('plugin')
       expect(() => assertReleasedPayloadSemantics({
@@ -291,23 +292,27 @@ describe('Mnemon DSH lifecycle integration', () => {
     const decision = await value.preStep([userMessage()], 1)
     if (decision.kind !== 'enter') throw new Error('unexpected rejection')
     const messages = decision.messages.slice(1)
-    expect(messages.map(message => message.source.form)).toEqual(['instructions', 'recall'])
+    expect(messages.map(message => message.source.form)).toEqual(['instructions', 'snapshot'])
     for (const message of messages) {
       const event = session.append('user/message', message, { surfaceOp: 'append' })
       expect(format.releasedV4SessionFormatCodec.encodeEvent(event).data.source).toEqual(message.source)
     }
     const artifact = { header: session.header, inheritedEventCount: 0, events: session.snapshotEvents() }
     expect(() => format.restoreReleasedV4Artifact(artifact, sessionApi.KNOWN_SESSION_EVENT_TYPES)).not.toThrow()
-    const oldWrapper = { ...artifact.events[0], data: { ...messages[0], source: { kind: 'plugin', plugin: '@tingfeng/dsh-tingfeng', form: 'instructions' } } }
+    const oldWrapper = { ...artifact.events[0], data: { ...messages[0], source: { kind: 'plugin', plugin: MNEMON_PLUGIN_SOURCE, form: 'instructions' } } }
     expect(() => format.restoreReleasedV4Artifact({ ...artifact, events: [oldWrapper] }, sessionApi.KNOWN_SESSION_EVENT_TYPES))
       .toThrow('format v4 message requires a producer-owned source kind')
     value.stop()
   })
 
+  // Each shape `isMnemonMessageSource` accepts. The bare package name is absent
+  // on purpose: the plugin's source kind is `dsh-mnemon`, and a `kind` that is a
+  // package name is what the released V4 codec rejects (see the wrapper case
+  // above), so it must not be treated as our own message here either.
   const ownSources = [
-    { kind: '@tingfeng/dsh-tingfeng', form: 'instructions' },
-    { kind: 'plugin:@tingfeng/dsh-tingfeng', form: 'instructions' },
-    { kind: 'plugin', plugin: '@tingfeng/dsh-tingfeng', form: 'instructions' },
+    { kind: MNEMON_PLUGIN_SOURCE, form: 'instructions' },
+    { kind: `plugin:${MNEMON_PLUGIN_SOURCE}`, form: 'instructions' },
+    { kind: 'plugin', plugin: MNEMON_PLUGIN_SOURCE, form: 'instructions' },
   ]
 
   it.each(ownSources)('does not reinject context into a request already owned by Mnemon: %j', async source => {
@@ -325,14 +330,14 @@ describe('Mnemon DSH lifecycle integration', () => {
     if (decision.kind !== 'enter') throw new Error('unexpected rejection')
     expect(decision.messages).toHaveLength(2)
     expect(decision.messages.some(message => message.source.form === 'instructions')).toBe(false)
-    expect(decision.messages.at(-1)?.source.form).toBe('recall')
+    expect(decision.messages.at(-1)?.source.form).toBe('snapshot')
     value.stop()
   })
 
   it.each([
     { kind: 'plugin', plugin: 'other-plugin' },
     { kind: 'plugin:dsh-tingfeng-other' },
-    { kind: 'other-plugin', plugin: '@tingfeng/dsh-tingfeng' },
+    { kind: 'other-plugin', plugin: MNEMON_PLUGIN_SOURCE },
   ])('does not let another producer suppress Mnemon context: %j', async source => {
     const value = fixture()
     const other = { ...userMessage('Unrelated producer context'), source }
@@ -341,8 +346,11 @@ describe('Mnemon DSH lifecycle integration', () => {
     const decision = await value.preStep([other], 1)
     if (decision.kind !== 'enter') throw new Error('unexpected rejection')
     expect(decision.messages[0]).toEqual(other)
-    expect(decision.messages.slice(1).map(message => message.source)).toEqual([
-      { kind: '@tingfeng/dsh-tingfeng', form: 'instructions' }, { kind: '@tingfeng/dsh-tingfeng', form: 'recall' },
+    // `toMatchObject`, not `toEqual`: a snapshot source also carries the
+    // `sections` the agent loop needs, and this assertion is about which forms
+    // arrive and in what order, not about that payload.
+    expect(decision.messages.slice(1).map(message => message.source)).toMatchObject([
+      { kind: MNEMON_PLUGIN_SOURCE, form: 'instructions' }, { kind: MNEMON_PLUGIN_SOURCE, form: 'snapshot' },
     ])
     value.stop()
   })
@@ -359,9 +367,12 @@ describe('Mnemon DSH lifecycle integration', () => {
     }, async () => ({ kind: 'enter', messages: [user, shared] })) as HostPreStepDecision
     expect(value.agent.ctx.on).toHaveBeenCalledWith('agent/pre-step', expect.any(Function), { prepend: true })
     expect(decision.kind === 'enter' && decision.messages.slice(0, 2)).toEqual([user, shared])
+    // This Wake publishes no sections, and `form:'snapshot'` requires at least
+    // one (agent-loop falls back to no form on an empty array), so an empty
+    // section list must surface as `recall`.
     expect(decision.kind === 'enter' && decision.messages.at(-1)).toMatchObject({
       content: [{ type: 'text', text }],
-      source: { kind: '@tingfeng/dsh-tingfeng', form: 'recall' },
+      source: { kind: MNEMON_PLUGIN_SOURCE, form: 'recall' },
     })
     if (decision.kind === 'enter') expect(decision.messages.at(-1)?.source).not.toHaveProperty('summary')
     await value.turnStopping(1)
@@ -373,16 +384,16 @@ describe('Mnemon DSH lifecycle integration', () => {
   it('re-composes the guided reminder after a rewind drops it from the surface', async () => {
     const value = fixture()
     const forms = (decision: HostPreStepDecision) => decision.kind === 'enter' ? decision.messages.map(message => message.source.form) : []
-    expect(forms(await value.preStep([userMessage()], 1))).toEqual([undefined, 'instructions', 'recall'])
+    expect(forms(await value.preStep([userMessage()], 1))).toEqual([undefined, 'instructions', 'snapshot'])
 
     // Still visible: a later first step must not duplicate it. The snapshot
     // rides along because this fixture's Wake text is turn-derived.
-    expect(forms(await value.preStep([userMessage()], 2))).toEqual([undefined, 'recall'])
+    expect(forms(await value.preStep([userMessage()], 2))).toEqual([undefined, 'snapshot'])
 
     // Rewind replaces the surface and drops the reminder. The append-only event
     // log still contains it, which is why presence cannot be read from there.
     value.agent.session.surface = { nodes: [] }
-    expect(forms(await value.preStep([userMessage()], 3))).toEqual([undefined, 'instructions', 'recall'])
+    expect(forms(await value.preStep([userMessage()], 3))).toEqual([undefined, 'instructions', 'snapshot'])
   })
 
   it('pins one immutable Wake across every model step and releases it at the turn boundary', async () => {
@@ -849,7 +860,7 @@ describe('Mnemon DSH lifecycle integration', () => {
     expect(decision).toMatchObject({ kind: 'enter' })
     if (decision.kind !== 'enter') throw new Error('unexpected rejection')
     expect(decision.messages).toHaveLength(3)
-    expect(decision.messages[1]?.source).toMatchObject({ kind: '@tingfeng/dsh-tingfeng', form: 'instructions' })
+    expect(decision.messages[1]?.source).toMatchObject({ kind: MNEMON_PLUGIN_SOURCE, form: 'instructions' })
     expect(decision.messages[1]?.content[0]?.text).toBe('[MNEMON] Use mnemon_view_route only when relevant evidence is missing. Use mnemon_view_action only for an intended memory change; require a write receipt. Use only ids offered by the current View and follow each Source\'s semantics. Otherwise use none.')
     expect(value.coordinator.recall).not.toHaveBeenCalled()
 
@@ -859,7 +870,7 @@ describe('Mnemon DSH lifecycle integration', () => {
     // fixture derives Wake text from the turn, so turn 2 is a new revision.
     expect(second.messages).toHaveLength(2)
     expect(second.messages.some(message => (message.source as { form?: string }).form === 'instructions')).toBe(false)
-    expect(second.messages.at(-1)?.source).toMatchObject({ kind: '@tingfeng/dsh-tingfeng', form: 'recall' })
+    expect(second.messages.at(-1)?.source).toMatchObject({ kind: MNEMON_PLUGIN_SOURCE, form: 'snapshot' })
     expect(value.coordinator.recall).not.toHaveBeenCalled()
     expect(value.lifecycle.snapshot('session-1').counters).toMatchObject({ primes: 1, recallCues: 1, writebackCues: 1 })
   })

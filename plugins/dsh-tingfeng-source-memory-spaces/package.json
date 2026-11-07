@@ -59,7 +59,7 @@
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.1",
-    "@tingfeng/dsh-tingfeng": "0.5.41-ours.1",
+    "@tingfeng/dsh-tingfeng": "0.5.41-ours.6",
     "react": "^18.2.0"
   },
   "devDependencies": {

@@ -74,8 +74,11 @@ export async function apply(ctx, config) {
     await writeFile(join(leaf, 'package.json'), JSON.stringify({ name: 'fixture-leaf', version: '1.0.0', type: 'module', main: './index.js' }))
     await writeFile(join(leaf, 'index.js'), 'export function apply(ctx) { ctx.provide("otherFixture", {}) }')
   }
+  // `symlink` does not create the link's parent directory, and the scoped
+  // `@tingfeng` level is never made above: link into a missing scope fails with
+  // ENOENT naming the *target*, which reads like a missing source package.
+  await mkdir(join(profileDir, 'node_modules/@tingfeng'), { recursive: true })
   if (isolated) {
-    await mkdir(join(profileDir, 'node_modules'), { recursive: true })
     await symlink(join(modules, '@tingfeng/dsh-tingfeng'), join(profileDir, 'node_modules/@tingfeng/dsh-tingfeng'), process.platform === 'win32' ? 'junction' : 'dir')
   }
   if (otherBundle) await symlink(join(modules, 'fixture-other'), join(profileDir, 'node_modules/fixture-other'), process.platform === 'win32' ? 'junction' : 'dir')
@@ -96,7 +99,10 @@ export async function apply(ctx, config) {
     assert.notEqual(duplicated.find(row => row.id === 'mnemon').config.timeoutMs, 4321,
       'The config editor sees the first duplicate while the override updates the other one')
     // The documented recovery preserves overrides and uses the automatically loaded bundle once.
-    await writeFile(patchPath, '- id: mnemon-bundle\n  name: @tingfeng/dsh-tingfeng/bundle\n  disabled: false\n' + retained)
+    // Quoted, because a bare scalar starting with `@` is a reserved indicator in
+    // YAML and the host's parser rejects the whole patch list with
+    // "bad indentation of a mapping entry" at the line carrying the name.
+    await writeFile(patchPath, '- id: mnemon-bundle\n  name: "@tingfeng/dsh-tingfeng/bundle"\n  disabled: false\n' + retained)
   }
   const ConfigEditor = settings ? (await load('@deepseek-ai/dsh-config-editor')).default : undefined
   let Manager

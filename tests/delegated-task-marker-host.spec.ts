@@ -116,6 +116,8 @@ it.each(['fork', 'spawn'] as const)('starts the idle review a %s child runs with
 
 it('names every delegated operation by a line the documented pattern matches', () => {
   expect(DELEGATED_OPERATIONS.map(delegatedTaskLine).filter(line => !DELEGATED_TASK_LINE.test(line))).toEqual([])
-  expect(DELEGATED_TASK_LINE.source).toBe('^\\[@tingfeng/dsh-tingfeng:delegated [a-z-]+\\]$')
+  // `.source` keeps the escaped slash the literal was written with, so build the
+  // expectation from the same constant instead of restating it by hand.
+  expect(DELEGATED_TASK_LINE.source).toBe(`^\\[${DELEGATED_TASK_PREFIX.slice(1).replaceAll('/', '\\/')}[a-z-]+\\]$`)
   expect(new Set(DELEGATED_OPERATIONS.map(delegatedTaskLine)).size).toBe(DELEGATED_OPERATIONS.length)
 })

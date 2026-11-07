@@ -304,7 +304,10 @@ describe('@tingfeng/dsh-tingfeng plugin composition', () => {
   })
 
   it('anchors client discovery on the Host Entry while the Starter declares every plugin', () => {
-    expect(bundlePatch).toMatch(/- id: mnemon\n(?:\s+#.*\n)*\s+name: @tingfeng\/dsh-tingfeng\n/u)
+    // The row now sits inside the `mnemon-bundle` group, so `- id:` is indented
+    // and a comment may separate it from `name:`. Anchoring on column 0 matched
+    // the flat layout this file used before the bundle layer existed.
+    expect(bundlePatch).toMatch(/\s+- id: mnemon\n(?:\s*#.*\n)*\s+name: ['"]?@tingfeng\/dsh-tingfeng['"]?\n/u)
     expect(bundlePatch).not.toContain('bundledContributions')
     expect(bundlePatch).not.toContain('name: @tingfeng/dsh-tingfeng/core')
   })

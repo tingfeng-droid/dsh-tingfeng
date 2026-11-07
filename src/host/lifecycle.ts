@@ -230,6 +230,16 @@ class MnemonAgentLifecycle {
    * property the model acts on, and `replace` can change it.
    */
   private injectedMemoryKey: string | undefined
+  /**
+   * Durable seq of the newest `compaction/summary` already accounted for.
+   *
+   * Compaction replaces an earlier span of the conversation with one
+   * checkpoint, so a snapshot injected before that span was shadowed no longer
+   * sits in the live surface: the model loses it while `injectedMemoryKey`
+   * keeps claiming it was delivered. Every compaction therefore invalidates
+   * the key once, which re-emits the current snapshot on the next step.
+   */
+  private deliveredAtCompactionSeq: number | null = null
   private idleReviewTimer: ReturnType<typeof setTimeout> | undefined
   private reviewController: AbortController | undefined
   private reviewRunning = false
@@ -381,13 +391,60 @@ class MnemonAgentLifecycle {
     // by a ticking `[created=Nd]` does not re-emit. The full text is still what
     // gets injected, and it is still recorded, so a later change is detected.
     const key = runtimeSnapshotChangeKey(text)
-    if (key === this.injectedMemoryKey) return undefined
+    // Re-emit when the rendered text changed, or when a compaction happened
+    // after the last delivery: the checkpoint shadows the span that carried the
+    // previous copy, so `injectedMemoryKey` alone would keep claiming delivery
+    // of text that is no longer in the live surface.
+    const compactionSeq = this.newestCompactionSeq()
+    if (key === this.injectedMemoryKey && !this.snapshotSupersededByCompaction()) return undefined
     this.injectedMemoryKey = key
+    // Record the compaction position this copy belongs to. A `null` read keeps
+    // the previous answer so a broken session view cannot force a re-emit.
+    if (compactionSeq !== null) this.deliveredAtCompactionSeq = compactionSeq
     const sections = wake.sections
       .map(s => ({ name: s.layerId, text: s.text }))
       .filter(s => s.text.trim() !== '')
     // sections must be non-empty for form:'snapshot' (agent-loop:343 falls back to no form on empty array)
     return sections.length > 0 ? createPluginMessage(text, 'snapshot', sections) : createPluginMessage(text, 'recall')
+  }
+
+  /**
+   * Whether the snapshot still on the surface predates the newest compaction.
+   *
+   * The pre-step gate skips injection when an own snapshot is already visible,
+   * which is right while that copy is current. After a compaction the copy can
+   * survive in the surface while describing an older memory state, so the gate
+   * would suppress the one re-emit that repairs it. Delivering sets
+   * `deliveredAtCompactionSeq`; a newer compaction means the visible copy was
+   * delivered before it and must be replaced.
+   *
+   * A `null` read (no compaction, or an unreadable session view) reports false
+   * so a transient failure keeps the old, quieter behaviour.
+   */
+  private snapshotSupersededByCompaction(): boolean {
+    const newest = this.newestCompactionSeq()
+    return newest !== null && this.deliveredAtCompactionSeq !== newest
+  }
+
+  /**
+   * The newest `compaction/summary` seq on the surface, if any.
+   *
+   * `null` means "no compaction present, or the session view could not be
+   * read". Both must behave the same way at the call site: stay quiet rather
+   * than re-emitting on a transient read failure.
+   */
+  private newestCompactionSeq(): number | null {
+    let newest: number | undefined
+    try {
+      for (const event of this.agent.session.snapshotEvents()) {
+        if (event?.type !== 'compaction/summary') continue
+        const seq = typeof event.seq === 'number' ? event.seq : undefined
+        if (seq !== undefined && (newest === undefined || seq > newest)) newest = seq
+      }
+    } catch {
+      return null
+    }
+    return newest ?? null
   }
 
   private async preStep(payload: PreStepPayload, next: () => Promise<HostPreStepDecision>): Promise<HostPreStepDecision> {
@@ -419,8 +476,14 @@ class MnemonAgentLifecycle {
     }
     if (payload.step !== 1) return decision
 
+    // A visible own snapshot normally means "already delivered this turn, do
+    // not duplicate". A compaction breaks that reasoning: it replaces a span
+    // with one checkpoint, and the surviving snapshot can be an older copy that
+    // no longer describes the current state. The gate therefore only suppresses
+    // when the snapshot on the surface is still the one this session delivered
+    // at the current compaction position.
     const ownRequest = decision.messages.some(message => isMnemonMessageSource(message.source))
-    if (ownRequest) {
+    if (ownRequest && !this.snapshotSupersededByCompaction()) {
       return decision
     }
     if (decision.messages.length === 0) return decision

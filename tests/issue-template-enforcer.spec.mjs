@@ -22,7 +22,7 @@ const questionBody = bugBody.replace('Bug 报告 / Bug report', '问题 / Questi
 const issue = (overrides = {}) => ({ number: 235, state: 'open', body: bugBody, labels: [{ name: 'bug' }], ...overrides })
 const missingLabel = () => issue({ labels: [] })
 const incomplete = () => issue({ body: bugBody.replace(baseSections[6][1], '_No response_') })
-const marker = '<!-- @tingfeng/dsh-tingfeng:issue-template-check -->'
+const marker = '<!-- dsh-mnemon:issue-template-check -->'
 const botComment = (body) => ({ id: 123, body, user: { login: 'github-actions[bot]', type: 'Bot' } })
 const checks = []
 
