@@ -139,7 +139,7 @@ mnemon:
 | `conversationInteraction.turnBar` | `true` | boolean | The turn memory bar under replies; applies at once |
 | `coldLibHint.enabled` | `true` | boolean | Whether a turn may carry the cold-library reminder. The reminder only appends one line naming the domains it matched; it never blocks or rewrites anything |
 | `coldLibHint.rules` | `null` | `null` / list / `[]` | Keyword table as `{ domain, keywords, flags }`, where `keywords` is a regex source string. `null` keeps the built-in table; `[]` disables every rule; a list replaces it. Set this per machine: which domains a machine works is a property of that machine, not of the package |
-| `coldLibHint.exclusions` | `null` | `null` / list / `[]` | Regex sources that mark a clause as discussion rather than a request. Each clause (split at `。！？；，、` and newlines) is judged on its own, so a long message keeps a request that sits beside a discussion |
+| `coldLibHint.exclusions` | `null` | `null` / list / `[]` | Regex sources that mark a clause as discussion rather than a request. Each clause (split at `。！？；，、` and newlines) is judged on its own, so a long message keeps a request that sits beside a discussion | Changes take effect on the next restart: the compiled table is read when an Agent's lifecycle is installed, and a live settings write does not re-read it.
 
 | `conversationInteraction.saveAction` | `true` | boolean | The **Save to memory** action and confirmation on finished replies; applies at once |
 | `skills` | see [Skills settings](#skills-settings) | the keys listed there | Skills' self-evolution, its review parameters, the conversation line and the sidebar entry; applies at once without rebuilding the memory runtime |

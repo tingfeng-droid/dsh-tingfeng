@@ -191,3 +191,33 @@ describe('cold-library keyword reminder through the profile config', () => {
     expect(text).not.toContain('\n')
   })
 })
+
+describe('cold-library keyword table follows a configuration swap', () => {
+  it('recompiles when the profile config changes, not only at startup', () => {
+    // An Agent outlives many configuration writes. The engine keeps a compiled
+    // table keyed by the config object it came from, so a swap must produce a
+    // different table — otherwise a live write appears to do nothing until the
+    // next restart, while the plugin's other readers already see the new value.
+    const first = resolveConfig({ coldLibHint: { enabled: true, rules: [{ domain: '甲', keywords: '甲词', flags: 'u' }], exclusions: null } })
+    const second = resolveConfig({ coldLibHint: { enabled: true, rules: [{ domain: '乙', keywords: '乙词', flags: 'u' }], exclusions: null } })
+
+    const a = resolveColdLibHint(first.coldLibHint)
+    const b = resolveColdLibHint(second.coldLibHint)
+
+    expect(a.rules.map(rule => rule.domain)).toEqual(['甲'])
+    expect(b.rules.map(rule => rule.domain)).toEqual(['乙'])
+    // The old table must not answer for the new config.
+    expect(matchColdLibHint('乙词', a.rules, a.exclusions)).toEqual([])
+    expect(matchColdLibHint('乙词', b.rules, b.exclusions)).toEqual(['乙'])
+  })
+
+  it('yields an identical table for an unchanged config object', () => {
+    // The engine caches on object identity. Recompiling an unchanged config
+    // would be wasted work on every turn; returning a different table would
+    // mean the cache key is wrong.
+    const config = resolveConfig({ coldLibHint: { enabled: true, rules: [{ domain: '甲', keywords: '甲词', flags: 'u' }], exclusions: null } })
+    const first = resolveColdLibHint(config.coldLibHint)
+    const second = resolveColdLibHint(config.coldLibHint)
+    expect(second.rules[0]?.pattern.source).toBe(first.rules[0]?.pattern.source)
+  })
+})
