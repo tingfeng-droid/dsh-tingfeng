@@ -26,4 +26,4 @@ Implemented and verified on 2026-09-06.
 - Full `pnpm@10.13.1 run verify` passed, including 783 root tests, workspace tests, deterministic builds, Headless activation and package checks.
 - Independent package verification passed for sixteen plugin repositories and seventeen packed artifacts.
 - The real DSH WebUI was checked at 1280 × 720 and 390 × 844. Copying, disclosure, scrolling, and long package names work without horizontal overflow.
-- [Screenshots and validation limits](../pr-assets/status-version-maintenance/README.md) record the real UI evidence and the simulated Windows coverage.
+- Screenshots and validation limits record the real UI evidence and the simulated Windows coverage.

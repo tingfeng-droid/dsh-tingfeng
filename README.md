@@ -32,7 +32,7 @@ Thanks to the upstream author for the original work.
 
 <p align="center">
   <a href="https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/en/guides/installation.md"><strong>Install and start</strong></a> ·
-  <a href="https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/assets/webui-v0.5.32/README.md">Watch the demo</a> ·
+  Watch the demo ·
   <a href="https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/en/README.md">Documentation</a> ·
   <a href="https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/en/development/extensions.md">Build a plugin</a>
 </p>
@@ -71,7 +71,7 @@ These recordings come from a real WebUI with the live DeepSeek model answering, 
   <a href="https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/en/guides/ui-guide.md#on-the-plugins-page"><img src="https://raw.githubusercontent.com/tingfeng-droid/dsh-tingfeng/main/docs/assets/webui-v0.5.32/en/plugins.gif" alt="DSH's Plugins page, then dsh-tingfeng's page: memory composition, the main strategy menu, the Layered strategy's and Memory Spaces' pages, then storage and interface" width="880" /></a>
 </p>
 
-Every step is explained in the [UI guide](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/en/guides/ui-guide.md); all screens, recordings and the capture environment are in the [v0.5.32 gallery](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/assets/webui-v0.5.32/README.md).
+Every step is explained in the UI guide; all screens, recordings and the capture environment are in the v0.5.32 gallery.
 
 ## Three kinds of memory
 
@@ -131,6 +131,38 @@ dsh-tingfeng supports published DSH `0.2.2-rc.1` and retains support for the `0.
 - **Core** validates the result into one immutable **View** for the turn. The DSH Host pins it to that turn and controls tool access.
 
 The same public contracts serve the shipped plugins and external repositories. [Architecture](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/en/development/architecture.md) explains ownership, the turn lifecycle and the UI regions components contribute to.
+
+## Pairing with `dsh-compaction-vcc`: rules and memory stay verbatim after compaction
+
+An **optional** pairing. Each plugin works on its own; you only get the full effect with both.
+
+**Background.** DSH's default compaction is LLM summarization: when the context nears its threshold, a model rewrites an older span into a summary. The problem is not that it gets shorter — it is that it gets **rewritten**. The summary reads fluently and looks factual, and the model then treats **its own summary as a factual premise**. One paraphrased number, one softened constraint, one dropped precondition is enough to put an entire downstream reasoning chain on a false footing.
+
+For **dialogue**, what that mostly costs is precision. For **rules and memory**, what it costs is **behaviour itself**: "when the conclusion conflicts with the evidence, change the conclusion" summarized as "be careful with conclusions" is a different instruction — and the model has no way to notice it was edited.
+
+[`dsh-compaction-vcc`](https://github.com/tingfeng-droid/dsh-compaction-vcc) takes the other route: **LLM-free conversation compilation**. It never calls a model and never rewrites a word; it only moves original tokens, and every elision leaves a `(seq N)` pointer that the `recall` tool restores verbatim.
+
+**The two plugins connect through one flag:**
+
+| Component | Responsibility |
+|---|---|
+| `dsh-compaction-vcc` | Keeps dialogue verbatim; elisions become `(seq N)` pointers, recallable |
+| **`dsh-tingfeng`** (this plugin) | Re-injects rules and memory **verbatim** after compaction; tags injected blocks with its own `source.kind` |
+| `elideCheckpointInjectedBodies: true` | Lets the engine replace the *stale* memory copy inside an old checkpoint with a one-line pointer — this plugin injects a fresh one anyway |
+
+```
+no summarizer anywhere in the loop — nothing in the context is ever rewritten
+```
+
+**What you get:** after many compactions, the agent can still quote your rules word for word, still tell a number *you measured* from a number *it estimated*, and still recall which conclusions were overturned. With summarization compaction, those three collapse into one fluent paragraph that reads like fact.
+
+**Install the compaction half:**
+
+```bash
+dsh plugin --profile web add dsh-compaction-vcc
+```
+
+This plugin works without it — but compaction then still goes through the official summarizer, and rules and memory still get rewritten in long sessions.
 
 ## Official plugins
 

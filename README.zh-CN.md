@@ -33,7 +33,7 @@
 
 <p align="center">
   <a href="https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/zh-CN/guides/installation.md"><strong>安装与启动</strong></a> ·
-  <a href="https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/assets/webui-v0.5.32/README.md">观看演示</a> ·
+  观看演示 ·
   <a href="https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/zh-CN/README.md">文档中心</a> ·
   <a href="https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/zh-CN/development/extensions.md">制作插件</a>
 </p>
@@ -72,7 +72,7 @@
   <a href="https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/zh-CN/guides/ui-guide.md#在插件页中"><img src="https://raw.githubusercontent.com/tingfeng-droid/dsh-tingfeng/main/docs/assets/webui-v0.5.32/zh-CN/plugins.gif" alt="DSH 的插件页，再进入可组合记忆的页面：记忆组合、主策略菜单、分层策略与记忆空间的组件页，以及存储与界面" width="880" /></a>
 </p>
 
-更多画面与每一步的说明见[界面指南](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/zh-CN/guides/ui-guide.md)，全部截图、录屏与采集环境见 [v0.5.32 图集](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/assets/webui-v0.5.32/README.md)。
+更多画面与每一步的说明见界面指南，全部截图、录屏与采集环境见 v0.5.32 图集。
 
 ## 三类记忆
 
@@ -132,6 +132,38 @@ dsh-tingfeng 支持已发布的 DSH `0.2.2-rc.1`，同时保留对 `0.2.1` RC �
 - **Core（核心）** 把结果校验为本轮唯一的不可变 **View（上下文视图）**，DSH 宿主将它固定到这一轮并控制工具访问。
 
 随附插件与外部仓库使用同一套公开契约。[架构](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/zh-CN/development/architecture.md)说明了归属关系、回合生命周期，以及组件可以贡献内容的界面区域。
+
+## 和 `dsh-compaction-vcc` 配合：压缩之后，规则和记忆仍然是原文
+
+这是一个**可选的配套关系**，两个插件各自独立可用，但装上才能拿到完整效果。
+
+**背景**：DSH 默认的压缩是 LLM 摘要式——上下文接近阈值时，让模型把一段旧历史改写成摘要。问题不在"变短"，在于**改写**：摘要读起来流畅、像事实，模型随后会把**自己的摘要当成事实前提**往下推理。一个被改写的数字、一句被弱化的约束、一个被丢掉的前提，就足以让整条推理链建立在假基础上。
+
+这件事对**对话**影响最大的是细节精度，而对**规则和记忆**影响的是**行为本身**：「结论与证据冲突时改结论」被概括成「注意结论」，就是另一条指令了，而模型无法察觉自己被改写过。
+
+[`dsh-compaction-vcc`](https://github.com/tingfeng-droid/dsh-compaction-vcc) 用的是另一条路：**零 LLM 的对话编译**。它不调模型、不换词，只搬运原文 token；省略的部分留下 `(seq N)` 指针，配 `recall` 工具一字不差捞回来。
+
+**两个插件靠一个开关连起来：**
+
+| 组件 | 负责 |
+|---|---|
+| `dsh-compaction-vcc` | 对话保原文，省略的留 `(seq N)` 指针，可 `recall` |
+| **`dsh-tingfeng`（本插件）** | 压缩之后**逐字重发**规则和记忆；给注入块打上自己的 `source.kind` |
+| `elideCheckpointInjectedBodies: true` | 让压缩引擎把旧检查点里**过期的**记忆副本换成一行指针——反正本插件会注入新的 |
+
+```
+整条链路里没有摘要器 —— 上下文里没有任何文字被改写过
+```
+
+**效果**：压缩很多次之后，模型仍然能逐字引用你的规则、分得清「你实测的数」和「它推算的数」、记得哪些结论被推翻过。换成摘要式压缩，这三件事会一起塌成一段读起来很像事实的流畅文字。
+
+**安装压缩那一半：**
+
+```bash
+dsh plugin --profile web add dsh-compaction-vcc
+```
+
+不装也能用本插件，只是压缩仍走官方摘要——长会话里规则和记忆仍会被改写。
 
 ## 官方插件
 

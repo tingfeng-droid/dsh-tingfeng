@@ -12,7 +12,7 @@
 
 A skill is a folder with a `SKILL.md`, in the [Agent Skills](https://agentskills.io/specification) format DSH reads. The page never calls a model itself, and skills reach the model only through DSH's own `skill` tool: Skills never adds anything to a turn's memory View.
 
-The screens below come from the [v0.5.34 Skills gallery](../../assets/skills-v0.5.34/README.md), captured on the fictional Lumen project: the assistant wrote release notes with the `release-notes` skill, the user corrected the format, and self-evolution took it from there.
+The screens below come from the v0.5.34 Skills gallery, captured on the fictional Lumen project: the assistant wrote release notes with the `release-notes` skill, the user corrected the format, and self-evolution took it from there.
 
 ## The Skills page
 
@@ -22,7 +22,7 @@ The page has five tabs: **Skills**, **Evolution**, **Evals**, **Market** and **T
 
 On wide screens, the skill list and the selected document scroll independently. Selecting another skill opens its detail at the top while keeping your place in the list. Narrow screens keep the scrollable list above the document.
 
-![Skills: every skill by where it lives, one shadowed; release-notes with an improvement waiting](../../assets/skills-v0.5.34/en/skills-library.jpg)
+**Skills: every skill by where it lives, one shadowed; release-notes with an improvement waiting**
 
 The list groups every `SKILL.md` DSH can load by where it lives, in DSH's order of precedence: the project's `.dsh/skills` and `.agents/skills`, then your `~/.dsh/skills` and `~/.agents/skills`. When two skills share a name, DSH loads the first, and the other is marked **Shadowed**. Files DSH would refuse are counted under the list (*N files cannot load*) and open to their reasons.
 
@@ -54,17 +54,17 @@ On wide screens, the Pending and Done lists scroll independently of the selected
 
 | A suggestion and its evidence | Its draft, backtested |
 |---|---|
-| ![Evolution, Pending: the suggestion to update release-notes, with its evidence folded out](../../assets/skills-v0.5.34/en/skills-suggestion.jpg) | ![The draft under the suggestion: its notes and changes, the backtest Current 40 → Draft 93 +53, and the diff](../../assets/skills-v0.5.34/en/skills-draft.jpg) |
+| **Evolution, Pending: the suggestion to update release-notes, with its evidence folded out** | **The draft under the suggestion: its notes and changes, the backtest Current 40 → Draft 93 +53, and the diff** |
 
 - **A suggestion** says what it proposes, a new skill or an update to one, in one line, with its reason, the conversation it came from and its confidence. **Draft** asks a task Agent to write the new `SKILL.md`; **Dismiss** sets it aside. Its **Evidence** folds out the cited steps of the conversation, each linking to the full record.
 - **A draft** shows its notes and changes, the backtest as one line, such as *Current 40 → Draft 93 +53*, which opens to each case's verdicts, and the diff. **Adopt** writes it (a new skill goes to your user skills or the project's, as you choose), **Discard** drops it, and the menu holds **Edit draft** and **Redraft with a note**. A draft that scored lower than the current version asks before it is adopted.
 - **Evidence** shows each conversation as numbered steps (your messages, tool calls with their failures, skill loads) with what the review marked on them. **Pin** keeps a record from being pruned; choosing steps and **Make** turns them into test cases for a skill.
 
-![Evolution, Evidence: four recorded conversations; the release notes conversation with its signals and numbered steps](../../assets/skills-v0.5.34/en/skills-evidence.jpg)
+**Evolution, Evidence: four recorded conversations; the release notes conversation with its signals and numbered steps**
 
 ### Evals
 
-![Evals: each skill with its cases and last score; release-notes with three cases and its backtest case by case](../../assets/skills-v0.5.34/en/skills-evals.jpg)
+**Evals: each skill with its cases and last score; release-notes with three cases and its backtest case by case**
 
 Every skill's tests in one place. The list shows the skills with cases first, each with its last score against the version DSH loads, then the skills without cases, then the skills a suggestion proposes that do not exist yet (**Not created**), which link to their suggestion.
 
@@ -81,7 +81,7 @@ Existing cases remain text-only and previous runs are unchanged; mark image-depe
 
 ### Market
 
-![Market: searching changelog finds a skill in the listed sources and 30 on skills.sh](../../assets/skills-v0.5.34/en/skills-market.jpg)
+**Market: searching changelog finds a skill in the listed sources and 30 on skills.sh**
 
 The market reads skills from **sources**, each one way skills are already published:
 
@@ -100,7 +100,7 @@ The market reads skills from **sources**, each one way skills are already publis
 
 | A preview with its security reviews | Sources |
 |---|---|
-| ![The preview of a skills.sh skill: its SKILL.md, files, license and five security reviews](../../assets/skills-v0.5.34/en/skills-market-preview.jpg) | ![Sources: the built-in Featured and skills.sh, a team catalog, and Add a source](../../assets/skills-v0.5.34/en/skills-sources.jpg) |
+| **The preview of a skills.sh skill: its SKILL.md, files, license and five security reviews** | **Sources: the built-in Featured and skills.sh, a team catalog, and Add a source** |
 
 An Agent follows a skill as written, and a skill may carry scripts. Install only what you trust, and read the `SKILL.md` first.
 
@@ -121,7 +121,7 @@ A review that fails is logged under the turn and keeps its window; after three f
 
 ## In a conversation
 
-![A turn that used release-notes, with the Turn skills line: release-notes, suggested 1](../../assets/skills-v0.5.34/en/chat-skills.jpg)
+**A turn that used release-notes, with the Turn skills line: release-notes, suggested 1**
 
 A turn that used a skill, or earned a review, ends with a **Turn skills** line. It names the skills the turn used, loaded by the model or called by you as `/name`, then shows **Reviewing** while the review waits or runs, and **suggested** with a count once it has left suggestions. Each skill opens on the Skills page; the suggestions open the suggestion, or the **Pending** list when there are several. The line also shows in a conversation reopened from history, and it is hidden when the turn has nothing to say. Turn it off with **In the conversation**.
 
@@ -133,7 +133,7 @@ With **Sidebar entry** on, Skills becomes a sidebar entry of its own, next to th
 
 | dsh-mnemon's page under Plugins | Skills' own page |
 |---|---|
-| ![dsh-mnemon's page under Plugins: Skills in Memory composition, tagged Experimental](../../assets/skills-v0.5.34/en/plugin-skills-row.jpg) | ![Skills' page under Plugins: Self-evolution, Backtest drafts, Review parameters, In the conversation and Sidebar entry](../../assets/skills-v0.5.34/en/plugin-skills.jpg) |
+| **dsh-mnemon's page under Plugins: Skills in Memory composition, tagged Experimental** | **Skills' page under Plugins: Self-evolution, Backtest drafts, Review parameters, In the conversation and Sidebar entry** |
 
 Skills has its own page under **Plugins → dsh-mnemon**, like every component, and its row there carries the **Experimental** tag. Switches apply at once, without reloading the plugin.
 

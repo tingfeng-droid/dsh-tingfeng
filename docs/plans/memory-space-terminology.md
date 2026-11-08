@@ -24,7 +24,7 @@ Use **记忆空间** in Chinese and **memory space** in English for the persiste
 - Updated current product text, accessibility labels, Agent guidance, command output, bilingual documentation, package READMEs, contributor templates, and editable diagrams. Current README and guide images now use the terminology update; historical recordings and measured evidence remain identified as historical.
 - Introduced canonical `MemorySpace` contracts, `MemorySpaceRegistry`, and service operations such as `spaceDirectory`, `createSpace`, and `mergeSpaces`. Existing published types and operations retain compatibility aliases. Provider factories accept the canonical authority name while supporting older hosts; the legacy protected HTTP Provider field remains a field so existing subclasses can still override it.
 - Preserved registry file names and JSON shapes, tool/RPC spellings, Document/Pack lineage, revision encoding, CSS class maps, and historical documentation anchors. Migration fixtures verify that user-authored legacy titles are preserved.
-- Fixed narrow directory controls and paths, wrapped Provider metadata badges and the header storage badge, and tightened navigation spacing for longer labels. [Bilingual browser evidence](../assets/memory-space-terminology/README.md) covers desktop and narrow layouts.
+- Fixed narrow directory controls and paths, wrapped Provider metadata badges and the header storage badge, and tightened navigation spacing for longer labels. Bilingual browser evidence covers desktop and narrow layouts.
 - Added patch release intent for all 17 changed published packages; no package version was changed or published by this terminology task.
 
 ## Validation

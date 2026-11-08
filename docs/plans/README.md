@@ -8,11 +8,11 @@ Plans written before a larger change, kept for the reasoning behind it. The guid
 
 | Plan | Status |
 |---|---|
-| [Gaps from the October 2026 review](./review-gaps-2026-10.md) | Planned; item 12 is done ([record](../pr-assets/neutral-vector-note/README.md)), and the [roadmap](../en/roadmap.md#next-gaps-from-the-october-2026-review) lists the others |
+| Gaps from the October 2026 review | Planned; item 12 is done (record), and the roadmap lists the others |
 | [Skill management and self-evolution](./skill-management.md) | Implemented (experimental): the Skills page, self-evolution, evidence, evals, and a market of skills.sh, GitHub repositories, Agent Skills sites and catalogs |
 | [Git repository sync](./git-sync.md) | Shipped with Git sync ([#335](https://github.com/omdsh-dev/dsh-tingfeng/pull/335)); [Operations](../en/guides/operations.md#git-repository-sync) describes it. Its open questions for maintainers, such as where the credentials live and how long remote history is kept, remain open |
 | [Seeing every machine's backup, and merging through review](./memory-review-flow.md) | Shipped in [v0.5.26](../en/releases/v0.5.26.md) |
-| [Plugin-first interface](./plugin-first-ui.md) | The direction the plugin page and the Memory System follow. Memory Spaces contributes its own settings ([record](../pr-assets/spaces-owns-settings/README.md)); some moves for the shipped components remain, such as the Sources contributing their own Status cards |
+| Plugin-first interface | The direction the plugin page and the Memory System follow. Memory Spaces contributes its own settings (record); some moves for the shipped components remain, such as the Sources contributing their own Status cards |
 | [Memory space media refresh](./memory-space-media-refresh.md) | Completed; see its closing section |
 | [Memory space terminology](./memory-space-terminology.md) | Completed; see its closing section |
 | [Status version maintenance](./status-version-maintenance.md) | Implemented and verified on 2026-09-06 |
