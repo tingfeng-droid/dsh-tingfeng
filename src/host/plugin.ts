@@ -287,7 +287,7 @@ export function apply(rawContext: unknown, rawConfig: MnemonConfig | LiveHostCon
       // after the runtime it reads so teardown runs the other way round.
       ctx.effect(() => () => { index.dispose() }, 'dsh-tingfeng: cold-library index timer')
     }
-    return registerTools(ctx, runtime, coordinator, extensions, loader?.await?.(), shortIds, index === undefined ? undefined : () => { index.notify() })
+    return registerTools(ctx, runtime, coordinator, extensions, loader?.await?.(), shortIds, index === undefined ? undefined : () => { index.notify() }, dataDir)
   }, 'dsh-tingfeng: Source tool lifecycle')
   registerCommands(ctx.commands, runtime, coordinator)
   registerGuidance(ctx, resolved)

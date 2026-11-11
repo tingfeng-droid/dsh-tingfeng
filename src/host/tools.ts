@@ -8,6 +8,7 @@ import type { RuntimeMemoryImportance, RuntimeMemoryTarget } from 'dsh-tingfeng-
 import { CATEGORIES, EDGE_TYPES, SOURCES, type Category, type EdgeType, type Source } from 'dsh-tingfeng-source-memory-spaces/contracts'
 import { assertParticipation } from './access.ts'
 import type { MemoryCapability, MemoryJsonValue, MemoryMutationReceipt } from '../core/contracts/index.ts'
+import { isHandleQuery, lookupHandle } from './handle-lookup.ts'
 import { unofferedViewId } from './view-presentation.ts'
 import { agentScope, type MnemonAgentRuntimeSource, type MnemonRuntimeGraph } from './runtime.ts'
 import { isSubagent, MnemonSubagentCoordinator } from './subagent.ts'
@@ -69,12 +70,12 @@ function documentActionReceipt(receipt: MemoryMutationReceipt): MemoryMutationRe
  * historical registry order, which puts Memory Spaces' reads before the Documents tools and its writes after
  * the runtime memory tool. DSH's prompt assembler independently orders wire schemas.
  */
-export function registerTools(ctx: HostContextShape, runtimeSource: MnemonAgentRuntimeSource, coordinator: MnemonSubagentCoordinator, contributions: MemoryRuntime, initialReady?: Promise<unknown>, shortIds?: ShortIdStore, onLibraryChange?: () => void): () => void {
+export function registerTools(ctx: HostContextShape, runtimeSource: MnemonAgentRuntimeSource, coordinator: MnemonSubagentCoordinator, contributions: MemoryRuntime, initialReady?: Promise<unknown>, shortIds?: ShortIdStore, onLibraryChange?: () => void, dataDir = ''): () => void {
   const definitions: ToolDefinition[] = []
   const catalog = { tools: { register: (tool: ToolDefinition) => { definitions.push(tool) } } } as unknown as HostContextShape
   const helpers = toolHelpers(runtimeSource)
   registerViewTools(catalog, helpers, coordinator)
-  registerMemorySpaceReadTools(catalog, helpers, coordinator)
+  registerMemorySpaceReadTools(catalog, helpers, coordinator, shortIds, dataDir)
   registerDocumentTools(catalog, helpers, coordinator)
   registerRuntimeTools(catalog, helpers, coordinator)
   registerMemorySpaceWriteTools(catalog, helpers, coordinator, shortIds, onLibraryChange)
@@ -214,7 +215,27 @@ function registerViewTools(ctx: HostContextShape, { runtimeFor, config, composab
 }
 
 /** Memory Spaces' catalog, Recall, Related and health. */
-function registerMemorySpaceReadTools(ctx: HostContextShape, { sourceFor, requireSource }: ToolHelpers, coordinator: MnemonSubagentCoordinator): void {
+/**
+ * Where `mnemon` lives and which data directory to read, taken from the same
+ * resolved config every other CLI call uses.
+ *
+ * Read per call rather than captured at registration: a profile may switch its
+ * storage root while the process stays up.
+ */
+function cliLookup(runtimeFor: (exec: ToolExecution) => MnemonRuntimeGraph, dataDir: string) {
+  return (exec: ToolExecution) => {
+    const config = runtimeFor(exec).config
+    return {
+      command: config.cliPath ?? 'mnemon',
+      dataDir,
+      timeoutMs: config.timeoutMs,
+      env: { MNEMON_EMBED_MODEL: config.embedding.model },
+    }
+  }
+}
+
+function registerMemorySpaceReadTools(ctx: HostContextShape, { sourceFor, requireSource, runtimeFor }: ToolHelpers, coordinator: MnemonSubagentCoordinator, shortIds: ShortIdStore | undefined, dataDir: string): void {
+  const lookup = cliLookup(runtimeFor, dataDir)
   ctx.tools.register(definition({
     name: 'mnemon_memory_bodies',
     description: 'Inspect a bounded Memory Space catalog with ids, routing, capabilities, activation, and health; paths, settings, and statistics are omitted. Use only for explicit space inspection or management, or before a capability-dependent write. Never call it to route Recall: omit memoryBodyIds and mnemon_recall searches every pinned active space.',
@@ -250,6 +271,16 @@ function registerMemorySpaceReadTools(ctx: HostContextShape, { sourceFor, requir
     async execute(args: { query: string; mode?: 'smart' | 'keyword' | 'basic'; limit?: number; memoryBodyIds?: string[] }, exec: ToolExecution) {
       requireSource(exec, 'memory-spaces', 'recall')
       const agent = requireAgent(exec)
+      // A handle is an exact reference, not a phrase: `Z015` must reach that one
+      // entry instead of being scored as text. Only when the table has the handle
+      // does this take effect, and a handle naming nothing falls through to the
+      // normal query — a number that looks like a handle may still be a search.
+      if (isHandleQuery(args.query, shortIds)) {
+        const hit = lookupHandle(args.query.trim(), shortIds!, lookup(exec))
+        if (hit !== undefined) {
+          return { query: args.query, mode: 'handle', results: [hit] } as never
+        }
+      }
       return coordinator.recall(agent, args, exec.signal, { requirePinnedView: true })
     },
     presentCall: (args: { query: string }) => ({ card: 'generic', title: 'Recall Mnemon memory', kind: 'search', rawInput: args.query }),
