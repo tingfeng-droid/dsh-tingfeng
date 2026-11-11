@@ -65,13 +65,16 @@ function writeTargets(command: string): string[] {
 
   // POSIX redirection, per segment: `> f`, `>> f`, `>f`, with an optional `&1`
   // style descriptor that is not a path.
-  for (const match of command.matchAll(/(?:^|[^<>&\d])>>?\s*([^\s|;&<>()]+)/gu)) {
+  // `[ \t]` rather than `\s`: a multi-line script would otherwise let a `>` on
+  // one line take its path from the next, and a `cp` two lines further down then
+  // appeared to write the file it was only reading.
+  for (const match of command.matchAll(/(?:^|[^<>&\d])>>?[ \t]*([^\s|;&<>()]+)/gu)) {
     const target = match[1]
     if (target !== undefined && !/^&\d$/u.test(target)) targets.push(target)
   }
 
   // `tee [-a] f...` — every operand after the flags is a destination.
-  for (const match of command.matchAll(/(?:^|[|;&]\s*|\s)tee\s+((?:-{1,2}[\w-]+\s+)*)([^|;&<>]+)/gu)) {
+  for (const match of command.matchAll(/(?:^|[|;&][ \t]*|[ \t])tee[ \t]+((?:-{1,2}[\w-]+[ \t]+)*)([^|;&<>\n]+)/gu)) {
     for (const word of (match[2] ?? '').trim().split(/\s+/u)) {
       if (word !== '' && !word.startsWith('-')) targets.push(word)
     }
@@ -85,7 +88,7 @@ function writeTargets(command: string): string[] {
   // `cp`/`mv`/`install` write their LAST operand and read the others, so only the
   // last one is a destination. A trailing directory changes nothing: it is still
   // the destination, and `cp x AGENTS.md` remains covered.
-  for (const match of command.matchAll(/(?:^|[|;&]\s*|\s)(?:cp|mv|install)\s+((?:-{1,2}[\w-]+\s+)*)([^|;&<>]+)/gu)) {
+  for (const match of command.matchAll(/(?:^|[|;&][ \t]*|[ \t])(?:cp|mv|install)[ \t]+((?:-{1,2}[\w-]+[ \t]+)*)([^|;&<>\n]+)/gu)) {
     const words = (match[2] ?? '').trim().split(/\s+/u).filter(word => word !== '' && !word.startsWith('-'))
     const last = words[words.length - 1]
     if (last !== undefined) targets.push(last)
@@ -105,7 +108,7 @@ function writeTargets(command: string): string[] {
   }
 
   // `rm`/`del`/`Remove-Item` destroy the operand itself.
-  for (const match of command.matchAll(/(?:^|[|;&]\s*|\s)(?:rm|del|Remove-Item)\s+((?:-\S+\s+)*)([^|;&<>]+)/giu)) {
+  for (const match of command.matchAll(/(?:^|[|;&][ \t]*|[ \t])(?:rm|del|Remove-Item)[ \t]+((?:-\S+[ \t]+)*)([^|;&<>\n]+)/giu)) {
     for (const word of (match[2] ?? '').trim().split(/\s+/u)) {
       if (word !== '' && !word.startsWith('-')) targets.push(word)
     }

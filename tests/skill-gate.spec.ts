@@ -262,3 +262,32 @@ describe('PowerShell: reading is never refused', () => {
     })
   }
 })
+
+describe('a multi-line script is judged line by line', () => {
+  const A = '~/.agents/' + ['AGENTS', 'md'].join('.')
+
+  /**
+   * The `>` on one line used to take its path from a later line, so a `cp` three
+   * lines down looked like it wrote the file it was only reading. Blank spaces in
+   * the patterns are `[ \\t]` now, never `\\s`.
+   */
+  it('lets a backup with a command substitution in the same line through', () => {
+    const command = `cp ${A} /tmp/bak.md && echo "ok: $(wc -c < /tmp/bak.md)"`
+    expect(gateDecision(call('bash', { command }), { enabled: true })).toBeUndefined()
+  })
+
+  it('lets a two-line read-and-export script through', () => {
+    const command = `echo start\ncat ${A} > /tmp/copy.txt && echo "done: $(wc -l < /tmp/copy.txt)"`
+    expect(gateDecision(call('bash', { command }), { enabled: true })).toBeUndefined()
+  })
+
+  it('still refuses a real write anywhere in a multi-line script', () => {
+    const command = `echo start\necho x > ${A}\necho done`
+    expect(gateDecision(call('bash', { command }), { enabled: true })).toBeTypeOf('string')
+  })
+
+  it('still refuses a copy whose destination is on a later line', () => {
+    const command = `cp /tmp/x ${A}\nls`
+    expect(gateDecision(call('bash', { command }), { enabled: true })).toBeTypeOf('string')
+  })
+})
