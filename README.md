@@ -122,6 +122,50 @@ npx @deepseek-ai/dsh web
 
 dsh-tingfeng supports published DSH `0.2.2-rc.1` and retains support for the `0.2.1` RC line and `0.2.0-rc.2`. RC1 requires Node.js >=24.9.0; older Hosts follow their own Node.js requirements. The same package serves the desktop app's Plugins page, `dsh plugin --profile web add dsh-tingfeng` on the command line, and Headless with `dsh plugin --profile headless add dsh-tingfeng`; older hosts keep the release [compatibility and upgrades](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/en/reference/compatibility.md) names for them. [Getting started](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/en/guides/getting-started.md) continues from here, and [compatibility and upgrades](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/en/reference/compatibility.md) covers existing installations.
 
+## Three optional memory-hygiene features
+
+In long use the problem is not that memory holds too little. It is that what it holds drifts out of step with reality and nobody notices. Each feature below addresses one form of that drift, and **all three are off by default**:
+
+| Feature | Problem | What it does |
+|---|---|---|
+| **Short handles** | A 36-character UUID cannot be remembered, and every rewrite changes it | One `Z001`-style label per entry, recognised by the retrieval tools |
+| **Index generation** | A hand-maintained index goes stale silently after a rename | Rewrites the marked region, checks it three ways, writes nothing on failure |
+| **Write gate** | "Read the skill before writing" was executed 39% of the time | Refuses the first write of each turn so the skill actually gets read |
+
+### Short handles
+
+Mnemon addresses entries by UUID, and the CLI has no update — **a rewrite is a new row plus a soft-delete of the old one, so the UUID always changes**. Remembering that UUID therefore stops working the moment the entry is reorganised.
+
+A short handle gives each entry a `Z001`-style label. **It points at the current row rather than naming a stable identity**: a rewrite allocates a new handle, a deletion discards it, and **numbers are never reused** — reusing one would make `Z015` in an earlier conversation name a different entry.
+
+The retrieval tools check for a handle before running a normal retrieval and return that one entry when it resolves (`mode: handle`, `score: 1`). Anything unrecognised or no longer present **falls back to normal retrieval** rather than erroring or returning nothing.
+
+**Known limit**: handles work only inside the plugin's tools. `mnemon` is a third-party CLI that knows nothing about them, so a shell retrieval still does an ordinary lexical match. Keep using anchor words for batch and scripted work.
+
+### Index generation
+
+The index is **injected every turn**, which makes its failures worse than those of an ordinary generated file: **a stale index is repaired by the next successful run, but a wrong index keeps being repeated to the model**. The rendered block is therefore checked before it reaches disk, and **any failure means nothing is written**:
+
+- the number of data rows equals the number of entries read
+- every row carries a handle — no blanks, no placeholder dash
+- no description merely restates its own title
+
+Writes are deferred by a **quiet period**: a run that changes the library six times writes the file once, after it stops moving. `provider: none` calls no model at all and falls back to a summary line in the body or the first heading — **usable on a machine without a local model**.
+
+### Write gate
+
+A skill enters context only when the `skill` tool opens it. A rule recorded in memory saying "read it before writing" was measured at 39% — **having read a rule is not the same as following it**.
+
+The gate replaces remembering with being stopped: **it refuses the first write of each turn and lets the second through**. Refusing every time stalls a turn, and once a turn stalls nobody knows where.
+
+- **Writes only**: every retrieval and inspection tool is never refused
+- **Four files only**: the two runtime-memory projections and the two rule files; scratch files stay writable
+- **Shell writes are covered, and the criterion is the destination**: `cp index /tmp/bak` is allowed because the source is not a destination, while `echo x > index` is refused
+
+**Known limit**: writing through an interpreter expression or a helper script gets through. Parsing the destination of an arbitrary program is not possible, and every widening costs a false refusal on a read — the gate exists to make the skill be read, not to stop a determined writer.
+
+See the [configuration reference](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/en/reference/configuration.md).
+
 ## How it works
 
 [![Source facts flow through a Strategy and Core validation into one View for the DSH Host](https://raw.githubusercontent.com/tingfeng-droid/dsh-tingfeng/main/docs/assets/diagrams/en/composable-memory.png)](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/en/development/architecture.md)

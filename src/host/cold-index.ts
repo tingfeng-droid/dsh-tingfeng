@@ -325,6 +325,20 @@ export async function renderBlock(entries: readonly IndexEntry[], options: Rende
  *  - a description that is just the title again, which is the model restating
  *    rather than summarising and leaves the column uninformative.
  */
+/**
+ * Why a rendered block must not be written, or `undefined` when it may be.
+ *
+ * The index is injected every turn, so it differs from every other generated
+ * file in one way that decides this check's severity: a stale index is repaired
+ * by the next successful run, but a wrong index keeps being repeated to the model
+ * until someone notices. A row count that lost an entry, a blank handle, or a
+ * description that merely restates its own title are all shapes this renderer
+ * produced in testing and all shapes that read as correct while being wrong.
+ *
+ * The caller's response is therefore total: any problem keeps the previous file
+ * untouched and reports the reason. Writing a partial or plausible-looking block
+ * is worse than writing nothing.
+ */
 export function blockProblem(block: string, entries: number): string | undefined {
   // Data rows, not the header and not the `|---|` rule: any row whose first cell
   // is not the literal word `编号` and that carries at least three cells.

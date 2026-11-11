@@ -123,6 +123,50 @@ npx @deepseek-ai/dsh web
 
 dsh-tingfeng 支持已发布的 DSH `0.2.2-rc.1`，同时保留对 `0.2.1` RC 系列和 `0.2.0-rc.2` 的支持。RC1 要求 Node.js >=24.9.0；旧版宿主遵循其各自的 Node.js 要求。同一个包也用于桌面版的插件页、命令行 `dsh plugin --profile web add dsh-tingfeng`，以及 Headless：`dsh plugin --profile headless add dsh-tingfeng`；更早的宿主请继续使用[兼容性与升级](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/zh-CN/reference/compatibility.md)为其列出的版本。接下来可以看[入门指南](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/zh-CN/guides/getting-started.md)，已有安装的升级见[兼容性与升级](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/zh-CN/reference/compatibility.md)。
 
+## 三个可选的记忆卫生功能
+
+长期用下来，记忆的问题不是"记得不够多"，而是**记得的那些慢慢和现实脱节，而没有人发现**。下面三项各解决其中一种，**全部默认关闭**：
+
+| 功能 | 解决的问题 | 打开后 |
+|---|---|---|
+| **冷库短编号** | 36 位 UUID 背不下来，而且每次改写都会换 | 每条一张 `Z001` 这样的名牌，检索工具直接认 |
+| **冷库索引生成** | 手工维护的索引在条目改名后静默过期 | 标记区自动重写，写盘前三道自检，不过就不写 |
+| **写入闸门** | 「写记忆前先读技能」这条规则实测只有 39% 被执行 | 每回合拦第一次写，逼出一次读技能 |
+
+### 短编号
+
+Mnemon 用 UUID 寻址条目，而 CLI 没有 update——**改写就是新行加软删除旧行，UUID 必变**。所以「记住那个 UUID」这件事在整理之后自动失效。
+
+短编号给每条一个 `Z001` 式把手。**它是当前行的指针，不是稳定身份**：改写换新号、删除作废，**号码永不回收**（复用会让旧对话里的 `Z015` 指到别的条目）。
+
+检索工具在走常规检索前先认编号，命中就精准取回那一条（`mode: handle`、`score: 1`）；认不出或查不到就**退回常规检索**，不报错也不返回空。
+
+**已知边界**：编号只在插件工具里有效。`mnemon` 是第三方 CLI，不认识编号，直接跑命令行仍是普通词法检索。批量与脚本化场景请继续用锚词。
+
+### 索引生成
+
+索引是**每轮注入**的，这决定了它的错误比一般生成文件更严重：**旧索引会被下一次成功运行修好，坏索引会一直重复给模型**。所以渲染结果写盘前检查三件事，**任一不过就完全不写**：
+
+- 数据行数等于本次读到的条目数
+- 每行都有编号，不出现空或占位横线
+- 摘要不得只是标题换个说法
+
+写入按**静默期**推迟：一轮整理改六次不会写六次，等库安静下来写一遍。`provider: none` 不调用任何模型，摘要退回正文里的摘要行或第一个小标题——**没有本地模型的机器也能用**。
+
+### 写入闸门
+
+技能只有被 `skill` 工具展开才进上下文。一条写在记忆里的「写之前先读」实测执行率 39%——**规则读过了，不代表照着做**。
+
+闸门把「记得做」换成「不做就写不了」：**每回合拦第一次写，第二次放行**。硬拦到底会让回合卡死，而卡死之后没人知道卡在哪里。
+
+- **只拦写**：各种检索与查看永不拦
+- **只拦四个文件**：运行时记忆的两份投影、两份规则文件；临时文件照写
+- **命令行也管，判据是目的地**：`cp 索引 /tmp/bak` 放行（源不是目的地），`echo x > 索引` 拦截
+
+**已知边界**：通过解释器表达式或辅助脚本写入绕得过去。解析任意程序的写入目的地做不到，而每放宽一次就多一次对读取的误拒——闸门要的是让人想起读技能，不是拦住执意写入的人。
+
+配置见[配置参考](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/zh-CN/reference/configuration.md)。
+
 ## 工作原理
 
 [![来源事实经策略组合与核心校验，形成交给 DSH 宿主的唯一上下文视图](https://raw.githubusercontent.com/tingfeng-droid/dsh-tingfeng/main/docs/assets/diagrams/zh-CN/composable-memory.png)](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/zh-CN/development/architecture.md)

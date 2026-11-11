@@ -357,6 +357,117 @@ DSH's live catalog reports each model's input modalities, and the picker labels 
 
 When the active Strategy does not drive idle review or runtime capacity maintenance, **Memory System** names the unavailable workflows even without a selected conversation. The General Strategy drives neither. The settings page explains this dependency and retains your choices for switching back to a supporting Strategy; enabling the review switch alone cannot opt a Strategy into these workflows. Manual actions keep their existing permissions.
 
+## Cold-library short handles
+
+A cold-library entry is addressed in Mnemon by a 36-character UUID, and a rewrite produces a new UUID — the CLI has no update, so a rewrite is a new row plus a soft-delete of the old one. Using that UUID as the daily retrieval entry point does not hold up: it cannot be remembered, and it changes when the entry is reorganised.
+
+**Short handles** give each entry a `Z001`-style handle. **A handle points at the current row; it is not a stable identity.** A rewrite allocates a new handle and discards the old one, a deletion discards the handle, and **numbers are never reused** — reusing one would make `Z015` in an earlier conversation name a different entry.
+
+| Key | Default | Range | Meaning |
+|---|---:|---|---|
+| `shortIds.enabled` | `false` | boolean | Maintain the handle table and recognise handles at the retrieval entry point |
+| `shortIds.prefix` | `Z` | non-empty string | Handle prefix |
+| `shortIds.digits` | `3` | 1–9 | Digits after the prefix, zero-padded |
+
+The table lives in the storage root as `short-ids.json`, beside `runtime/`, `documents/` and `skills/`, and stays **outside Packs and Git sync**: two machines may hold different handles for the same entry. A host upgrade replaces the package directory and does not touch this file.
+
+### How a handle is recognised
+
+`mnemon_recall` checks whether its argument is a handle (prefix plus a fixed number of digits, **case-insensitive**) before running a normal retrieval. A match is resolved in two steps: the table turns the handle into a UUID, then `mnemon show` fetches that entry. Results carry `mode: handle` and `score: 1`, matching an exact hit.
+
+**An unrecognised handle falls back to normal retrieval rather than erroring or returning nothing**: text shaped like a handle may really be what is being searched for. A handle that no longer exists takes this path.
+
+**Handles work only in the plugin's tools.** `mnemon` is a third-party CLI that knows nothing about handles, so running a retrieval from a shell with a handle still does an ordinary lexical match and returns unrelated rows. **Keep using anchor words for batch and scripted work** rather than depending on handles.
+
+```yaml
+mnemon:
+  shortIds:
+    enabled: true
+    prefix: Z
+    digits: 3
+```
+
+## Cold-library index generation
+
+A hand-maintained index rots, and it rots silently: an entry is renamed or a group gains a row, and the table keeps describing the previous version. The work splits in two — **deciding what an entry is about** needs a person or a model, while **keeping the table in step with the library** is bookkeeping, and bookkeeping should be automatic.
+
+When enabled, the plugin rewrites the region between two markers in the index file whenever the library changes. Hand-written sections outside the markers — how to search, what tends to go wrong — survive unchanged.
+
+| Key | Default | Range | Meaning |
+|---|---:|---|---|
+| `indexSync.enabled` | `false` | boolean | Generate the index block |
+| `indexSync.targetPath` | empty | path | Index file; empty disables generation |
+| `indexSync.debounceMs` | `300000` | 0–3600000 ms | Quiet period after the last change, then one write |
+| `indexSync.summary.provider` | `none` | `none` / `ollama` | Description source: a local model, or **no model at all** |
+| `indexSync.summary.endpoint` | `http://127.0.0.1:11434` | HTTP(S) URL | Endpoint used when `ollama` |
+| `indexSync.summary.model` | `qwen3.5:4b` | model name | Model used when `ollama` |
+| `indexSync.summary.maxChars` | `60` | 10–200 | Character cap for one description |
+| `indexSync.summary.maxInputChars` | `800` | — | Prefix length of the entry body sent for summarising |
+
+The quiet period is not a fixed interval but a **deferred write**: a run that merges six entries changes the library six times, and writing each time would rewrite one file six times and expose five intermediate states. The write happens once the library has stopped moving. A caller that has to read the index immediately does not wait — it writes directly and cancels the timer.
+
+### Three checks before writing
+
+The index is **injected every turn**, which makes its failures worse than those of an ordinary generated file: **a stale index is repaired by the next successful run, but a wrong index keeps being repeated to the model** until someone notices. The rendered block is therefore checked before it reaches disk, and **any failure means nothing is written** — the previous file is kept and the reason is reported:
+
+- **Row count** — the number of data rows equals the number of entries read;
+- **Non-empty handle** — no blank handle and no placeholder dash;
+- **Description does not restate its title** — a description that paraphrases its own title carries no information, and that row falls back to the body.
+
+All three shapes occurred in testing: a row matcher that assumed a leading backtick dropped every row without a handle, and the count no longer matched; and the model occasionally returned the title reworded as a description.
+
+### Without a local model
+
+`provider: none` calls no model. Descriptions are taken in a fixed order: a summary line on the second line of the body → the first second-level heading (with leading numbering such as a section marker or `3.` stripped) → the first sentence of the body (skipping parenthetical notes, table rows and code blocks) → the entry title.
+
+**Writing a summary line in the body gives a good description on a machine without a model.** When a model is available it still wins: distilling 800 characters beats a hand-written line. That input length is measured, not chosen — 1200 characters produced a shallower description than 800, because the model spent its budget summarising the whole text instead of naming the point.
+
+With `provider: ollama` and no running service, **each run waits out the timeout** (about 20 seconds) before falling back; `none` returns immediately. Machines without a local model should set `none` explicitly.
+
+```yaml
+mnemon:
+  indexSync:
+    enabled: true
+    targetPath: <path to the index file>
+    summary:
+      provider: none
+```
+
+## Write gate
+
+A skill enters context only when the `skill` tool opens it. A rule recorded in memory saying "read it before writing" was measured and long went unexecuted — having read a rule is not the same as following it. **The gate replaces remembering with being stopped.**
+
+| Key | Default | Range | Meaning |
+|---|---:|---|---|
+| `skillGate.enabled` | `false` | boolean | Enable the gate |
+| `skillGate.instruction` | empty | ≤600 characters | Custom refusal text; empty uses the built-in English one |
+
+The behaviour is **refuse the first write of each turn and let the second through**. Refusing every time stalls a turn, and once a turn stalls nobody knows where; one refusal has already changed what happens next, which is the whole point. It rearms each turn rather than once per session, because a long session outlives the skill being in context.
+
+**Writes only**: `mnemon_recall`, `mnemon_document_search`, `mnemon_memory_bodies` and other reads are never refused. **Four files only**: the two runtime-memory projections and the two rule files. Every other path stays writable — scratch files are the most common write.
+
+Shell writes are covered too, and the criterion is the **destination**, not whether the command mentions a file name:
+
+| Command | Result | Why |
+|---|---|---|
+| `cp <index> /tmp/bak` | allowed | destination is the temp directory; the source is not a destination |
+| `cat <index> > /tmp/x` | allowed | same |
+| `sed -n '1,20p' <index>` | allowed | `-n` only prints |
+| `echo x > <index>` | refused | destination is a guarded file |
+| `cp /tmp/x <index>` | refused | destination is a guarded file |
+| `sed -i 's/a/b/' <index>` | refused | in-place rewrite |
+
+**This is the part of the feature most likely to be got wrong.** An early version keyed on whether the file name appeared in the command, so backing up the index — the routine that editing it depends on — was refused. Filling in the PowerShell verbs then treated every path parameter as a destination, so reads were refused. Last, the redirection patterns used whitespace that could cross a newline, letting a redirection on one line take its path from the next. **The criterion is always the destination.** Read the reason above each pattern in `skill-gate.ts` before changing this table.
+
+**Known limit**: writing through an interpreter expression or a helper script gets through, and always will. Parsing the destination of an arbitrary program is not possible, and every widening costs a false refusal on a read — the gate exists to make the skill be read, not to stop a determined writer.
+
+```yaml
+mnemon:
+  skillGate:
+    enabled: true
+    instruction: ""
+```
+
 ## Skills settings
 
 Skills keeps its settings under `skills` in the `mnemon` entry, edited on its own page under **Plugins → dsh-mnemon** through the `mnemon-skills` settings scope. Settings apply live once saved, without rebuilding the memory runtime; the destination selector and review parameters wait for **Apply** or **Discard**. The [Skills guide](../guides/skills.md#self-evolution) explains what each does.
