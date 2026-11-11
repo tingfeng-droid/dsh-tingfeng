@@ -343,6 +343,8 @@ export interface Config {
    * local model still gets an index, only one built from first lines.
    */
   indexSync?: IndexSyncConfig
+  /** A gate that refuses the first write of a turn until the curator skill is read. */
+  skillGate?: SkillGateConfig
 }
 
 /** Handle shape as a profile declares it. */
@@ -397,6 +399,23 @@ export interface ResolvedIndexSyncConfig {
 }
 
 /** Handle shape after normalization: every field present. */
+/**
+ * The opt-in gate on writing memory, rules and the index.
+ *
+ * Off by default: it is a workflow one profile wants, not a behaviour every user
+ * of the package expects.
+ */
+export interface SkillGateConfig {
+  enabled: boolean
+  /** The text a refused call returns, in the profile's own language. */
+  instruction: string
+}
+
+export interface ResolvedSkillGateConfig {
+  enabled: boolean
+  instruction: string
+}
+
 export interface ResolvedShortIdConfig {
   enabled: boolean
   prefix: string
@@ -467,6 +486,7 @@ export interface ResolvedConfig {
   syncEnabled: boolean
   shortIds: ResolvedShortIdConfig
   indexSync: ResolvedIndexSyncConfig
+  skillGate: ResolvedSkillGateConfig
 }
 
 export interface ResolvedInteractionConfig {

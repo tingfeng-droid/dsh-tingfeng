@@ -30,6 +30,7 @@ import type { PreparedMemoryPlacement } from 'dsh-tingfeng-source-memory-spaces/
 import type { MemoryWake } from "../core/contracts/index.ts"
 import { agentScope, type MnemonAgentRuntimeSource } from './runtime.ts'
 import { createPluginMessage, MNEMON_PLUGIN_SOURCE } from './plugin-message.ts'
+import { SkillGate } from './skill-gate.ts'
 import type { SkillEvolution } from './skill-evolution.ts'
 import { IdleReviewWatermarkStore } from './idle-review-watermark.ts'
 
@@ -204,6 +205,8 @@ class MnemonAgentLifecycle {
   private primePending = true
   private startSource: LifecycleAgentSnapshot['startSource']
   private readonly guidedTurns = new Set<number>()
+  /** Refuses the first write of each turn so the curator skill is read first. */
+  private skillGate = new SkillGate({ enabled: false })
   private readonly memoryActivity = new TurnActivityProjection()
   private readonly turnActivity = new Map<number, {
     messageIds: Set<string>
@@ -278,6 +281,13 @@ class MnemonAgentLifecycle {
   start(): () => void {
     this.restoreWatermark()
     this.observedReviewPolicy = this.reviewPolicy()
+    // Built here rather than as a field: the switch lives in the resolved config,
+    // which is not available to a field initializer.
+    const gate = this.config.skillGate
+    this.skillGate = new SkillGate({
+      enabled: gate.enabled,
+      ...(gate.instruction === '' ? {} : { instruction: gate.instruction }),
+    })
     const disposers = [
       this.agent.ctx.on('session/event', ((session: HostAgent['session'], event: HostSessionEvent) => this.sessionEvent(session, event)) as never),
       this.agent.ctx.on('system-prompt/assemble', ((assembly: PromptAssembly, context: PromptAssemblyContext, next: () => Promise<PromptAssembly>) => this.assemblePrompt(assembly, context, next)) as never),
@@ -289,6 +299,13 @@ class MnemonAgentLifecycle {
       this.agent.ctx.on('agent/pre-step', ((payload: PreStepPayload, next: () => Promise<HostPreStepDecision>) => this.preStep(payload, next)) as never, { prepend: true }),
       this.agent.ctx.on('agent/turn-stopping', ((payload: TurnStoppingPayload) => this.finishTurn(payload)) as never),
     ]
+    // The gate is a tool guard rather than a pre-step message on purpose: a
+    // reminder in context can be read and skipped, while a refused call stops the
+    // write. Optional, because a Host without scoped guards still runs the rest.
+    if (this.config.skillGate.enabled && typeof this.agent.ctx?.tools?.guard === 'function') {
+      const dispose = this.agent.ctx.tools.guard(this.skillGate.guard)
+      if (typeof dispose === 'function') disposers.push(dispose as () => void)
+    }
     return () => {
       this.disposed = true
       this.releaseView()
@@ -445,6 +462,8 @@ class MnemonAgentLifecycle {
   }
 
   private async preStep(payload: PreStepPayload, next: () => Promise<HostPreStepDecision>): Promise<HostPreStepDecision> {
+    // Re-arm the skill gate at every turn boundary: the guard sees calls, not turns.
+    this.skillGate.beginTurn(payload.turn)
     if (payload.step === 1) this.cancelIdleReview(true)
     const decision = await next()
     if (decision.kind === 'reject' || payload.signal.aborted) {

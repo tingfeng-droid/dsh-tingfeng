@@ -290,6 +290,12 @@ export const Config: z<Config> = z.object({
   // Also off by default, and it writes a file: a profile has to name the target
   // before anything is touched.
   indexSync: IndexSyncSchema,
+  // A gate on writing memory, rules and the index: off until a profile opts in,
+  // because the package ships publicly and this is one machine's workflow.
+  skillGate: z.object({
+    enabled: z.boolean().default(false),
+    instruction: z.string().max(600).default(''),
+  }).default({ enabled: false, instruction: '' }),
 })
 
 export function resolveInteractionConfig(config: InteractionConfig = {}): ResolvedInteractionConfig {
@@ -513,5 +519,9 @@ export function resolveConfig(config: Config = {}): ResolvedConfig {
     syncEnabled: config.syncEnabled ?? false,
     shortIds: resolveShortIds(config.shortIds),
     indexSync: resolveIndexSync(config.indexSync),
+    skillGate: {
+      enabled: config.skillGate?.enabled === true,
+      instruction: (config.skillGate?.instruction ?? '').trim(),
+    },
   }
 }
