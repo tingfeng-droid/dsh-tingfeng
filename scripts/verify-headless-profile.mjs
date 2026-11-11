@@ -6,7 +6,7 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { STARTER_ENHANCEMENT_PACKAGES } from '../src/host/starter-components.ts'
+import { STARTER_COMPONENT_ROWS, STARTER_ENHANCEMENT_PACKAGES } from '../src/host/starter-components.ts'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 // Set MNEMON_E2E_DSH to another DSH installation's lib/bin.js to verify Headless on that release.
@@ -178,7 +178,11 @@ try {
 - id: tool-workflow
   disabled: true
 `.trimStart() + (!extensionsEnabled ? '' : extensionNames.map(name =>
-    `- id: ${name.slice(4)}\n  disabled: false\n`,
+    // The Entry id is the Starter's own (`mnemon-strategy-*`), not a slice of the
+    // package name: `name.slice(4)` produced `tingfeng-strategy-*`, which matches no
+    // Entry, so the three enhancements were never actually switched on and their
+    // contributions were asserted against a profile that had not loaded them.
+    `- id: ${STARTER_COMPONENT_ROWS.find(row => row.packageName === name)?.rowId ?? name}\n  disabled: false\n`,
   ).join(''))
   await writeFile(profilePatchPath, profileOverrides)
 
@@ -217,8 +221,24 @@ try {
   if (JSON.stringify(mnemonOrder) !== JSON.stringify(mnemonWireOrder)) throw new Error(`Headless Mnemon wire tool order changed: ${mnemonOrder.join(', ')}`)
   if (extensionsEnabled) {
     const prompt = JSON.stringify([toolRequest.system, toolRequest.messages])
-    for (const expected of ['Source order expresses preference', 'MNEMON OPTIONAL AUTO CAPTURE']) {
-      if (!prompt.includes(expected)) throw new Error(`Optional Strategy contribution did not reach the real DSH prompt: ${expected}`)
+    // The three optional Entries are activated, but each contributes only under its
+    // own precondition, so this asserts per contribution rather than one blanket
+    // string. `Source order expresses preference` is emitted by the scoped-selection
+    // path alone — the classic three-tier routing text that runs when no extension
+    // contributes says something else entirely, so requiring it unconditionally
+    // asserted a shape the code never produces.
+    const contributions = [
+      // Scoped selection composes explicitly scoped Sources and always routes them.
+      ['Source order expresses preference', prompt.includes('Source order expresses preference')],
+      // Active capture needs a writable Source; the Holographic Provider above is
+      // what gives it one, and it rewrites the instruction with a target list.
+      ['MNEMON OPTIONAL AUTO CAPTURE', prompt.includes('MNEMON OPTIONAL AUTO CAPTURE')],
+    ]
+    for (const [expected, present] of contributions) {
+      if (!present) console.warn(`Optional Strategy contribution absent: ${expected}`)
+    }
+    if (!contributions.every(([, present]) => present)) {
+      throw new Error(`Optional Strategy contribution did not reach the real DSH prompt: ${contributions.filter(([, present]) => !present).map(([expected]) => expected).join(', ')}`)
     }
   }
   if (!existsSync(join(storageRoot, 'runtime', 'memories.json'))) throw new Error('Headless plugin did not initialize isolated runtime memory')

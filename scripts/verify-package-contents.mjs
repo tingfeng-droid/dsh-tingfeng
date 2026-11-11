@@ -29,7 +29,13 @@ const required = [...executables, ...locales, 'package.json', 'cordis.patch.yml'
 
 const allowedRootFiles = new Set(['package.json', 'cordis.patch.yml', 'LICENSE', 'README.md', 'README.zh-CN.md', 'SECURITY.md', 'THIRD_PARTY_NOTICES.md'])
 const missing = required.filter(path => !paths.includes(path))
-const unexpected = paths.filter(path => !allowedRootFiles.has(path) && !executables.includes(path) && !locales.includes(path) && !(/^lib\/.+\.(?:js|d\.ts)$/.test(path)))
+// The package also ships the 18 official plugins under `plugins/<name>/`, each with
+// the same asset kinds a package has: built JS and declarations, its manifest, its
+// README, locales, presentation assets and (for strategies) its patch file. They are
+// listed explicitly in the manifest's `files` field, so they are expected, not
+// unexpected — matching only `lib/` at the root refused every one of them.
+const officialPluginFile = /^plugins\/[^/]+\/(?:lib\/.+\.(?:js|d\.ts)|locale\/.+\.json|presentation\/.+|market\/.+|package\.json|README\.md|cordis\.patch\.yml)$/
+const unexpected = paths.filter(path => !allowedRootFiles.has(path) && !executables.includes(path) && !locales.includes(path) && !(/^lib\/.+\.(?:js|d\.ts)$/.test(path)) && !officialPluginFile.test(path))
 const clientBundle = readFileSync(new URL('../lib/client.js', import.meta.url), 'utf8')
 const hostLeaks = ['require("node:', "require('node:", '#region src/host/version-updates.ts', '#region src/host/rpc.ts',
   'login/device/code', 'login/oauth/access_token', 'api.github.com', 'Ov23liq4i7n8UsylGRfb']
@@ -54,8 +60,11 @@ const relativeReadmeImages = readmeFiles.flatMap((path) => {
 // This ceiling only catches an accident, such as a dependency bundled into
 // lib/client.js. Pull requests leave it alone; a release raises it once the
 // measured package comes within about 10% of it. The release branch measured
-// 2,233,414 bytes at v0.5.39 (about 89% of the previous 2.5 MB ceiling).
-const maximumUnpackedBytes = 3_000_000
+// 2,233,414 bytes at v0.5.39 (about 89% of the previous 2.5 MB ceiling), and
+// 5,167,999 bytes at v0.11.0 — the growth is feature code (five host modules
+// for short handles, index generation and the write gate), not an accident:
+// lib/ is 2.78 MB and the 18 official plugins are 2.02 MB.
+const maximumUnpackedBytes = 5_500_000
 
 if (missing.length > 0 || unexpected.length > 0 || hostLeaks.length > 0 || relativeReadmeImages.length > 0 || pack.unpackedSize > maximumUnpackedBytes) {
   if (missing.length > 0) console.error(`Missing package files:\n${missing.map(path => `- ${path}`).join('\n')}`)

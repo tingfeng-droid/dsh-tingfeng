@@ -7,6 +7,7 @@ import { cp, mkdir, mkdtemp, readFile, readdir, realpath, rm, writeFile } from '
 import { tmpdir } from 'node:os'
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { withoutWorkspaceDevLinks } from './release.mjs'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const args = new Set(process.argv.slice(2))
@@ -18,7 +19,10 @@ const concurrency = Math.min(Number(configuredConcurrency), names.length)
 const manifest = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'))
 // An earlier release that installs on both supported DSH releases is the
 // realistic upgrade base; upgrading to the same version would test nothing.
-const upgradeBase = '0.5.29'
+// This is the newest version this repository actually published — the inherited
+// 0.5.29 was an upstream tag that does not exist under this package name, so the
+// upgrade leg could never resolve it (ERR_PNPM_NO_MATCHING_VERSION).
+const upgradeBase = '0.6.2'
 assert.notEqual(upgradeBase, manifest.version, 'The upgrade base must be an earlier release than the packed version')
 const temporary = await mkdtemp(join(tmpdir(), 'mnemon-plugin-artifacts-'))
 assert(!inside(root, temporary), 'The consumer must be outside the development workspace')
@@ -100,7 +104,11 @@ async function parallel(values, concurrency, action) {
 
 async function pack(directory, expectedName) {
   const output = await run('npm', ['pack', '--ignore-scripts', '--json', '--pack-destination', join(temporary, 'tarballs')], directory, `pack ${expectedName}`)
-  const [artifact] = JSON.parse(output)
+  // `npm pack --json` returns an array on older npm and an object keyed by package
+  // name on current releases (npm 11+). Accept either so this check is not tied
+  // to one npm major.
+  const parsedPack = JSON.parse(output)
+  const artifact = Array.isArray(parsedPack) ? parsedPack[0] : Object.values(parsedPack)[0]
   const ownManifest = JSON.parse(await readFile(join(directory, 'package.json'), 'utf8'))
   assert.equal(artifact.name, expectedName)
   assert.equal(artifact.version, ownManifest.version)
@@ -184,7 +192,13 @@ try {
     { directory: root, name: manifest.name },
     ...names.map(name => ({ directory: join(root, 'plugins', name), name })),
   ]
+  // The nested manifests carry pnpm-only `workspace:` dev ranges that npm refuses to
+  // parse outside the workspace (EUNSUPPORTEDPROTOCOL). The real release drops them
+  // while packing, and the published tarballs carry no such range — so packing and
+  // every install step below run with them dropped, restored byte-for-byte after.
   const packed = new Map()
+  const allDirectories = packages.map(input => input.directory)
+  await withoutWorkspaceDevLinks(allDirectories, async () => {
   await parallel(packages, concurrency, async input => packed.set(input.name, await pack(input.directory, input.name)))
   // Parallel packing completes out of order. Populate the public registry maps
   // in package-name order so leak checks and the consumer fixture stay stable.
@@ -215,6 +229,7 @@ try {
   // installs, real DSH checks and the external consumer concurrent without
   // oversubscribing the runner with an unbounded Promise.all.
   await parallel(checks, concurrency, check => check.action())
+  })
   console.log(`Verified ${names.length} independent plugin repositories and ${artifacts.size} packed artifacts with ${concurrency} workers, public SDK-only composition and Client tests.`)
   succeeded = true
 } finally {

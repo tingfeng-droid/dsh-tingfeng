@@ -44,7 +44,12 @@ function verifyDeclarations(filename) {
 // this package and the packages a plugin's client already has. Through the
 // Host protocol they would reach the SDK's cordis Context augmentation, which
 // splits Context in the standalone typecheck of a plugin that imports the client.
-const CLIENT_DECLARATION_PACKAGES = new Set(['react', '@deepseek-ai/dsh-client-ui-primitives'])
+// This package's own `./contracts` entry is browser-safe by construction: it
+// resolves to `core/contracts`, which carries no Host or SDK code and declares no
+// cordis Context augmentation. Client files import it for the shared type
+// vocabulary, and the recursion below still walks into it, so the reachability
+// rules apply to whatever it pulls in.
+const CLIENT_DECLARATION_PACKAGES = new Set(['react', '@deepseek-ai/dsh-client-ui-primitives', 'dsh-tingfeng/contracts'])
 function verifyClientDeclarations(filename, seen = new Set()) {
   if (seen.has(filename)) return seen
   seen.add(filename)
