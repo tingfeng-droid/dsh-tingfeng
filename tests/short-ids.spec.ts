@@ -38,7 +38,7 @@ describe('short id handles', () => {
   it('matches only its own grammar, so a topic is not read as a handle', () => {
     const pattern = shortIdPattern({ prefix: 'Z', digits: 3 })
     expect(pattern.test('Z001')).toBe(true)
-    expect(pattern.test('z001')).toBe(false)
+    expect(pattern.test('z001')).toBe(true)   // typing is case-blind; the table keeps one spelling
     expect(pattern.test('Z01')).toBe(false)
     expect(pattern.test('Z0001')).toBe(false)
     expect(pattern.test('账号池')).toBe(false)

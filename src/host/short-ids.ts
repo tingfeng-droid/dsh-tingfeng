@@ -77,8 +77,21 @@ function isValidPrefix(value: string): boolean {
  * The handle grammar one file uses. Exposed so callers can tell "this query is
  * a handle" from "this query is a topic" without duplicating the rule.
  */
+/**
+ * The shape of one handle.
+ *
+ * Case-insensitive: `z016` and `Z016` name the same entry, because the person
+ * typing it does not think about which shift key the table happens to use. The
+ * table still stores one spelling, and `normalizeShortId` maps input onto it.
+ */
 export function shortIdPattern(options: Pick<ShortIdOptions, 'prefix' | 'digits'>): RegExp {
-  return new RegExp(`^${options.prefix}\\d{${options.digits}}$`, 'u')
+  const prefix = options.prefix.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&')
+  return new RegExp(`^${prefix}\\d{${options.digits}}$`, 'iu')
+}
+
+/** The handle as the table spells it: same prefix casing, same digits. */
+export function normalizeShortId(options: Pick<ShortIdOptions, 'prefix' | 'digits'>, input: string): string {
+  return formatShortId(options, Number(input.trim().slice(options.prefix.length)))
 }
 
 /** Render one ordinal as a handle. */
@@ -235,7 +248,8 @@ export class ShortIdStore {
 
   /** Look one handle up, or `undefined` when it names nothing live. */
   resolve(handle: string): ShortIdRecord | undefined {
-    return this.load().map[handle]
+    const map = this.load().map
+    return map[handle] ?? map[normalizeShortId(this.options, handle)]
   }
 
   /** True when the query is shaped like a handle for this table. */

@@ -36,6 +36,7 @@ describe('isHandleQuery', () => {
   })
 
   it('does not treat ordinary text as a handle', () => {
+    expect(isHandleQuery('z016', store)).toBe(true)
     expect(isHandleQuery('账号池', store)).toBe(false)
     expect(isHandleQuery('Z1', store)).toBe(false)
     expect(isHandleQuery('Z0001', store)).toBe(false)
@@ -115,5 +116,24 @@ describe('lookupHandle', () => {
     const { handle } = store.assign('uuid-8', 'default', '辛')
     const { run } = fakeCli(() => JSON.stringify({ content: '辛的正文' }))
     expect(lookupHandle(handle, store, { ...base, run })?.id).toBe('uuid-8')
+  })
+})
+
+describe('handle casing', () => {
+  it('resolves a lower-case handle to the same entry', () => {
+    const { handle } = store.assign('uuid-case', 'default', '甲')
+    expect(store.resolve(handle.toLowerCase())?.id).toBe('uuid-case')
+    expect(store.resolve(handle.toUpperCase())?.id).toBe('uuid-case')
+  })
+
+  it('recognises a lower-case query as a handle', () => {
+    expect(isHandleQuery('z001', store)).toBe(true)
+  })
+
+  it('still hands the CLI the stored spelling of the id, not the typed case', () => {
+    const { handle } = store.assign('uuid-case2', 'default', '乙')
+    const { calls, run } = fakeCli(() => JSON.stringify({ id: 'uuid-case2', content: '乙' }))
+    lookupHandle(handle.toLowerCase(), store, { ...base, run })
+    expect(calls[0]).toContain('uuid-case2')
   })
 })
