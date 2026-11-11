@@ -1,6 +1,6 @@
 {
   "name": "dsh-tingfeng-provider-openviking",
-  "version": "0.5.10",
+  "version": "0.11.0",
   "description": "OpenViking Provider child for the Memory Spaces Source.",
   "license": "MIT",
   "type": "module",

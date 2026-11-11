@@ -1,6 +1,6 @@
 {
   "name": "dsh-tingfeng-source-runtime",
-  "version": "0.5.17",
+  "version": "0.11.0",
   "description": "Self-contained runtime Source for Composable View Memory.",
   "license": "MIT",
   "type": "module",
@@ -51,7 +51,7 @@
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.1",
-    "dsh-tingfeng": "^0.10.2",
+    "dsh-tingfeng": "^0.11.0",
     "react": "^18.2.0"
   },
   "devDependencies": {

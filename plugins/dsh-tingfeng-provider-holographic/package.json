@@ -1,6 +1,6 @@
 {
   "name": "dsh-tingfeng-provider-holographic",
-  "version": "0.5.7",
+  "version": "0.11.0",
   "description": "Holographic Provider child for the Memory Spaces Source.",
   "license": "MIT",
   "type": "module",
