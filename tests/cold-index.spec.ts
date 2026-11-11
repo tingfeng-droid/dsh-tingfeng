@@ -3,6 +3,7 @@ import fs from 'node:fs'
 import os from 'node:os'
 import { join } from 'node:path'
 import {
+  blockProblem,
   describeEntry,
   groupEntries,
   renderBlock,
@@ -330,5 +331,50 @@ describe('fallback reads like a description, not a table of contents', () => {
     const block = await renderBlock([entry('【甲 · 总主题：组A】\n\n## 3. 构建命令\n\n内容')], { markers })
     expect(block).toContain('构建命令')
     expect(block).not.toContain('3. 构建')
+  })
+})
+
+describe('blockProblem', () => {
+  /** A sound three-row block: handles present, descriptions say something new. */
+  const good = [
+    '### 组（3 条）',
+    '',
+    '| 编号 | 条目 | 一句话 |',
+    '|---|---|---|',
+    '| `Z001` | 甲 | 讲甲这件事 |',
+    '| `Z002` | 乙 | 讲乙这件事 |',
+    '| `Z003` | 丙 | 讲丙这件事 |',
+  ].join('\n')
+
+  it('accepts a block whose rows match the entries', () => {
+    expect(blockProblem(good, 3)).toBeUndefined()
+  })
+
+  it('refuses when the row count disagrees with the entries collected', () => {
+    expect(blockProblem(good, 4)).toContain('row(s)')
+  })
+
+  it('refuses a row whose handle is the em dash placeholder', () => {
+    const block = good.replace('`Z002`', '—')
+    expect(blockProblem(block, 3)).toContain('missing handle')
+  })
+
+  it('refuses a row with an empty handle cell', () => {
+    const block = good.replace('`Z002`', '')
+    expect(blockProblem(block, 3)).toContain('missing handle')
+  })
+
+  it('refuses a description that only repeats the title', () => {
+    const block = good.replace('讲乙这件事', '乙')
+    expect(blockProblem(block, 3)).toContain('repeats the title')
+  })
+
+  it('says which rows failed, not just how many', () => {
+    const block = good.replace('`Z002`', '—')
+    expect(blockProblem(block, 3)).toContain('乙')
+  })
+
+  it('accepts an empty library', () => {
+    expect(blockProblem('', 0)).toBeUndefined()
   })
 })

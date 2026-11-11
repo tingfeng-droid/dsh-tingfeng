@@ -309,6 +309,53 @@ export async function renderBlock(entries: readonly IndexEntry[], options: Rende
 }
 
 /** What one run did, for a caller that reports rather than prints. */
+/**
+ * Why a rendered block must not be written, or `undefined` when it is sound.
+ *
+ * The index is injected into every conversation, so a bad block is worse than no
+ * block: a stale index is corrected the next time it renders, while a block full
+ * of `—` handles or duplicated titles misleads for as long as it sits there. The
+ * caller keeps the file untouched on a refusal.
+ *
+ * Three failures are worth refusing, each one seen on real data:
+ *  - a row count that disagrees with the entries collected, which means the
+ *    grouping dropped or duplicated something;
+ *  - a row whose handle cell is empty or `—` while the table has a handle column,
+ *    which happens when the handle table and the library disagree;
+ *  - a description that is just the title again, which is the model restating
+ *    rather than summarising and leaves the column uninformative.
+ */
+export function blockProblem(block: string, entries: number): string | undefined {
+  // Data rows, not the header and not the `|---|` rule: any row whose first cell
+  // is not the literal word `编号` and that carries at least three cells.
+  const rows = block.split('\n').filter(line => {
+    const trimmed = line.trim()
+    if (!trimmed.startsWith('|') || !trimmed.endsWith('|')) return false
+    if (/^\|[-:\s|]+\|$/u.test(trimmed)) return false
+    const cells = trimmed.split('|').map(cell => cell.trim())
+    return cells.length >= 3 && cells[1] !== '编号' && cells[1] !== '条目'
+  })
+  if (entries > 0 && rows.length !== entries) {
+    return `rendered ${rows.length} row(s) for ${entries} entr(y|ies)`
+  }
+  const duplicated: string[] = []
+  for (const row of rows) {
+    const cells = row.split('|').map(cell => cell.trim())
+    // cells[0] is the empty string before the leading pipe.
+    const handle = cells[1] ?? ''
+    const title = cells[2] ?? ''
+    const description = cells[3] ?? ''
+    if (handle === '—' || handle === '') duplicated.push(title)
+    const bare = title.replace(/^\*\*|\*\*$/gu, '').trim()
+    if (description !== '' && bare !== '' && description === bare) duplicated.push(title)
+  }
+  if (duplicated.length > 0) {
+    const sample = duplicated.slice(0, 3).join(' / ')
+    return `${duplicated.length} row(s) with a missing handle or a description that repeats the title: ${sample}`
+  }
+  return undefined
+}
+
 export interface IndexUpdate {
   readonly changed: boolean
   readonly entries: number
@@ -355,6 +402,11 @@ export function spliceBlock(file: string, block: string, markers: IndexMarkers):
  */
 export async function updateIndex(file: string, entries: readonly IndexEntry[], options: RenderOptions): Promise<IndexUpdate> {
   const block = await renderBlock(entries, options)
+  const problem = blockProblem(block, entries.length)
+  if (problem !== undefined) {
+    // Nothing written: the previous index stays, which is stale but true.
+    throw failure(new Error(problem), 'be rendered; the previous index was kept')
+  }
   const digest = digestOf(block)
   let current: string
   try {

@@ -46,24 +46,100 @@ const GATED_PATHS: readonly string[] = [
  * on a read.
  */
 const GATED_FILE = /(?:MEMORY|USER|AGENTS)\.md/u
-const WRITE_VERB = /(?:^|[|;&]\s*|\s)(?:tee|sed\s+-i|perl\s+-[a-z]*i|cp|mv|install|truncate|dd\s+of=|Set-Content|Add-Content|Out-File|New-Item|sc|Set-Item)(?:\s|$|[=:])/iu
-const REDIRECT = /(?:^|[^<])>>?\s*\S*/u
-const POWERSHELL_REDIRECT = />\s*[^|<;]*$/u
 
-/** True when this command writes one of the four files the curator owns. */
+/**
+ * Where a command sends its output, or `undefined` when nothing can be found.
+ *
+ * The distinction the gate needs is not "does this command mention a gated file"
+ * but "is a gated file the thing being written". `cp AGENTS.md /tmp/backup` and
+ * `cat AGENTS.md > /tmp/copy` both name the file and neither touches it — and
+ * backing up the index before editing it is the routine this gate must not block.
+ *
+ * Extraction, not verification: this returns a best-effort list of destinations
+ * and the caller asks whether any of them is gated. An unparseable command yields
+ * `undefined` and the caller treats that as "could be anything" only when the
+ * command also carries a write verb — see `shellWritesGatedFile`.
+ */
+function writeTargets(command: string): string[] {
+  const targets: string[] = []
+
+  // POSIX redirection, per segment: `> f`, `>> f`, `>f`, with an optional `&1`
+  // style descriptor that is not a path.
+  for (const match of command.matchAll(/(?:^|[^<>&\d])>>?\s*([^\s|;&<>()]+)/gu)) {
+    const target = match[1]
+    if (target !== undefined && !/^&\d$/u.test(target)) targets.push(target)
+  }
+
+  // `tee [-a] f...` — every operand after the flags is a destination.
+  for (const match of command.matchAll(/(?:^|[|;&]\s*|\s)tee\s+((?:-{1,2}[\w-]+\s+)*)([^|;&<>]+)/gu)) {
+    for (const word of (match[2] ?? '').trim().split(/\s+/u)) {
+      if (word !== '' && !word.startsWith('-')) targets.push(word)
+    }
+  }
+
+  // `dd ... of=f`.
+  for (const match of command.matchAll(/\bof=([^\s|;&<>]+)/gu)) {
+    if (match[1] !== undefined) targets.push(match[1])
+  }
+
+  // `cp`/`mv`/`install` write their LAST operand and read the others, so only the
+  // last one is a destination. A trailing directory changes nothing: it is still
+  // the destination, and `cp x AGENTS.md` remains covered.
+  for (const match of command.matchAll(/(?:^|[|;&]\s*|\s)(?:cp|mv|install)\s+((?:-{1,2}[\w-]+\s+)*)([^|;&<>]+)/gu)) {
+    const words = (match[2] ?? '').trim().split(/\s+/u).filter(word => word !== '' && !word.startsWith('-'))
+    const last = words[words.length - 1]
+    if (last !== undefined) targets.push(last)
+  }
+
+  // In-place editors rewrite their operands: `sed -i`, `perl -pi`, `truncate`.
+  // `sed -n '1,20p' file` only prints and must stay readable; only an `-i` flag
+  // (borrowed together with any other short flags, as `-i.bak` or `-ni`) writes.
+  if (/(?:^|[|;&]\s*|\s)sed\s+(?:-\S+\s+)*-[a-z]*i/ui.test(command)
+    || /(?:^|[|;&]\s*|\s)perl\s+(?:-\S+\s+)*-\S*i/ui.test(command)) {
+    for (const match of command.matchAll(/(?:^|[|;&]\s*|\s)(?:sed|perl)\s+((?:-\S+\s+)*)('[^']*'|"[^"]*"|\S*)(?:\s+([^|;&<>]+))?/gu)) {
+      // The expression is the first non-flag operand; the file(s) follow.
+      for (const word of (match[3] ?? '').trim().split(/\s+/u)) {
+        if (word !== '') targets.push(word)
+      }
+    }
+  }
+
+  // `rm`/`del`/`Remove-Item` destroy the operand itself.
+  for (const match of command.matchAll(/(?:^|[|;&]\s*|\s)(?:rm|del|Remove-Item)\s+((?:-\S+\s+)*)([^|;&<>]+)/giu)) {
+    for (const word of (match[2] ?? '').trim().split(/\s+/u)) {
+      if (word !== '' && !word.startsWith('-')) targets.push(word)
+    }
+  }
+
+  // PowerShell's `Set-Content f` / `-Path f` / `-FilePath f` and the bare `< f`
+  // forms of `New-Item`.
+  for (const match of command.matchAll(/(?:-Path|-FilePath|-LiteralPath)\s+('[^']*'|"[^"]*"|[^\s;|]+)/giu)) {
+    if (match[1] !== undefined) targets.push(match[1])
+  }
+  for (const match of command.matchAll(/(?:Set-Content|Add-Content|Out-File|New-Item|Set-Item|sc)\s+(?:-\S+\s+)*('[^']*'|"[^"]*"|[^-\s;|][^\s;|]*)/giu)) {
+    if (match[1] !== undefined) targets.push(match[1])
+  }
+
+  return targets.map(target => target.replace(/^['"]|['"]$/gu, ''))
+}
+
+/**
+ * True when a gated file is a destination of this command.
+ *
+ * A command whose destination cannot be parsed falls back to the destructive
+ * verbs only — `rm`, `truncate`, `dd` — never to `sed`/`perl`/`cp`, because those
+ * have read-only forms (`sed -n`, `cp a b` with the file first) and guessing
+ * wrong there blocks the backups that editing the index depends on.
+ * A command that only reads a gated file produces no destination and stays free.
+ */
 function shellWritesGatedFile(command: string): boolean {
-  // A command that never mentions one of the files cannot write it.
   if (!GATED_FILE.test(command)) return false
-  if (REDIRECT.test(command) || POWERSHELL_REDIRECT.test(command)) return true
-  if (WRITE_VERB.test(command)) return true
-  // `tee`, `dd of=`, `cp`, `mv` and PowerShell's verbs put the file right after
-  // the verb with no space at all, so match the verb and the file anywhere.
-  if (/(?:tee|dd\s+of=|cp|mv|install|Set-Content|Add-Content|Out-File)/iu.test(command)) return true
-  // `dd of=<file>` has no separator at all between the key and the path.
-  if (/\bdd\b[^|;&]*\bof=/iu.test(command)) return true
-  // `Remove-Item`/`rm`/`del` delete rather than write, but losing the file is the
-  // same loss the gate exists to prevent.
-  return /(?:^|[|;&]\s*|\s)rm(?:\s|$)/u.test(command) || /Remove-Item|\bdel\b/iu.test(command)
+  const targets = writeTargets(command)
+  if (targets.length > 0) return targets.some(target => GATED_FILE.test(target))
+  // Nothing parsed as a destination. Only verbs that cannot be read-only still
+  // count, so an unparseable `sed`/`cp` stays free while an unparseable `rm`
+  // does not.
+  return /(?:^|[|;&]\s*|\s)(?:tee|truncate|rm|del|Remove-Item|dd\s+of=)(?:\s|$)/iu.test(command)
 }
 
 /** What the model reads instead of a result, and the one thing it may do next. */

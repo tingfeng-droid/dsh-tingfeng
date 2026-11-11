@@ -161,3 +161,50 @@ describe('shell commands that write a gated file', () => {
     expect(gateDecision(call('powershell', { command: `cat ${M}` }), on)).toBeUndefined()
   })
 })
+
+
+describe('reading a gated file is never refused', () => {
+  const A = '~/.agents/' + ['AGENTS', 'md'].join('.')
+  const R = '~/.mnemon/runtime/' + ['MEMORY', 'md'].join('.')
+
+  /** Every one of these only reads. Backing the index up before editing it is routine. */
+  const reads = [
+    `wc -l ${A}`,
+    `cat ${A}`,
+    `grep -n xx ${A}`,
+    `sed -n '1,20p' ${A}`,
+    `head -c 200 ${R}`,
+    `diff ${A} /tmp/bak`,
+    `md5sum ${R}`,
+    `cat ${A} > /tmp/copy.txt`,
+    `grep -c x ${A} | tee /tmp/out.txt`,
+    `cp ${A} /tmp/backup.md`,
+    `cp -a ${A} /tmp/dir/`,
+    `sed -n '1,5p' ${A} > /tmp/x`,
+  ]
+
+  for (const command of reads) {
+    it(`lets through: ${command}`, () => {
+      expect(gateDecision(call('bash', { command }), { enabled: true })).toBeUndefined()
+    })
+  }
+
+  /** The destination decides: these write a gated file, so they must be refused. */
+  const writes = [
+    `echo x > ${A}`,
+    `cat /tmp/x > ${A}`,
+    `cp /tmp/x ${A}`,
+    `mv /tmp/x ${A}`,
+    `sed -i 's/a/b/' ${A}`,
+    `dd if=/dev/zero of=${R}`,
+    `echo x | tee ${A}`,
+    `Set-Content -Path ${A} -Value x`,
+    `Remove-Item ${A}`,
+  ]
+
+  for (const command of writes) {
+    it(`refuses: ${command}`, () => {
+      expect(gateDecision(call('bash', { command }), { enabled: true })).toBeTypeOf('string')
+    })
+  }
+})
