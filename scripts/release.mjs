@@ -389,7 +389,12 @@ function missingRegistryVersion(error) {
 export async function inspectRegistryArtifact(name, version, registry = defaultRegistry, run = npm) {
   try {
     const output = await run(['view', `${name}@${version}`, 'version', 'dist.integrity', '--json', '--prefer-online', '--registry', registry], root)
-    const value = JSON.parse(output)
+    // `npm view` wraps the answer in an array when more than one field is asked for,
+    // and returns the bare object when one is. Reading it as an object made both
+    // lookups undefined, so the integrity guard compared a real digest against
+    // undefined and refused a version that had in fact been published byte for byte.
+    const parsed = JSON.parse(output)
+    const value = Array.isArray(parsed) ? parsed[0] : parsed
     return { version: value.version, integrity: value['dist.integrity'] }
   } catch (error) {
     if (missingRegistryVersion(error)) return null
