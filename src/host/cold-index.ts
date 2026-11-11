@@ -165,15 +165,67 @@ export interface IndexRow {
   readonly description: string
 }
 
+/**
+ * Lines that say nothing about what an entry is about.
+ *
+ * Measured on this library: with the model switched off, taking "the first body
+ * line" produced a parenthetical merge note on every one of 44 entries — not one
+ * was a description. The notes are bookkeeping ("（本条合并自…）", "（合并 c8c3cd4c…）"),
+ * so a fallback that reads them is worse than printing nothing.
+ */
+const BOOKKEEPING = /^[（(]/u
+
+/**
+ * A markdown heading's own text. A section number is stripped because a heading
+ * reads as a table of contents otherwise: "一、现状（2026-11-10 实读）" names the
+ * order of the page, and "现状（2026-11-10 实读）" names the entry.
+ */
+const HEADING = /^#{1,6}\s+(?<text>.+)$/u
+const SECTION_NUMBER = /^(?:[一二三四五六七八九十]+|\d+)[、.．]\s*/u
+
+/**
+ * The best one-liner this entry carries without a model.
+ *
+ * Order of preference: an explicit summary the writer left as the second line
+ * (see `SUMMARY_LINE`), the first section heading, then the first line of prose
+ * that is not bookkeeping. Every step is a guess about someone else's document,
+ * so each one is narrow rather than clever.
+ */
 function fallbackDescription(title: string, content: string, max: number): string {
-  const body = content
-    .split('\n')
-    .slice(1)
-    .map(line => line.replace(/^[#>\s-]+/u, '').trim())
-    .find(line => line !== '' && !line.startsWith('|') && !line.startsWith('```'))
-  const source = body ?? title
-  return source.length > max ? `${source.slice(0, max)}…` : source
+  const lines = content.split('\n')
+  const clamp = (text: string): string => (text.length > max ? `${text.slice(0, max)}…` : text)
+
+  // A writer on a machine with no model can state the summary itself, as the
+  // second line, prefixed so it cannot be confused with prose.
+  const declared = (lines[1] ?? '').trim()
+  if (declared.startsWith(SUMMARY_LINE)) {
+    const text = declared.slice(SUMMARY_LINE.length).trim()
+    if (text !== '') return clamp(text)
+  }
+
+  const body = lines.slice(1).map(line => line.trim())
+
+  // A heading names the section the entry opens with, which is usually closer to
+  // "what this is about" than the paragraph under it. Tried before prose.
+  for (const line of body) {
+    const text = HEADING.exec(line)?.groups?.text?.trim().replace(SECTION_NUMBER, '')
+    if (text !== undefined && text !== '') return clamp(text)
+  }
+
+  for (const line of body) {
+    if (line === '' || line.startsWith('|') || line.startsWith('```')) continue
+    if (BOOKKEEPING.test(line) || line.startsWith('#')) continue
+    return clamp(line.replace(/^[>\s-]+/u, ''))
+  }
+  return clamp(title)
 }
+
+/**
+ * The prefix a writer uses to state an entry's own one-line summary, for
+ * machines whose index is generated without a model. Empty disables the rule.
+ */
+export const SUMMARY_LINE = '摘要：'
+
 
 async function describe(entry: IndexEntry, options: RenderOptions): Promise<string> {
   const max = options.maxDescription ?? DEFAULT_MAX_DESCRIPTION

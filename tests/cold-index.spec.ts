@@ -276,3 +276,59 @@ describe('handle column', () => {
     expect(block).toContain('压缩编译插件（自有+开源）')
   })
 })
+
+describe('fallback without a model', () => {
+  const entry = (text: string) => ({ id: 'x', store: 'default', content: text })
+
+  it('skips a merge note rather than printing it as the description', async () => {
+    const block = await renderBlock([entry('【甲 · 总主题：组A】\n（本条合并自原（一）+（二））\n真正的正文在这里。')], { markers })
+    expect(block).not.toContain('本条合并自')
+    expect(block).toContain('真正的正文在这里')
+  })
+
+  it('skips any parenthetical note, not just the ones written today', async () => {
+    const block = await renderBlock([entry('【甲 · 总主题：组A】\n（2026-11-04 实测。另一台机器端口不同）\n正文。')], { markers })
+    expect(block).not.toContain('2026-11-04')
+    expect(block).toContain('正文')
+  })
+
+  it('prefers a heading when the body starts with one', async () => {
+    const block = await renderBlock([entry('【甲 · 总主题：组A】\n\n## 两棵树（别再混淆）\n\n内容')], { markers })
+    expect(block).toContain('两棵树')
+  })
+
+  it('uses the summary the writer declared on the second line', async () => {
+    const block = await renderBlock([entry('【甲 · 总主题：组A】\n摘要：一句话说清这条讲什么\n\n## 正文')], { markers })
+    expect(block).toContain('一句话说清这条讲什么')
+  })
+
+  it('falls back to the title when the entry has no body at all', async () => {
+    const block = await renderBlock([entry('【甲条目标题 · 总主题：组A】')], { markers })
+    expect(block).toContain('甲条目标题')
+  })
+
+  it('still prefers the model when one answers', async () => {
+    const block = await renderBlock([entry('【甲 · 总主题：组A】\n摘要：手写的\n正文')], {
+      markers,
+      summarize: async () => '模型写的',
+    })
+    expect(block).toContain('模型写的')
+    expect(block).not.toContain('手写的')
+  })
+})
+
+describe('fallback reads like a description, not a table of contents', () => {
+  const entry = (text: string) => ({ id: 'x', store: 'default', content: text })
+
+  it('drops a Chinese section number from a heading', async () => {
+    const block = await renderBlock([entry('【甲 · 总主题：组A】\n\n## 一、现状（先说结论）\n\n内容')], { markers })
+    expect(block).toContain('现状（先说结论）')
+    expect(block).not.toContain('一、现状')
+  })
+
+  it('drops an arabic section number too', async () => {
+    const block = await renderBlock([entry('【甲 · 总主题：组A】\n\n## 3. 构建命令\n\n内容')], { markers })
+    expect(block).toContain('构建命令')
+    expect(block).not.toContain('3. 构建')
+  })
+})
