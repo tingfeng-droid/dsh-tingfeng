@@ -30,8 +30,41 @@ const GATED_PATHS: readonly string[] = [
   '/.dsh/AGENTS.md',
 ]
 
-/** Shell redirection into one of the gated files is the same write by another route. */
-const SHELL_WRITE = /(?:^|[^<])>>?\s*\S*(?:MEMORY\.md|USER\.md|AGENTS\.md)/u
+/**
+ * A shell command that writes one of the gated files.
+ *
+ * One regex covering both platforms' idioms, because the same profile runs on
+ * Linux and on Windows and the gate cannot ask which: POSIX redirection and
+ * `tee`; PowerShell's `Set-Content`, `Add-Content`, `Out-File` and `>` redirection
+ * (which differs only in that the target may precede nothing at all); and the
+ * editing commands that rewrite a file in place — `sed -i`, `perl -pi`, `cp`,
+ * `mv`, `dd of=`, `install`, `truncate`.
+ *
+ * Deliberately not exhaustive: `python -c "open(...).write(...)"` and a helper
+ * script both slip through, and always will. The gate exists to make the skill be
+ * read, not to stop a determined writer, and every widening costs a false refusal
+ * on a read.
+ */
+const GATED_FILE = /(?:MEMORY|USER|AGENTS)\.md/u
+const WRITE_VERB = /(?:^|[|;&]\s*|\s)(?:tee|sed\s+-i|perl\s+-[a-z]*i|cp|mv|install|truncate|dd\s+of=|Set-Content|Add-Content|Out-File|New-Item|sc|Set-Item)(?:\s|$|[=:])/iu
+const REDIRECT = /(?:^|[^<])>>?\s*\S*/u
+const POWERSHELL_REDIRECT = />\s*[^|<;]*$/u
+
+/** True when this command writes one of the four files the curator owns. */
+function shellWritesGatedFile(command: string): boolean {
+  // A command that never mentions one of the files cannot write it.
+  if (!GATED_FILE.test(command)) return false
+  if (REDIRECT.test(command) || POWERSHELL_REDIRECT.test(command)) return true
+  if (WRITE_VERB.test(command)) return true
+  // `tee`, `dd of=`, `cp`, `mv` and PowerShell's verbs put the file right after
+  // the verb with no space at all, so match the verb and the file anywhere.
+  if (/(?:tee|dd\s+of=|cp|mv|install|Set-Content|Add-Content|Out-File)/iu.test(command)) return true
+  // `dd of=<file>` has no separator at all between the key and the path.
+  if (/\bdd\b[^|;&]*\bof=/iu.test(command)) return true
+  // `Remove-Item`/`rm`/`del` delete rather than write, but losing the file is the
+  // same loss the gate exists to prevent.
+  return /(?:^|[|;&]\s*|\s)rm(?:\s|$)/u.test(command) || /Remove-Item|\bdel\b/iu.test(command)
+}
 
 /** What the model reads instead of a result, and the one thing it may do next. */
 export const GATE_INSTRUCTION =
@@ -72,9 +105,9 @@ export function gateDecision(execution: ToolExecution, options: SkillGateOptions
     return path !== undefined && GATED_PATHS.some(suffix => path.endsWith(suffix)) ? refusal : undefined
   }
 
-  if (name === 'bash') {
+  if (name === 'bash' || name === 'pwsh' || name === 'powershell') {
     const command = typeof args.command === 'string' ? args.command : undefined
-    return command !== undefined && SHELL_WRITE.test(command) ? refusal : undefined
+    return command !== undefined && shellWritesGatedFile(command) ? refusal : undefined
   }
 
   return undefined

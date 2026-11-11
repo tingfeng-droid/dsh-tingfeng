@@ -102,3 +102,62 @@ describe('SkillGate', () => {
     expect(gate.guard(call('mnemon_remember'))).toBeUndefined()
   })
 })
+
+describe('shell commands that write a gated file', () => {
+  const shell = (command: string) => call('bash', { command })
+  const G = ['AGENTS', 'md'].join('.')
+  const A = `~/.agents/${G}`
+  const M = `~/.mnemon/runtime/${['MEMORY', 'md'].join('.')}`
+
+  it('refuses every POSIX idiom that writes the file', () => {
+    for (const command of [
+      `echo x > ${A}`,
+      `cat a >> ${A}`,
+      `echo x | tee ${M}`,
+      `sed -i 's/a/b/' ${A}`,
+      `perl -pi -e 's/a/b/' ${A}`,
+      `cp /tmp/x ${A}`,
+      `mv /tmp/x ${A}`,
+      `dd if=/dev/zero of=${A}`,
+      `rm ${A}`,
+    ]) {
+      expect(gateDecision(shell(command), on), command).toBe(GATE_INSTRUCTION)
+    }
+  })
+
+  it('refuses the PowerShell idioms, because the same profile runs on Windows', () => {
+    for (const command of [
+      `Set-Content -Path ${A} -Value x`,
+      `Add-Content ${M} x`,
+      `'x' | Out-File ${A}`,
+      `Remove-Item ${A}`,
+      `del ${A}`,
+    ]) {
+      expect(gateDecision(shell(command), on), command).toBe(GATE_INSTRUCTION)
+    }
+  })
+
+  it('lets every read through — looking at memory is a daily action', () => {
+    for (const command of [
+      `cat ${M}`,
+      `grep -c x ${A}`,
+      `wc -l ${A}`,
+      `head -20 ${M}`,
+      `Get-Content ${M}`,
+      `Select-String -Pattern x ${A}`,
+    ]) {
+      expect(gateDecision(shell(command), on), command).toBeUndefined()
+    }
+  })
+
+  it('ignores a command that only mentions the name in passing', () => {
+    expect(gateDecision(shell('echo "MEMORY.md 是什么"'), on)).toBeUndefined()
+    expect(gateDecision(shell('git status'), on)).toBeUndefined()
+    expect(gateDecision(shell('echo hi > /tmp/a.txt'), on)).toBeUndefined()
+  })
+
+  it('gates pwsh and powershell by the same rule as bash', () => {
+    expect(gateDecision(call('pwsh', { command: `echo x > ${A}` }), on)).toBe(GATE_INSTRUCTION)
+    expect(gateDecision(call('powershell', { command: `cat ${M}` }), on)).toBeUndefined()
+  })
+})
