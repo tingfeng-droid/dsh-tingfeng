@@ -111,14 +111,38 @@ function writeTargets(command: string): string[] {
     }
   }
 
-  // PowerShell's `Set-Content f` / `-Path f` / `-FilePath f` and the bare `< f`
-  // forms of `New-Item`.
-  for (const match of command.matchAll(/(?:-Path|-FilePath|-LiteralPath)\s+('[^']*'|"[^"]*"|[^\s;|]+)/giu)) {
-    if (match[1] !== undefined) targets.push(match[1])
+  // PowerShell names its destination either positionally or through a parameter.
+  // `-Path` on its own says nothing: `Get-Content -Path f`, `Select-String -Path f`
+  // and `Test-Path f` are all reads, and refusing them was the widest false
+  // positive this gate had. So a parameter only counts when the VERB before it
+  // writes — the verb list decides, not the parameter name.
+  const PS_WRITE_VERB = String.raw`(?:Set-Content|Add-Content|Out-File|New-Item|Set-Item|Remove-Item|Clear-Content|Copy-Item|Move-Item|Rename-Item|Tee-Object)`
+  const psVerb = new RegExp(`(?:^|[|;&{(]\\s*)${PS_WRITE_VERB}\\b`, 'iu')
+  if (psVerb.test(command)) {
+    for (const match of command.matchAll(new RegExp(`(?:^|[|;&{(]\\s*)(${PS_WRITE_VERB})\\b([^|;&}]*)\\}?(?:$|[|;&])`, 'giu'))) {
+      const verb = (match[1] ?? '').toLocaleLowerCase()
+      const words: string[] = []
+      for (const part of (match[2] ?? '').matchAll(/('[^']*'|"[^"]*"|[^\s;]+)/gu)) {
+        const word = (part[1] ?? '').replace(/^['"]|['"]$/gu, '')
+        // Skip the parameter name itself (`-Path`): its value is the next token.
+        if (word !== '' && !/^-[A-Za-z]/u.test(word)) words.push(word)
+      }
+      // `Copy-Item`/`Move-Item`/`Rename-Item` read their FIRST operands and write
+      // the LAST, exactly as `cp`/`mv` do; collecting every operand would refuse
+      // the backup `Copy-Item AGENTS.md C:\temp\bak.md` that this gate exists to
+      // allow. The remaining verbs write every operand they are given.
+      const lastOperand = /^(?:copy-item|move-item|rename-item)$/u.test(verb)
+      targets.push(...(lastOperand ? words.slice(-1) : words))
+    }
   }
-  for (const match of command.matchAll(/(?:Set-Content|Add-Content|Out-File|New-Item|Set-Item|sc)\s+(?:-\S+\s+)*('[^']*'|"[^"]*"|[^-\s;|][^\s;|]*)/giu)) {
-    if (match[1] !== undefined) targets.push(match[1])
+
+  // `[System.IO.File]::WriteAllText('f', …)` / `::AppendAllText` / `::WriteAllLines`.
+  for (const match of command.matchAll(/\\?::(?:WriteAllText|WriteAllLines|AppendAllText|AppendAllLines)\s*\(\s*('[^']*'|"[^"]*"|[^,)]+)/giu)) {
+    if (match[1] !== undefined) targets.push(match[1].replace(/^['"]|['"]$/gu, ''))
   }
+
+  // `[System.IO.File]::ReadAllText(...)` and friends are reads; they must not be
+  // mistaken for a destination, so nothing is collected for them.
 
   return targets.map(target => target.replace(/^['"]|['"]$/gu, ''))
 }

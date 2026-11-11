@@ -208,3 +208,57 @@ describe('reading a gated file is never refused', () => {
     })
   }
 })
+
+describe('PowerShell: reading is never refused', () => {
+  const F = ['AGENTS', 'md'].join('.')
+  const M = ['MEMORY', 'md'].join('.')
+  const A = `C:\\Users\\39212\\.agents\\${F}`
+  const R = `C:\\Users\\39212\\.mnemon\\runtime\\${M}`
+
+  /**
+   * `-Path` appears on reads too — `Get-Content -Path f` is the ordinary way to
+   * read a file, and refusing it was the widest false positive the gate had.
+   * The verb decides, not the parameter name.
+   */
+  const reads = [
+    `Get-Content ${A}`,
+    `Get-Content -Path ${A}`,
+    `Get-Content -Path ${A} -TotalCount 20`,
+    `Get-Content -Raw ${R}`,
+    `Select-String -Path ${A} -Pattern xx`,
+    `Select-String xx ${A}`,
+    `Test-Path ${A}`,
+    `Get-FileHash ${A}`,
+    `Get-Item ${A}`,
+    `Measure-Object -Line ${A}`,
+    `(Get-Content ${A}).Count`,
+    `[System.IO.File]::ReadAllText('${A}')`,
+    `Copy-Item ${A} C:\\temp\\bak.md`,
+    `Get-Content ${A} | Set-Content C:\\temp\\x.txt`,
+    `Get-Content ${A} | Out-File C:\\temp\\x.txt`,
+  ]
+
+  for (const command of reads) {
+    it(`lets through: ${command}`, () => {
+      expect(gateDecision(call('pwsh', { command }), { enabled: true })).toBeUndefined()
+    })
+  }
+
+  const writes = [
+    `echo x > ${A}`,
+    `echo x | Set-Content ${A}`,
+    `Set-Content -Path ${A} -Value x`,
+    `Add-Content ${A} x`,
+    `Out-File ${A}`,
+    `Remove-Item ${A}`,
+    `Copy-Item C:\\temp\\x.md ${A}`,
+    `Move-Item C:\\temp\\x.md ${A}`,
+    `[System.IO.File]::WriteAllText('${A}', 'x')`,
+  ]
+
+  for (const command of writes) {
+    it(`refuses: ${command}`, () => {
+      expect(gateDecision(call('pwsh', { command }), { enabled: true })).toBeTypeOf('string')
+    })
+  }
+})
