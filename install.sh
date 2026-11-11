@@ -29,7 +29,11 @@ DEST="$ROOT/node_modules/dsh-tingfeng"
 # 统一把 tgz 放到 ~/dsh-packs（与既有约定一致），再从那里引用
 PACKS="$HOME/dsh-packs"
 mkdir -p "$PACKS"
-cp -f "$TGZ" "$PACKS/"
+# 源文件已经在这个目录里时 cp 会拒绝自己拷自己（即使 -f），所以先比路径
+case "$TGZ" in
+  "$PACKS"/*) ;;
+  *) cp -f "$TGZ" "$PACKS/" ;;
+esac
 TGZ="$PACKS/$(basename "$TGZ")"
 
 VERSION=$(python3 -c "import tarfile,json,sys;print(json.load(tarfile.open(sys.argv[1]).extractfile('package/package.json'))['version'])" "$TGZ")
