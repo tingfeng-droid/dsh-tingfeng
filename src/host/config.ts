@@ -29,8 +29,6 @@ import {
   MNEMON_EMBEDDING_PROTOCOLS,
 } from './config-values.ts'
 import type {
-  ColdLibHintConfig,
-  ColdLibHintRuleConfig,
   Config as SharedConfig,
   CustomPackConfig as SharedCustomPackConfig,
   InteractionConfig as SharedInteractionConfig,
@@ -42,7 +40,11 @@ import type {
   ResolvedInteractionConfig as SharedResolvedInteractionConfig,
   ResolvedSkillsConfig,
   RuntimeMemoryConfig,
+  IndexSyncConfig,
+  ResolvedIndexSyncConfig,
+  ResolvedShortIdConfig,
   ResolvedTaskAgentModelConfig,
+  ShortIdConfig,
   TaskAgentModelConfig,
 } from "./protocol.ts"
 
@@ -158,24 +160,37 @@ const IdleReviewSchema = z.object({
 })
 
 /**
- * One keyword table entry as a profile config file can hold it: a regex source
- * plus flags, both strings. Compiled on resolution, so a mistyped pattern is a
- * dropped rule rather than a failed startup.
+ * Handles that address one cold-library entry, e.g. `Z001`.
+ *
+ * Off by default. The prefix and width are configuration so a machine can pick
+ * a shape its own notes already use; the table itself is machine-local state
+ * and never leaves the storage root.
  */
-const ColdLibHintRuleSchema: z<ColdLibHintRuleConfig> = z.object({
-  domain: z.string(),
-  keywords: z.string(),
-  flags: z.string().default('u'),
+const ShortIdsSchema: z<ShortIdConfig> = z.object({
+  enabled: z.boolean().default(false),
+  prefix: z.string().default('Z'),
+  digits: z.number().step(1).min(1).max(9).default(3),
 })
 
-const ColdLibHintSchema: z<ColdLibHintConfig> = z.object({
-  enabled: z.boolean().default(true),
-  // `null` keeps the built-in table; `[]` means no rules at all; an array
-  // replaces it. Three states, so the field cannot default to an array: this
-  // schema fills a missing array with `[]`, which would erase the difference
-  // between "not configured" and "configured empty".
-  rules: z.union([z.array(ColdLibHintRuleSchema), z.const(null)]).default(null),
-  exclusions: z.union([z.array(z.string()), z.const(null)]).default(null),
+/**
+ * The generated half of a cold-library index.
+ *
+ * Off by default, and every part of it is optional: a profile that names no
+ * `targetPath` gets no file, and one that names no model gets the entry's own
+ * first line where a summary would go.
+ */
+const IndexSyncSchema: z<IndexSyncConfig> = z.object({
+  enabled: z.boolean().default(false),
+  targetPath: z.string().default(''),
+  beginMarker: z.string().default('<!-- AUTO-GENERATED:BEGIN 这一段由 dsh-tingfeng 生成，手改会被覆盖 -->'),
+  endMarker: z.string().default('<!-- AUTO-GENERATED:END -->'),
+  debounceMs: z.number().step(1).min(0).max(3_600_000).default(300_000),
+  summary: z.object({
+    provider: z.union(['ollama', 'none'] as const).default('none'),
+    endpoint: z.string().default('http://127.0.0.1:11434'),
+    model: z.string().default('qwen3.5:4b'),
+    maxChars: z.number().step(1).min(10).max(200).default(60),
+  }).default({}),
 })
 
 const MemoryParticipationModeSchema = z.union(['off', 'manual', 'automatic'] as const)
@@ -269,9 +284,12 @@ export const Config: z<Config> = z.object({
   // Git sync is off until a user switches it on: the block stays a title and a
   // switch, and nothing about Git is probed while it is off.
   syncEnabled: z.boolean().default(false),
-  // Which domains this machine works is a property of the machine, not of the
-  // package, so the keyword table is configuration with built-in defaults.
-  coldLibHint: ColdLibHintSchema,
+  // Off by default: a handle table is one machine's addition to its own
+  // workflow, and a machine that never asked for it must not grow one.
+  shortIds: ShortIdsSchema,
+  // Also off by default, and it writes a file: a profile has to name the target
+  // before anything is touched.
+  indexSync: IndexSyncSchema,
 })
 
 export function resolveInteractionConfig(config: InteractionConfig = {}): ResolvedInteractionConfig {
@@ -318,6 +336,60 @@ function resolveCustomPacks(value: CustomPackConfig[] | undefined, legacyDataDir
     packs.push({ id, name: 'Custom Pack', dataDir: validateCustomDataDir(legacyDataDir) })
   }
   return packs
+}
+
+/**
+ * Resolve the handle table's shape.
+ *
+ * The validation mirrors `ShortIdStore`, which refuses the same shapes: failing
+ * here names the field, while failing at first write would only surface once a
+ * user tried to save a memory.
+ */
+/**
+ * Resolve the index-sync block.
+ *
+ * A configured-but-empty target is a mistake worth naming here: the feature
+ * would look switched on while writing nothing, and the user would be looking for
+ * a file that never appears.
+ */
+function resolveIndexSync(value: IndexSyncConfig | undefined): ResolvedIndexSyncConfig {
+  const enabled = value?.enabled ?? false
+  if (typeof enabled !== 'boolean') throw new Error('dsh-tingfeng: indexSync.enabled must be a boolean')
+  const targetPath = value?.targetPath ?? ''
+  if (enabled && targetPath.trim() === '') throw new Error('dsh-tingfeng: indexSync.targetPath is required when indexSync.enabled is true')
+  const beginMarker = value?.beginMarker ?? '<!-- AUTO-GENERATED:BEGIN 这一段由 dsh-tingfeng 生成，手改会被覆盖 -->'
+  const endMarker = value?.endMarker ?? '<!-- AUTO-GENERATED:END -->'
+  if (beginMarker === endMarker) throw new Error('dsh-tingfeng: indexSync markers must differ')
+  const debounceMs = value?.debounceMs ?? 300_000
+  if (!Number.isSafeInteger(debounceMs) || debounceMs < 0 || debounceMs > 3_600_000) throw new Error('dsh-tingfeng: indexSync.debounceMs must be 0-3600000')
+  const summary = value?.summary
+  const provider = summary?.provider ?? 'none'
+  if (provider !== 'ollama' && provider !== 'none') throw new Error('dsh-tingfeng: indexSync.summary.provider must be ollama or none')
+  const maxChars = summary?.maxChars ?? 60
+  if (!Number.isSafeInteger(maxChars) || maxChars < 10 || maxChars > 200) throw new Error('dsh-tingfeng: indexSync.summary.maxChars must be 10-200')
+  return {
+    enabled,
+    targetPath: targetPath.trim(),
+    beginMarker,
+    endMarker,
+    debounceMs,
+    summary: {
+      provider,
+      endpoint: (summary?.endpoint ?? 'http://127.0.0.1:11434').trim(),
+      model: (summary?.model ?? 'qwen3.5:4b').trim(),
+      maxChars,
+    },
+  }
+}
+
+function resolveShortIds(value: ShortIdConfig | undefined): ResolvedShortIdConfig {
+  const enabled = value?.enabled ?? false
+  if (typeof enabled !== 'boolean') throw new Error('dsh-tingfeng: shortIds.enabled must be a boolean')
+  const prefix = value?.prefix ?? 'Z'
+  if (!/^[A-Za-z]{1,8}$/u.test(prefix)) throw new Error('dsh-tingfeng: shortIds.prefix must be 1-8 ASCII letters')
+  const digits = value?.digits ?? 3
+  if (!Number.isSafeInteger(digits) || digits < 1 || digits > 9) throw new Error('dsh-tingfeng: shortIds.digits must be 1-9')
+  return { enabled, prefix, digits }
 }
 
 function resolveTaskAgentModel(value: TaskAgentModelConfig | undefined): ResolvedTaskAgentModelConfig {
@@ -439,12 +511,7 @@ export function resolveConfig(config: Config = {}): ResolvedConfig {
     persistenceStrategy: resolvePersistenceStrategy(config.persistenceStrategy),
     taskAgentModel: resolveTaskAgentModel(config.taskAgentModel),
     syncEnabled: config.syncEnabled ?? false,
-    // Normalized here so a config that skipped the schema (a resolved config
-    // spread back in, a test fixture) still yields a complete block.
-    coldLibHint: {
-      enabled: config.coldLibHint?.enabled ?? true,
-      rules: config.coldLibHint?.rules ?? null,
-      exclusions: config.coldLibHint?.exclusions ?? null,
-    },
+    shortIds: resolveShortIds(config.shortIds),
+    indexSync: resolveIndexSync(config.indexSync),
   }
 }

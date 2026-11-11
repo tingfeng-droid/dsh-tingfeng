@@ -1,6 +1,6 @@
 {
   "name": "dsh-tingfeng",
-  "version": "0.6.2",
+  "version": "0.7.0",
   "description": "Composable, view-based context for DeepSeek Harness. Pluggable sources and strategies, with layered memory and self-evolving skills out of the box.",
   "keywords": [
     "deepseek-harness",

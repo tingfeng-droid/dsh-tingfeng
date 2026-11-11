@@ -1,5 +1,7 @@
 import type { MemoryRuntime } from '../core/runtime.ts'
 import { memoryTool } from './memory-tools.ts'
+import type { ShortIdStore } from './short-ids.ts'
+import { mutationResultCommitted } from './receipts.ts'
 import type { HostContextShape, ToolDefinition, ToolExecution } from './dsh.ts'
 import type { DocumentMutation } from 'dsh-tingfeng-source-documents/contracts'
 import type { RuntimeMemoryImportance, RuntimeMemoryTarget } from 'dsh-tingfeng-source-runtime/contracts'
@@ -67,7 +69,7 @@ function documentActionReceipt(receipt: MemoryMutationReceipt): MemoryMutationRe
  * historical registry order, which puts Memory Spaces' reads before the Documents tools and its writes after
  * the runtime memory tool. DSH's prompt assembler independently orders wire schemas.
  */
-export function registerTools(ctx: HostContextShape, runtimeSource: MnemonAgentRuntimeSource, coordinator: MnemonSubagentCoordinator, contributions: MemoryRuntime, initialReady?: Promise<unknown>): () => void {
+export function registerTools(ctx: HostContextShape, runtimeSource: MnemonAgentRuntimeSource, coordinator: MnemonSubagentCoordinator, contributions: MemoryRuntime, initialReady?: Promise<unknown>, shortIds?: ShortIdStore, onLibraryChange?: () => void): () => void {
   const definitions: ToolDefinition[] = []
   const catalog = { tools: { register: (tool: ToolDefinition) => { definitions.push(tool) } } } as unknown as HostContextShape
   const helpers = toolHelpers(runtimeSource)
@@ -75,7 +77,7 @@ export function registerTools(ctx: HostContextShape, runtimeSource: MnemonAgentR
   registerMemorySpaceReadTools(catalog, helpers, coordinator)
   registerDocumentTools(catalog, helpers, coordinator)
   registerRuntimeTools(catalog, helpers, coordinator)
-  registerMemorySpaceWriteTools(catalog, helpers, coordinator)
+  registerMemorySpaceWriteTools(catalog, helpers, coordinator, shortIds, onLibraryChange)
   const registered = new Map<string, () => unknown>()
   let active = true
   let ready = initialReady === undefined
@@ -421,8 +423,33 @@ function registerRuntimeTools(ctx: HostContextShape, { requireSource, config, co
   } as never))
 }
 
+/**
+ * Allocate handles for the rows a remember committed, and report them back.
+ *
+ * A failure here must not fail the write: the entry is already in the cold
+ * library, and losing its handle is recoverable while losing the entry is not.
+ * The handle list rides on the result under `shortIds` so the model learns the
+ * name immediately instead of searching for its own write afterwards.
+ */
+export function withShortIds(result: unknown, content: string, shortIds: ShortIdStore | undefined, onChange?: () => void): unknown {
+  if (shortIds === undefined) return result
+  if (result === null || typeof result !== 'object') return result
+  const written = (result as { writtenIds?: ReadonlyArray<{ id: string; memoryBodyId?: string }> }).writtenIds
+  if (written === undefined || written.length === 0) return result
+  const title = content.split('\n')[0]?.trim().slice(0, 120) ?? ''
+  const handles: Array<{ handle: string; id: string }> = []
+  for (const row of written) {
+    try {
+      const { handle } = shortIds.assign(row.id, row.memoryBodyId ?? 'default', title)
+      handles.push({ handle, id: row.id })
+    } catch { /* one unnameable row must not cost the others their handle */ }
+  }
+  if (handles.length > 0) onChange?.()
+  return handles.length === 0 ? result : { ...result, shortIds: handles }
+}
+
 /** Memory Spaces' writes: remember, link and forget, and creating, updating and merging spaces. */
-function registerMemorySpaceWriteTools(ctx: HostContextShape, { requireSource, sourceAction }: ToolHelpers, coordinator: MnemonSubagentCoordinator): void {
+function registerMemorySpaceWriteTools(ctx: HostContextShape, { requireSource, sourceAction }: ToolHelpers, coordinator: MnemonSubagentCoordinator, shortIds?: ShortIdStore, onLibraryChange?: () => void): void {
   ctx.tools.register(definition({
     name: 'mnemon_remember',
     description: 'Archive one durable insight in a selected provider-backed Memory Space. Ordinary new hot memory belongs in mnemon_runtime_memory; use direct archival only for explicit long-term persistence or runtime capacity migration. Choose the narrowest existing space, search it first, verify capabilities.remember=true, and wait for the provider receipt. Exact writes require confirmed persistence; providers using semantic extraction may truthfully return skipped. Do not dump transcripts, temporary progress, routine observations, or repository-obvious facts.',
@@ -444,9 +471,10 @@ function registerMemorySpaceWriteTools(ctx: HostContextShape, { requireSource, s
     async execute(args: { content: string; category?: Category; importance?: number; tags?: string[]; entities?: string[]; source?: Source; memoryBodyId?: string }, exec: ToolExecution) {
       requireSource(exec, 'memory-spaces', 'write')
       const request = { ...args, source: args.source ?? 'agent' }
-      return isSubagent(exec.agent)
-        ? sourceAction(exec, 'memory-spaces', 'remember', request)
-        : coordinator.remember(requireAgent(exec), request, exec.signal)
+      const result = isSubagent(exec.agent)
+        ? await sourceAction(exec, 'memory-spaces', 'remember', request)
+        : await coordinator.remember(requireAgent(exec), request, exec.signal)
+      return withShortIds(result, args.content, shortIds, onLibraryChange)
     },
     presentCall: () => ({ card: 'generic', title: 'Write Mnemon memory', kind: 'edit' }),
     presentResult: () => ({ card: 'generic', title: 'Mnemon memory processed' }),
@@ -489,11 +517,20 @@ function registerMemorySpaceWriteTools(ctx: HostContextShape, { requireSource, s
     },
     output: { schema: JSON_OBJECT_OUTPUT, render: (_args: unknown, value: unknown) => text(value),
       presentationMeta: namedToolPresentation('mnemon_forget') },
-    execute: (args: { id: string; memoryBodyId?: string }, exec: ToolExecution) => {
+    async execute(args: { id: string; memoryBodyId?: string }, exec: ToolExecution) {
       requireSource(exec, 'memory-spaces', 'forget')
-      return isSubagent(exec.agent)
-        ? sourceAction(exec, 'memory-spaces', 'forget', args)
-        : coordinator.write(requireAgent(exec), 'forget', args, exec.signal)
+      const result = isSubagent(exec.agent)
+        ? await sourceAction(exec, 'memory-spaces', 'forget', args)
+        : await coordinator.write(requireAgent(exec), 'forget', args, exec.signal)
+      // The row is gone, so the handle that named it would only mislead.
+      if (mutationResultCommitted(result)) {
+        if (shortIds !== undefined) {
+          try { shortIds.release(args.id, args.memoryBodyId ?? 'default') } catch { /* the handle table is a convenience */ }
+        }
+        // A removed entry changes the index as much as an added one.
+        onLibraryChange?.()
+      }
+      return result
     },
     presentCall: (args: { id: string }) => ({ card: 'generic', title: 'Forget Mnemon insight', kind: 'edit', rawInput: args.id }),
     presentResult: () => ({ card: 'generic', title: 'Mnemon insight forgotten' }),

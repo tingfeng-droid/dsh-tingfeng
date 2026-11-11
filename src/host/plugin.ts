@@ -1,3 +1,8 @@
+import { execFileSync } from 'node:child_process'
+import { homedir } from 'node:os'
+import { join } from 'node:path'
+import { ColdIndexSync } from './cold-index-sync.ts'
+import { parseLibrary, SUMMARY_PROMPT, updateIndex, type IndexEntry } from './cold-index.ts'
 import { Context } from '@deepseek-ai/cordis'
 import { Config as PlainConfig, InteractionConfig, resolveConfig, resolveInteractionConfig, SkillsConfig, type Config as MnemonConfig } from './config.ts'
 import { MnemonAutoBackupScheduler } from './auto-backup.ts'
@@ -14,6 +19,8 @@ import { registerRpc } from './rpc.ts'
 import { hasNativeDirectoryPicker } from './directory-picker.ts'
 import { migrateLegacyDisplayMode, registerSettingsRpc } from './settings.ts'
 import { MnemonSubagentCoordinator } from './subagent.ts'
+import { createStorageRoot } from './storage-root.ts'
+import { ShortIdStore } from './short-ids.ts'
 import { registerTools } from './tools.ts'
 import { registerMnemonSubagentTokenUsageProjection } from './subagent-token-usage.ts'
 import { provideMemoryRuntime } from '../core/runtime.ts'
@@ -82,6 +89,86 @@ function optionalGitHubAuth(ctx: HostContextShape): MnemonGitHubAuth {
 }
 
 /** DSH owns assembly; this Host only wires scope, phases and user preferences. */
+/**
+ * The scheduled regeneration of a cold-library index, or undefined when the
+ * profile did not switch it on.
+ *
+ * Reading the library goes through the CLI on purpose: `mnemon recall '' --basic`
+ * lists every row, while the recall route answers by relevance and stops at a
+ * tier, so an index built from that would quietly lose whatever ranked last.
+ */
+function coldIndexSync(
+  config: LiveMnemonRuntime['config'],
+  dataDir: string,
+  coordinator: MnemonSubagentCoordinator,
+  runtime: LiveMnemonRuntime,
+  shortIds: ShortIdStore | undefined,
+): ColdIndexSync | undefined {
+  const settings = config.indexSync
+  if (!settings.enabled) return undefined
+  const markers = { begin: settings.beginMarker, end: settings.endMarker }
+  const collect = async (): Promise<IndexEntry[]> => {
+    const command = config.cliPath ?? 'mnemon'
+    const argv = ['--data-dir', dataDir, 'recall', '', '--basic', '--limit', '100000', '--readonly']
+    const stdout = execFileSync(command, argv, {
+      encoding: 'utf8',
+      timeout: config.timeoutMs,
+      env: { ...process.env, MNEMON_EMBED_MODEL: config.embedding.model },
+      maxBuffer: 64 * 1024 * 1024,
+      windowsHide: true,
+    })
+    return parseLibrary(stdout)
+  }
+  const summarize = settings.summary.provider === 'ollama'
+    ? async (content: string): Promise<string | undefined> => {
+      const controller = new AbortController()
+      const timer = setTimeout(() => { controller.abort() }, 20_000)
+      timer.unref?.()
+      try {
+        const response = await fetch(`${settings.summary.endpoint.replace(/\/+$/u, '')}/api/generate`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            model: settings.summary.model,
+            prompt: SUMMARY_PROMPT(content, settings.summary.maxChars),
+            stream: false,
+            think: false,
+          }),
+          signal: controller.signal,
+        })
+        if (!response.ok) return undefined
+        const body = await response.json() as { response?: unknown }
+        return typeof body.response === 'string' ? body.response : undefined
+      } catch {
+        // No model, no summary: the first line still names the entry.
+        return undefined
+      } finally {
+        clearTimeout(timer)
+      }
+    }
+    : undefined
+  void coordinator
+  void runtime
+  return new ColdIndexSync({
+    debounceMs: settings.debounceMs,
+    collect,
+    markers,
+    maxChars: settings.summary.maxChars,
+    ...(summarize === undefined ? {} : { summarize }),
+    write: entries => updateIndex(settings.targetPath.startsWith('~')
+      ? join(homedir(), settings.targetPath.slice(1))
+      : settings.targetPath, entries, {
+      markers,
+      maxDescription: settings.summary.maxChars,
+      ...(summarize === undefined ? {} : { summarize }),
+      // The handle column is what makes the index usable without a search
+      // phrase: read Z011, type Z011, get that entry. Built from the live table
+      // so a rewritten entry loses its old handle here in the same run.
+      ...(shortIds === undefined ? {} : { handles: shortIds.handles() }),
+    }),
+  })
+}
+
 export function apply(rawContext: unknown, rawConfig: MnemonConfig | LiveHostConfig = {}): void {
   const ctx = rawContext as unknown as HostContextShape
   const config = plainHostConfig(rawConfig)
@@ -184,7 +271,23 @@ export function apply(rawContext: unknown, rawConfig: MnemonConfig | LiveHostCon
   }, 'dsh-tingfeng.lifecycle-root()')
   ctx.effect(() => {
     const loader = ctx.get('loader') as { await?(): Promise<unknown> } | undefined
-    return registerTools(ctx, runtime, coordinator, extensions, loader?.await?.())
+    // Built per lifecycle root, so a profile that switches the feature off never
+    // pays for a table and a test that never enables it never touches disk.
+    const dataDir = createStorageRoot(resolved).effectiveDataDir()
+    const shortIds = resolved.shortIds.enabled
+      ? new ShortIdStore({
+        prefix: resolved.shortIds.prefix,
+        digits: resolved.shortIds.digits,
+        directory: dataDir,
+      })
+      : undefined
+    const index = coldIndexSync(resolved, dataDir, coordinator, runtime, shortIds)
+    if (index !== undefined) {
+      // Registered before the tools so teardown cancels the timer first, and
+      // after the runtime it reads so teardown runs the other way round.
+      ctx.effect(() => () => { index.dispose() }, 'dsh-tingfeng: cold-library index timer')
+    }
+    return registerTools(ctx, runtime, coordinator, extensions, loader?.await?.(), shortIds, index === undefined ? undefined : () => { index.notify() })
   }, 'dsh-tingfeng: Source tool lifecycle')
   registerCommands(ctx.commands, runtime, coordinator)
   registerGuidance(ctx, resolved)

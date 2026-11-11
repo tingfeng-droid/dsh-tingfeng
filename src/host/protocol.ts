@@ -328,58 +328,79 @@ export interface Config {
    */
   syncEnabled?: boolean
   /**
-   * Cold-library keyword reminder. The keyword table ships with defaults, but a
-   * profile may replace it: which domains exist is a property of ONE machine's
-   * work, not of this package. A desktop with a GPU and NTFS disks needs the
-   * wallpaper and mount entries; an office machine without either needs neither,
-   * and keeping one shared table means every push between them overwrites the
-   * other's domains.
+   * Handles that address one cold-library entry, e.g. `Z001`.
+   *
+   * Off by default, and off costs nothing: no table is read and no file is
+   * written. A machine turns this on when typing an entry's 36-character UUID
+   * has become the obstacle, and picks the prefix and width its own notes use.
    */
-  coldLibHint?: ColdLibHintConfig
-}
-
-/** One domain of the cold-library reminder, as a profile declares it. */
-export interface ColdLibHintRuleConfig {
-  /** Short tag surfaced in the reminder text. */
-  domain: string
+  shortIds?: ShortIdConfig
   /**
-   * Regular-expression source (no slashes, no flags) matching the user phrasing
-   * that acts on this domain. Stored as a string because a profile config file
-   * can only hold text; the engine compiles it once per resolution.
+   * The generated half of a cold-library index.
+   *
+   * Off by default, and it writes a file: a profile names the target before
+   * anything is touched. Every other part is optional, so a machine with no
+   * local model still gets an index, only one built from first lines.
    */
-  keywords: string
-  /** Regex flags, e.g. `iu`. Defaults to `u`. */
-  flags?: string
+  indexSync?: IndexSyncConfig
 }
 
-export interface ColdLibHintConfig {
-  /** Defaults to on: the reminder is cheap and never blocks anything. */
+/** Handle shape as a profile declares it. */
+export interface ShortIdConfig {
+  /**
+   * Defaults to off. A handle table is one machine's addition to its own
+   * workflow; a machine that never asked for it must not grow one.
+   */
+  enabled?: boolean
+  /** Letters shown before the ordinal. Defaults to `Z`. */
+  prefix?: string
+  /** Zero-padded width of the ordinal. Defaults to 3, giving `Z001`. */
+  digits?: number
+}
+
+/** Where the generated index block goes, and what writes it. */
+export interface IndexSyncConfig {
+  /** Defaults to off. Nothing is read or written while it is off. */
+  enabled?: boolean
+  /** File holding the markers. Required when enabled. */
+  targetPath?: string
+  /** Opening marker, kept verbatim. Defaults to an HTML comment naming this plugin. */
+  beginMarker?: string
+  /** Closing marker. Must differ from the opening one. */
+  endMarker?: string
+  /** Quiet period before a write, so a batch of edits produces one run. */
+  debounceMs?: number
+  /** How each entry is described. */
+  summary?: {
+    /** `ollama` asks a local model; `none` uses the entry's own first line. */
+    provider?: 'ollama' | 'none'
+    endpoint?: string
+    model?: string
+    /** Cap for one description, in characters. */
+    maxChars?: number
+  }
+}
+
+/** Index-sync settings after normalization: every field present. */
+export interface ResolvedIndexSyncConfig {
   enabled: boolean
-  /**
-   * Replace the built-in keyword table. `null` (an omitted field) keeps the
-   * defaults; an empty array disables every rule while leaving the switch
-   * available. The schema keeps all three states apart, which is why this is
-   * nullable rather than optional.
-   */
-  rules: ColdLibHintRuleConfig[] | null
-  /**
-   * Replace the built-in exclusion list. An exclusion suppresses only the
-   * SENTENCE it appears in, so a long message that both discusses a domain and
-   * asks to act on it still triggers.
-   */
-  exclusions: string[] | null
+  targetPath: string
+  beginMarker: string
+  endMarker: string
+  debounceMs: number
+  summary: {
+    provider: 'ollama' | 'none'
+    endpoint: string
+    model: string
+    maxChars: number
+  }
 }
 
-/** One compiled matcher: the regex the engine actually tests. */
-export interface ResolvedColdLibHintRule {
-  domain: string
-  pattern: RegExp
-}
-
-export interface ResolvedColdLibHintConfig {
+/** Handle shape after normalization: every field present. */
+export interface ResolvedShortIdConfig {
   enabled: boolean
-  rules: ResolvedColdLibHintRule[]
-  exclusions: RegExp[]
+  prefix: string
+  digits: number
 }
 
 export interface TaskAgentModelConfig {
@@ -444,13 +465,8 @@ export interface ResolvedConfig {
   persistenceStrategy: ResolvedMemoryPersistenceStrategy
   taskAgentModel: ResolvedTaskAgentModelConfig
   syncEnabled: boolean
-  /**
-   * Kept in CONFIG shape, not compiled: this type is also fed back as input
-   * (resolved configs spread into `resolveConfig` in tests and live reload), so
-   * a compiled form here would make the two shapes diverge. Compilation happens
-   * once in `resolveColdLibHint`, at the engine that matches text.
-   */
-  coldLibHint: ColdLibHintConfig
+  shortIds: ResolvedShortIdConfig
+  indexSync: ResolvedIndexSyncConfig
 }
 
 export interface ResolvedInteractionConfig {
@@ -680,6 +696,20 @@ export interface DelegatedWriteResult {
   documentIds?: string[]
   /** Memories saved without a vector, as the Provider's receipt says (#388). */
   unembedded?: Array<{ memoryBodyId?: string; id?: string }>
+  /**
+   * The insights this write actually committed, exactly as its `mnemon_remember`
+   * receipts name them.
+   *
+   * A caller that only needs "did it land" reads `action`. This field is for a
+   * caller that has to name the row afterwards — a short-id table, a manual
+   * cross-reference in a note — where guessing from the summary would be wrong
+   * whenever two rows read alike.
+   *
+   * Absent when the provider returned no id (a skipped write, a provider that
+   * answers without one), so a caller must treat its absence as "no row to
+   * name", never as a failed write.
+   */
+  writtenIds?: ReadonlyArray<{ readonly id: string; readonly memoryBodyId?: string }>
   hint?: string
 }
 

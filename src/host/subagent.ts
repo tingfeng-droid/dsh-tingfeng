@@ -169,6 +169,27 @@ function withoutVector(receipts: readonly CapturedToolReceipt[]): Array<{ memory
   })
 }
 
+/**
+ * The insights a write committed, as its `mnemon_remember` receipts name them.
+ *
+ * Only `mnemon_remember` commits an insight: a link or a document write answers
+ * with its own id, and naming that in this list would point a handle at
+ * something the cold library cannot show. Two receipts for the same row collapse
+ * to one, so a write that answered twice does not appear twice.
+ */
+export function writtenInsights(receipts: readonly CapturedToolReceipt[]): Array<{ id: string; memoryBodyId?: string }> {
+  const unique = new Map<string, { id: string; memoryBodyId?: string }>()
+  for (const receipt of receipts) {
+    if (!isTool(receipt.name, 'mnemon_remember')) continue
+    const value = optionalObject(receipt.value)
+    if (value === undefined || !writeLanded(value)) continue
+    if (typeof value.id !== 'string' || value.id === '') continue
+    const memoryBodyId = typeof value.memoryBodyId === 'string' && value.memoryBodyId !== '' ? value.memoryBodyId : undefined
+    unique.set(`${memoryBodyId ?? ''}\u0000${value.id}`, { id: value.id, ...(memoryBodyId === undefined ? {} : { memoryBodyId }) })
+  }
+  return [...unique.values()]
+}
+
 /** A Memory Space write tool: each switches on the space it goes to. */
 const SPACE_WRITE_TOOLS: ReadonlySet<string> = new Set<MemoryToolName>(['mnemon_remember', 'mnemon_link'])
 
@@ -751,8 +772,14 @@ ${naturalRequest(request, target === undefined ? REQUEST_LABELS : TARGETED_WRITE
     const value = object(result.structured)
     const observed = terminalTool === undefined ? undefined : recoverStructuredResult({ terminalTools: [terminalTool] }, receipts)
     const claimed = typeof observed?.action === 'string' ? observed.action : typeof value.action === 'string' ? value.action : 'failed'
+    // The rows this write committed, taken from the same receipts the space scan
+    // reads. A caller that has to name the row afterwards (a short-id table) gets
+    // it here instead of guessing from the summary, which reads alike for two
+    // entries that differ only in a version or a path.
+    const written = writtenInsights(writes)
+    const writtenIds = written.length === 0 ? {} : { writtenIds: written }
     if (!autonomous) {
-      return { delegated: true, runId, provider, summary: typeof value.summary === 'string' ? value.summary : '', action: claimed, memoryBodyIds: strings(value.memoryBodyIds), documentIds: strings(value.documentIds) }
+      return { delegated: true, runId, provider, summary: typeof value.summary === 'string' ? value.summary : '', action: claimed, memoryBodyIds: strings(value.memoryBodyIds), documentIds: strings(value.documentIds), ...writtenIds }
     }
     // Where the memory went is what the Source receipts say, not what the writer reports,
     // including a write inside a Code Mode program that failed afterwards (#387).
@@ -777,6 +804,7 @@ ${naturalRequest(request, target === undefined ? REQUEST_LABELS : TARGETED_WRITE
       ...(activated.length === 0 ? {} : { activatedMemoryBodyIds: activated }),
       documentIds: strings(value.documentIds),
       ...(unembedded.length === 0 ? {} : { unembedded, hint: UNEMBEDDED_HINT }),
+      ...writtenIds,
     }
   }
 
