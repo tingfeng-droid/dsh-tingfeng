@@ -13,7 +13,6 @@ export const STARTER_COMPONENT_ROWS: ReadonlyArray<{ rowId: string; packageName:
   { rowId: 'mnemon-source-runtime', packageName: 'dsh-tingfeng-source-runtime' },
   { rowId: 'mnemon-source-documents', packageName: 'dsh-tingfeng-source-documents' },
   { rowId: 'mnemon-source-memory-spaces', packageName: 'dsh-tingfeng-source-memory-spaces' },
-  { rowId: 'mnemon-source-skills', packageName: 'dsh-tingfeng-source-skills' },
   { rowId: 'mnemon-strategy-default-three-tier', packageName: 'dsh-tingfeng-strategy-default-three-tier' },
   { rowId: 'mnemon-strategy-general', packageName: 'dsh-tingfeng-strategy-general' },
   { rowId: 'mnemon-strategy-auto-capture', packageName: 'dsh-tingfeng-strategy-auto-capture' },

@@ -8,7 +8,6 @@ import {
   type Config,
   type ResolvedIdleReviewConfig,
   type SettingsOperation,
-  type SkillsConfig,
 } from '../host/protocol.ts'
 import { installMemoryComponentFallbackUI, installMemoryComponentUI, type MemoryComponentSettingsProps, type MemoryComponentUIContext } from './component-ui.tsx'
 import type { MnemonTranslate } from './locales.ts'
@@ -16,7 +15,6 @@ import { MemorySpacesSettings } from './memory-spaces-client.ts'
 import css from './MnemonSettingsCard.module.css'
 import { SelectRow, ToggleRow } from './settings-controls.tsx'
 import { PanelActions, useLive, useScope, useStaged, WriteFailure } from './settings-panel.tsx'
-import { SKILLS_PACKAGE, SkillsSettings } from './skills-settings.tsx'
 import { TaskAgentModelRows, useTaskAgentModel } from './task-agent-model.tsx'
 
 /** The packages whose own settings dsh-tingfeng supplies, through the same region an installed component uses. */
@@ -28,7 +26,6 @@ export const THREE_TIER_PACKAGE = 'dsh-tingfeng-strategy-default-three-tier'
 export interface ShippedSettingsServices {
   scope: ClientSettingsScope<Config>
   /** 技能管理's own group of settings. */
-  skillsScope?: ClientSettingsScope<SkillsConfig>
   connection?: ClientConnectionHandle
   t: MnemonTranslate
 }
@@ -48,7 +45,6 @@ export function installShippedComponentSettings(ctx: MemoryComponentUIContext & 
     installMemoryComponentUI(ctx, { packageName: RUNTIME_PACKAGE, settings: page => <RuntimeSettings {...services} page={page} /> }),
     installMemoryComponentFallbackUI(ctx, { packageName: MEMORY_SPACES_PACKAGE, settings: page => <MemorySpacesSettings {...page} {...(locale === undefined ? {} : { locale })} /> }),
     installMemoryComponentUI(ctx, { packageName: THREE_TIER_PACKAGE, settings: page => <ThreeTierSettings {...services} page={page} /> }),
-    ...(services.skillsScope === undefined ? [] : [installMemoryComponentUI(ctx, { packageName: SKILLS_PACKAGE, settings: page => <SkillsSettings scope={services.skillsScope!} page={page} t={services.t} /> })]),
   ]
   return () => { for (const dispose of disposers.reverse()) dispose() }
 }

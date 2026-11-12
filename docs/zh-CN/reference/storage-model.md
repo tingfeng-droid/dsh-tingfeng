@@ -260,7 +260,7 @@ location      本地 Store/CLI 作用域，或远程 endpoint + Provider 作用�
 | `market/registries.json`、`market/cache/<id>.json` | 市场里添加的来源，以及每个来源最近一次发布的列表 | 直到移除；六小时后刷新 |
 | `trash/` | 被删除、或被更新与恢复替换下来的技能文件夹 | 直到手动删除 |
 
-该文件夹在存储锁内以原子替换方式写入，和其他 Source 一样跟随存储范围。它不属于 Mnemon Pack，因此 ZIP 备份和 Git 同步都不包含它；技能本身就是各技能目录里的普通文件。它的设置属于配置，保存在 `mnemon` 条目的 `skills` 下，见[技能管理设置](./configuration.md#技能管理设置)。
+该文件夹在存储锁内以原子替换方式写入，和其他 Source 一样跟随存储范围。它不属于 Mnemon Pack，因此 ZIP 备份和 Git 同步都不包含它；技能本身就是各技能目录里的普通文件。它的设置属于配置，保存在 `mnemon` 条目的 `skills` 下。
 
 ## 四类关系
 

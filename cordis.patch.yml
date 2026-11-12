@@ -51,31 +51,14 @@
         - id: mnemon-source-memory-spaces
           name: dsh-tingfeng-source-memory-spaces
           config:
-            # Every default Provider is an
-            # explicit child. A custom parent composition may choose a subset.
+            # One Provider ships in the box: the local Mnemon store, which is
+            # the only one that holds memory on its own disk. The external ones
+            # (Mem0, Honcho, OpenViking, Byterover, Hindsight, Holographic,
+            # RetainDB, Supermemory) install separately and are named here by a
+            # composition that wants them.
             providers:
               - use: dsh-tingfeng-provider-mnemon-native
                 instanceId: mnemon-native
-              - use: dsh-tingfeng-provider-openviking
-                instanceId: openviking
-              - use: dsh-tingfeng-provider-honcho
-                instanceId: honcho
-              - use: dsh-tingfeng-provider-mem0
-                instanceId: mem0
-              - use: dsh-tingfeng-provider-hindsight
-                instanceId: hindsight
-              - use: dsh-tingfeng-provider-holographic
-                instanceId: holographic
-              - use: dsh-tingfeng-provider-retaindb
-                instanceId: retaindb
-              - use: dsh-tingfeng-provider-byterover
-                instanceId: byterover
-              - use: dsh-tingfeng-provider-supermemory
-                instanceId: supermemory
-        # Skills keep DSH's own files and their evolution data; the page lives
-        # in the Memory System and nothing joins a model View.
-        - id: mnemon-source-skills
-          name: dsh-tingfeng-source-skills
         - id: mnemon-strategy-default-three-tier
           name: dsh-tingfeng-strategy-default-three-tier
         # A second main Strategy; memoryView.strategyTypeId selects which one

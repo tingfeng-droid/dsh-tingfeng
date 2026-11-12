@@ -92,6 +92,11 @@ export function createReleasePlan(packages, { tag, prerelease, baseVersions } = 
       for (const [name, range] of Object.entries(manifest[field] ?? {})) {
         if (name !== starterName && !name.startsWith('dsh-tingfeng-')) continue
         const dependency = packagesByName.get(name)
+        // A development dependency on an already-published sibling is not part
+        // of the release composition: nothing from it ships, and the workspace
+        // no longer has to keep a copy of a package that ships in the box. Only
+        // a runtime field has to resolve inside this workspace.
+        if (dependency === undefined && field === 'devDependencies') continue
         assert(dependency, `${manifest.name}: missing release composition package for ${name}`)
         if (item === starter && name !== starterName) {
           const embedded = range === `file:./plugins/${name}` || range === `file:plugins/${name}`

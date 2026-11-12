@@ -62,7 +62,6 @@ Each finished reply has a brain-shaped **Save to memory** in its action strip, t
 
 **A turn that used release-notes, with the Turn skills line: release-notes, suggested 1**
 
-A turn that used a skill, or earned a review, ends with a **Turn skills** line: the skills the turn used, then **Reviewing** while self-evolution reviews the conversation, and **suggested** with a count once the review left suggestions. Each item opens on the [Skills page](#skills). The line is on by default; **In the conversation** on Skills' page under Plugins turns it off. See [Skills in a conversation](./skills.md#in-a-conversation).
 
 ## The Memory System
 
@@ -171,12 +170,6 @@ Each space declares what its Provider can really supply. Mnemon Native gives typ
 
 **Save to memory** here works like the conversation's dialog with **Let the Agent decide**: write the candidate, send it to the task Agent, and view the result under **Content** from the receipt. Open **Advanced options** only when a target, category or importance is genuinely required.
 
-### Skills
-
-**Skills: every skill by where it lives, one shadowed; release-notes with an improvement waiting**
-
-**Skills** is the page of the experimental Skills component, with five tabs of its own: **Skills** to switch, use, edit and restore the DSH skills a workspace loads; **Evolution** for what self-evolution suggests, its drafts and their evidence; **Evals** for every skill's test cases and backtests; **Market** to search skills.sh and install from GitHub repositories, Agent Skills sites and catalogs; **Trash** restores or permanently deletes removed skills. With **Sidebar entry** on, the page becomes a sidebar entry of its own and leaves the Memory System. The [Skills guide](./skills.md) walks through each tab, with a screen for each.
-
 ### On a phone
 
 | Conversation | Memory Spaces | Configuration |
@@ -231,7 +224,6 @@ The gear on a row, the gear beside **Main strategy**, and a component's name any
 
 - **Runtime memory's page**: **User profile scope** and **Capacity limits**. *Shared globally* combines a global `USER.md` with workspace or custom `MEMORY.md`, without moving either. Set each capacity in bytes and choose **Apply**, or **Discard changes** to restore the saved values. Lowering a limit does not delete existing entries; see [Runtime Memory budgets](../reference/configuration.md#runtime-memory-budgets).
 - **Memory Spaces' page**: the **Memory providers**. Mnemon Native comes first and, expanded, holds only its embedding settings. Every third-party Provider has its own switch and is off by default; its endpoint, key and fields appear once it is on. The Global or Workspace tag shows its effective scope. OpenViking's **User key owner (skip admin)** field selects one user namespace for keys without admin access; see [its limits](./memory-providers.md#operational-boundaries).
-- **Skills' page**, tagged **Experimental**: **Self-evolution**, and while it is on, independent **Suggest new skills** and **Suggest skill improvements** switches, **Backtest drafts** and the folded **Review parameters**; **In the conversation** for the line under each turn; **Sidebar entry**. Switches apply at once, the parameters with **Apply**; see the [Skills guide](./skills.md#settings).
 - **Layered strategy's page**: **Background tasks**. **Task Agent model** chooses the model of the task Agents behind Save to memory, Ask Agent, Tidy names and descriptions, smart selection for new spaces and document archiving, never of the main conversation: **Follow global**, **Follow the conversation** or **Custom**. [Configuration](../reference/configuration.md#background-task-agent-model-route) explains each choice. **Idle review**, **Write runtime memory**, **Keep review limits after reopening** (off by default), its method and Agent Teams compatibility apply at once; **Review limits** apply with **Apply**. With **Write runtime memory** off, review only creates Documents. With persistent limits enabled, the workspace shows attempts for this parent session, restored usage and its next earliest review time. Persistence errors pause automatic review and show recovery guidance; regular conversation and manual actions remain available. Review runs only after turns the Layered strategy composed; see [configuration](../reference/configuration.md#provider-requirements).
 
 **Skills' page under Plugins: Self-evolution, Backtest drafts, Review parameters, In the conversation and Sidebar entry**

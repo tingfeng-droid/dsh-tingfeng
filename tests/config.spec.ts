@@ -4,25 +4,11 @@ import { parse } from 'yaml'
 import { MEMORY_PLACEMENT_CAPABILITIES } from 'dsh-tingfeng-source-memory-spaces/contracts'
 import { Config as RuntimeConfig } from 'dsh-tingfeng-source-runtime'
 import { RUNTIME_MEMORY_LIMIT_MAX_BYTES, RUNTIME_MEMORY_LIMITS } from 'dsh-tingfeng-source-runtime/contracts'
-import { Config, resolveConfig, resolveSkillsConfig } from "../src/host/config.ts"
+import { Config, resolveConfig } from "../src/host/config.ts"
 
 afterEach(() => vi.unstubAllEnvs())
 
 describe('Mnemon config and resolution', () => {
-  it('preserves the user skill destination for existing settings and validates explicit scopes', () => {
-    expect(resolveSkillsConfig().targetScope).toBe('user')
-    expect(resolveSkillsConfig({ evolution: true }).targetScope).toBe('user')
-    for (const targetScope of ['storage', 'user', 'project'] as const) expect(resolveSkillsConfig({ targetScope }).targetScope).toBe(targetScope)
-    expect(() => resolveSkillsConfig({ targetScope: 'cwd' } as never)).toThrow()
-  })
-  it('keeps both skill suggestion types enabled for old configurations and resolves each switch independently', () => {
-    expect(resolveSkillsConfig()).toMatchObject({ evolution: false, allowCreate: true, allowUpdate: true })
-    expect(resolveSkillsConfig({ evolution: true })).toMatchObject({ evolution: true, allowCreate: true, allowUpdate: true })
-    expect(resolveSkillsConfig({ allowCreate: false })).toMatchObject({ allowCreate: false, allowUpdate: true })
-    expect(resolveSkillsConfig({ allowUpdate: false })).toMatchObject({ allowCreate: true, allowUpdate: false })
-    expect(() => resolveSkillsConfig({ allowCreate: 'false' } as never)).toThrow()
-    expect(() => resolveSkillsConfig({ allowUpdate: 0 } as never)).toThrow()
-  })
   it('defaults persistent review watermarks off and accepts an explicit opt-in', () => {
     expect(resolveConfig({}).idleReview.persistWatermark).toBe(false)
     expect(resolveConfig({ idleReview: { persistWatermark: true } } as never).idleReview.persistWatermark).toBe(true)

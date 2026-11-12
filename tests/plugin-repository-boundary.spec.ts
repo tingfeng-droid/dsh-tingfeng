@@ -42,12 +42,15 @@ function packageName(specifier: string): string {
 }
 
 describe('standalone plugin repository boundary', () => {
-  it('keeps four Sources, two main Strategies, three optional contributions and nine private Providers explicit', () => {
+  it('keeps three Sources, two main Strategies, three optional contributions and the one bundled Provider explicit', () => {
     expect(pluginNames.filter(name => name.startsWith('dsh-tingfeng-source-'))).toEqual([
-      'dsh-tingfeng-source-documents', 'dsh-tingfeng-source-memory-spaces', 'dsh-tingfeng-source-runtime', 'dsh-tingfeng-source-skills',
+      'dsh-tingfeng-source-documents', 'dsh-tingfeng-source-memory-spaces', 'dsh-tingfeng-source-runtime',
     ])
     expect(pluginNames.filter(name => name.startsWith('dsh-tingfeng-strategy-'))).toEqual([...viewExtensions, ...mainStrategies].sort())
-    expect(pluginNames.filter(name => name.startsWith('dsh-tingfeng-provider-'))).toHaveLength(9)
+    // Only the local store ships in the repository. The eight external Providers
+    // are published packages a composition installs on demand, so they are
+    // devDependencies here rather than members of this workspace.
+    expect(pluginNames.filter(name => name.startsWith('dsh-tingfeng-provider-'))).toEqual(['dsh-tingfeng-provider-mnemon-native'])
   })
 
   for (const name of pluginNames) it(`${name} owns its build, tests and declared public dependencies`, () => {

@@ -281,7 +281,7 @@ Gateway 通过 Mnemon 在 `dshMnemon` 命名空间下的 `mnemonRemote` Typert �
 
 ### 设置通道
 
-`/dsh-tingfeng-settings` 为三个命名空间提供 `get` 与 `mutate`：`mnemon` 管理 Host 与存储设置，`mnemon-ui` 管理 `turnBar` 与 `saveAction`，保存为 `conversationInteraction`，`mnemon-skills` 管理技能管理的设置，保存为 `skills`（见[技能管理设置](./configuration.md#技能管理设置)）；`mnemon-skills` 的修改无需重建记忆运行图即可生效。mutation 携带 settings revision，防止覆盖并发编辑。插件页中的 dsh-mnemon 页面（`plugins.bundle.config`）在回环页面和远程页面上都通过该通道读写。回环页面还会跟随 DSH `ctx.configForms` 中 `mnemon` 条目的 revision，在其他页面或 profile 重新加载改动它时重新读取该通道。
+`/dsh-tingfeng-settings` 为两个命名空间提供 `get` 与 `mutate`：`mnemon` 管理 Host 与存储设置，`mnemon-ui` 管理 `turnBar` 与 `saveAction`，保存为 `conversationInteraction`。
 
 ### 记忆组合通道
 

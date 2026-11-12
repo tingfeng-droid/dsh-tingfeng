@@ -6,7 +6,7 @@ packages:
 # for local development. Packed/extracted packages have no workspace dependency.
 linkWorkspacePackages: true
 preferWorkspacePackages: true
-# [2026-11-05 办公机本地] 18 个子包之间有 4 组循环依赖（provider↔source↔strategy），
+# [2026-11-05 办公机本地] 10 个子包之间有循环依赖（provider↔source↔strategy），
 # pnpm 默认拒绝按拓扑序构建。这些环是上游 monorepo 结构本身，不是错误，
 # 放开让它们任意顺序构建即可。仅本机构建时需要，不影响产物。
 ignoreWorkspaceCycles: true
@@ -20,3 +20,12 @@ allowBuilds:
   node-pty: true
   protobufjs: true
 
+minimumReleaseAgeExclude:
+  - dsh-tingfeng-provider-holographic@0.11.0
+  - dsh-tingfeng-provider-byterover@0.11.0
+  - dsh-tingfeng-provider-hindsight@0.11.0
+  - dsh-tingfeng-provider-honcho@0.11.0
+  - dsh-tingfeng-provider-mem0@0.11.0
+  - dsh-tingfeng-provider-openviking@0.11.0
+  - dsh-tingfeng-provider-retaindb@0.11.0
+  - dsh-tingfeng-provider-supermemory@0.11.0

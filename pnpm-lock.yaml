@@ -14,59 +14,35 @@ importers:
       '@deepseek-ai/schemastery':
         specifier: ^3.18.4
         version: 3.18.5
-      dsh-tingfeng-provider-byterover:
-        specifier: 0.11.0
-        version: link:plugins/dsh-tingfeng-provider-byterover
-      dsh-tingfeng-provider-hindsight:
-        specifier: 0.11.0
-        version: link:plugins/dsh-tingfeng-provider-hindsight
-      dsh-tingfeng-provider-holographic:
-        specifier: 0.11.0
-        version: link:plugins/dsh-tingfeng-provider-holographic
-      dsh-tingfeng-provider-honcho:
-        specifier: 0.11.0
-        version: link:plugins/dsh-tingfeng-provider-honcho
-      dsh-tingfeng-provider-mem0:
-        specifier: 0.11.0
-        version: link:plugins/dsh-tingfeng-provider-mem0
       dsh-tingfeng-provider-mnemon-native:
-        specifier: 0.11.0
+        specifier: 0.11.2
         version: link:plugins/dsh-tingfeng-provider-mnemon-native
-      dsh-tingfeng-provider-openviking:
-        specifier: 0.11.0
-        version: link:plugins/dsh-tingfeng-provider-openviking
-      dsh-tingfeng-provider-retaindb:
-        specifier: 0.11.0
-        version: link:plugins/dsh-tingfeng-provider-retaindb
-      dsh-tingfeng-provider-supermemory:
-        specifier: 0.11.0
-        version: link:plugins/dsh-tingfeng-provider-supermemory
       dsh-tingfeng-source-documents:
-        specifier: 0.11.0
+        specifier: 0.11.2
         version: link:plugins/dsh-tingfeng-source-documents
       dsh-tingfeng-source-memory-spaces:
-        specifier: 0.11.0
+        specifier: 0.11.2
         version: link:plugins/dsh-tingfeng-source-memory-spaces
       dsh-tingfeng-source-runtime:
-        specifier: 0.11.0
+        specifier: 0.11.2
         version: link:plugins/dsh-tingfeng-source-runtime
       dsh-tingfeng-source-skills:
-        specifier: 0.11.0
+        specifier: 0.11.2
         version: link:plugins/dsh-tingfeng-source-skills
       dsh-tingfeng-strategy-auto-capture:
-        specifier: 0.11.0
+        specifier: 0.11.2
         version: link:plugins/dsh-tingfeng-strategy-auto-capture
       dsh-tingfeng-strategy-default-three-tier:
-        specifier: 0.11.0
+        specifier: 0.11.2
         version: link:plugins/dsh-tingfeng-strategy-default-three-tier
       dsh-tingfeng-strategy-general:
-        specifier: 0.11.0
+        specifier: 0.11.2
         version: link:plugins/dsh-tingfeng-strategy-general
       dsh-tingfeng-strategy-light-context:
-        specifier: 0.11.0
+        specifier: 0.11.2
         version: link:plugins/dsh-tingfeng-strategy-light-context
       dsh-tingfeng-strategy-scoped:
-        specifier: 0.11.0
+        specifier: 0.11.2
         version: link:plugins/dsh-tingfeng-strategy-scoped
       fflate:
         specifier: ^0.8.3
@@ -210,6 +186,30 @@ importers:
       diff:
         specifier: ^9.0.0
         version: 9.0.0
+      dsh-tingfeng-provider-byterover:
+        specifier: 0.11.0
+        version: 0.11.0(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@plugins+dsh-tingfeng-source-memory-spaces)
+      dsh-tingfeng-provider-hindsight:
+        specifier: 0.11.0
+        version: 0.11.0(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@plugins+dsh-tingfeng-source-memory-spaces)
+      dsh-tingfeng-provider-holographic:
+        specifier: 0.11.0
+        version: 0.11.0(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@plugins+dsh-tingfeng-source-memory-spaces)
+      dsh-tingfeng-provider-honcho:
+        specifier: 0.11.0
+        version: 0.11.0(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@plugins+dsh-tingfeng-source-memory-spaces)
+      dsh-tingfeng-provider-mem0:
+        specifier: 0.11.0
+        version: 0.11.0(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@plugins+dsh-tingfeng-source-memory-spaces)
+      dsh-tingfeng-provider-openviking:
+        specifier: 0.11.0
+        version: 0.11.0(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@plugins+dsh-tingfeng-source-memory-spaces)
+      dsh-tingfeng-provider-retaindb:
+        specifier: 0.11.0
+        version: 0.11.0(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@plugins+dsh-tingfeng-source-memory-spaces)
+      dsh-tingfeng-provider-supermemory:
+        specifier: 0.11.0
+        version: 0.11.0(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@plugins+dsh-tingfeng-source-memory-spaces)
       immer:
         specifier: ^10.1.1
         version: 10.2.0
@@ -286,183 +286,7 @@ importers:
         specifier: ~4.4.7
         version: 4.4.7(@types/react@18.3.31)(immer@10.2.0)(react@18.3.1)
 
-  plugins/dsh-tingfeng-provider-byterover:
-    dependencies:
-      '@deepseek-ai/cordis':
-        specifier: ^4.0.1
-        version: 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
-    devDependencies:
-      '@types/node':
-        specifier: ^22.0.0
-        version: 22.20.1
-      dsh-tingfeng-source-memory-spaces:
-        specifier: workspace:*
-        version: link:../dsh-tingfeng-source-memory-spaces
-      tsdown:
-        specifier: ^0.22.0
-        version: 0.22.14(@arethetypeswrong/core@0.18.5)(publint@0.3.23)(typescript@5.9.3)
-      typescript:
-        specifier: ^5.9.0
-        version: 5.9.3
-      vitest:
-        specifier: ^3.2.0
-        version: 3.2.7(@types/debug@4.1.13)(@types/node@22.20.1)(jsdom@26.1.0(supports-color@7.2.0))(lightningcss@1.33.0)(supports-color@7.2.0)(yaml@2.9.0)
-
-  plugins/dsh-tingfeng-provider-hindsight:
-    dependencies:
-      '@deepseek-ai/cordis':
-        specifier: ^4.0.1
-        version: 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
-    devDependencies:
-      '@types/node':
-        specifier: ^22.0.0
-        version: 22.20.1
-      dsh-tingfeng-source-memory-spaces:
-        specifier: workspace:*
-        version: link:../dsh-tingfeng-source-memory-spaces
-      tsdown:
-        specifier: ^0.22.0
-        version: 0.22.14(@arethetypeswrong/core@0.18.5)(publint@0.3.23)(typescript@5.9.3)
-      typescript:
-        specifier: ^5.9.0
-        version: 5.9.3
-      vitest:
-        specifier: ^3.2.0
-        version: 3.2.7(@types/debug@4.1.13)(@types/node@22.20.1)(jsdom@26.1.0(supports-color@7.2.0))(lightningcss@1.33.0)(supports-color@7.2.0)(yaml@2.9.0)
-
-  plugins/dsh-tingfeng-provider-holographic:
-    dependencies:
-      '@deepseek-ai/cordis':
-        specifier: ^4.0.1
-        version: 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
-    devDependencies:
-      '@types/node':
-        specifier: ^22.0.0
-        version: 22.20.1
-      dsh-tingfeng-source-memory-spaces:
-        specifier: workspace:*
-        version: link:../dsh-tingfeng-source-memory-spaces
-      tsdown:
-        specifier: ^0.22.0
-        version: 0.22.14(@arethetypeswrong/core@0.18.5)(publint@0.3.23)(typescript@5.9.3)
-      typescript:
-        specifier: ^5.9.0
-        version: 5.9.3
-      vitest:
-        specifier: ^3.2.0
-        version: 3.2.7(@types/debug@4.1.13)(@types/node@22.20.1)(jsdom@26.1.0(supports-color@7.2.0))(lightningcss@1.33.0)(supports-color@7.2.0)(yaml@2.9.0)
-
-  plugins/dsh-tingfeng-provider-honcho:
-    dependencies:
-      '@deepseek-ai/cordis':
-        specifier: ^4.0.1
-        version: 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
-    devDependencies:
-      '@types/node':
-        specifier: ^22.0.0
-        version: 22.20.1
-      dsh-tingfeng-source-memory-spaces:
-        specifier: workspace:*
-        version: link:../dsh-tingfeng-source-memory-spaces
-      tsdown:
-        specifier: ^0.22.0
-        version: 0.22.14(@arethetypeswrong/core@0.18.5)(publint@0.3.23)(typescript@5.9.3)
-      typescript:
-        specifier: ^5.9.0
-        version: 5.9.3
-      vitest:
-        specifier: ^3.2.0
-        version: 3.2.7(@types/debug@4.1.13)(@types/node@22.20.1)(jsdom@26.1.0(supports-color@7.2.0))(lightningcss@1.33.0)(supports-color@7.2.0)(yaml@2.9.0)
-
-  plugins/dsh-tingfeng-provider-mem0:
-    dependencies:
-      '@deepseek-ai/cordis':
-        specifier: ^4.0.1
-        version: 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
-    devDependencies:
-      '@types/node':
-        specifier: ^22.0.0
-        version: 22.20.1
-      dsh-tingfeng-source-memory-spaces:
-        specifier: workspace:*
-        version: link:../dsh-tingfeng-source-memory-spaces
-      tsdown:
-        specifier: ^0.22.0
-        version: 0.22.14(@arethetypeswrong/core@0.18.5)(publint@0.3.23)(typescript@5.9.3)
-      typescript:
-        specifier: ^5.9.0
-        version: 5.9.3
-      vitest:
-        specifier: ^3.2.0
-        version: 3.2.7(@types/debug@4.1.13)(@types/node@22.20.1)(jsdom@26.1.0(supports-color@7.2.0))(lightningcss@1.33.0)(supports-color@7.2.0)(yaml@2.9.0)
-
   plugins/dsh-tingfeng-provider-mnemon-native:
-    dependencies:
-      '@deepseek-ai/cordis':
-        specifier: ^4.0.1
-        version: 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
-    devDependencies:
-      '@types/node':
-        specifier: ^22.0.0
-        version: 22.20.1
-      dsh-tingfeng-source-memory-spaces:
-        specifier: workspace:*
-        version: link:../dsh-tingfeng-source-memory-spaces
-      tsdown:
-        specifier: ^0.22.0
-        version: 0.22.14(@arethetypeswrong/core@0.18.5)(publint@0.3.23)(typescript@5.9.3)
-      typescript:
-        specifier: ^5.9.0
-        version: 5.9.3
-      vitest:
-        specifier: ^3.2.0
-        version: 3.2.7(@types/debug@4.1.13)(@types/node@22.20.1)(jsdom@26.1.0(supports-color@7.2.0))(lightningcss@1.33.0)(supports-color@7.2.0)(yaml@2.9.0)
-
-  plugins/dsh-tingfeng-provider-openviking:
-    dependencies:
-      '@deepseek-ai/cordis':
-        specifier: ^4.0.1
-        version: 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
-    devDependencies:
-      '@types/node':
-        specifier: ^22.0.0
-        version: 22.20.1
-      dsh-tingfeng-source-memory-spaces:
-        specifier: workspace:*
-        version: link:../dsh-tingfeng-source-memory-spaces
-      tsdown:
-        specifier: ^0.22.0
-        version: 0.22.14(@arethetypeswrong/core@0.18.5)(publint@0.3.23)(typescript@5.9.3)
-      typescript:
-        specifier: ^5.9.0
-        version: 5.9.3
-      vitest:
-        specifier: ^3.2.0
-        version: 3.2.7(@types/debug@4.1.13)(@types/node@22.20.1)(jsdom@26.1.0(supports-color@7.2.0))(lightningcss@1.33.0)(supports-color@7.2.0)(yaml@2.9.0)
-
-  plugins/dsh-tingfeng-provider-retaindb:
-    dependencies:
-      '@deepseek-ai/cordis':
-        specifier: ^4.0.1
-        version: 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
-    devDependencies:
-      '@types/node':
-        specifier: ^22.0.0
-        version: 22.20.1
-      dsh-tingfeng-source-memory-spaces:
-        specifier: workspace:*
-        version: link:../dsh-tingfeng-source-memory-spaces
-      tsdown:
-        specifier: ^0.22.0
-        version: 0.22.14(@arethetypeswrong/core@0.18.5)(publint@0.3.23)(typescript@5.9.3)
-      typescript:
-        specifier: ^5.9.0
-        version: 5.9.3
-      vitest:
-        specifier: ^3.2.0
-        version: 3.2.7(@types/debug@4.1.13)(@types/node@22.20.1)(jsdom@26.1.0(supports-color@7.2.0))(lightningcss@1.33.0)(supports-color@7.2.0)(yaml@2.9.0)
-
-  plugins/dsh-tingfeng-provider-supermemory:
     dependencies:
       '@deepseek-ai/cordis':
         specifier: ^4.0.1
@@ -654,32 +478,32 @@ importers:
         specifier: workspace:*
         version: link:../..
       dsh-tingfeng-provider-byterover:
-        specifier: workspace:*
-        version: link:../dsh-tingfeng-provider-byterover
+        specifier: 0.11.0
+        version: 0.11.0(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@plugins+dsh-tingfeng-source-memory-spaces)
       dsh-tingfeng-provider-hindsight:
-        specifier: workspace:*
-        version: link:../dsh-tingfeng-provider-hindsight
+        specifier: 0.11.0
+        version: 0.11.0(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@plugins+dsh-tingfeng-source-memory-spaces)
       dsh-tingfeng-provider-holographic:
-        specifier: workspace:*
-        version: link:../dsh-tingfeng-provider-holographic
+        specifier: 0.11.0
+        version: 0.11.0(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@plugins+dsh-tingfeng-source-memory-spaces)
       dsh-tingfeng-provider-honcho:
-        specifier: workspace:*
-        version: link:../dsh-tingfeng-provider-honcho
+        specifier: 0.11.0
+        version: 0.11.0(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@plugins+dsh-tingfeng-source-memory-spaces)
       dsh-tingfeng-provider-mem0:
-        specifier: workspace:*
-        version: link:../dsh-tingfeng-provider-mem0
+        specifier: 0.11.0
+        version: 0.11.0(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@plugins+dsh-tingfeng-source-memory-spaces)
       dsh-tingfeng-provider-mnemon-native:
         specifier: workspace:*
         version: link:../dsh-tingfeng-provider-mnemon-native
       dsh-tingfeng-provider-openviking:
-        specifier: workspace:*
-        version: link:../dsh-tingfeng-provider-openviking
+        specifier: 0.11.0
+        version: 0.11.0(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@plugins+dsh-tingfeng-source-memory-spaces)
       dsh-tingfeng-provider-retaindb:
-        specifier: workspace:*
-        version: link:../dsh-tingfeng-provider-retaindb
+        specifier: 0.11.0
+        version: 0.11.0(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@plugins+dsh-tingfeng-source-memory-spaces)
       dsh-tingfeng-provider-supermemory:
-        specifier: workspace:*
-        version: link:../dsh-tingfeng-provider-supermemory
+        specifier: 0.11.0
+        version: 0.11.0(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@plugins+dsh-tingfeng-source-memory-spaces)
       immer:
         specifier: ^10.1.1
         version: 10.2.0
@@ -5426,6 +5250,62 @@ packages:
 
   dom-accessibility-api@0.5.16:
     resolution: {integrity: sha512-X7BJ2yElsnOJ30pZF4uIIDfBEVgF4XEBxL9Bxhy6dnrm5hkzqmsWHGTiHqRiITNhMyFLyAiWndIJP7Z1NTteDg==}
+
+  dsh-tingfeng-provider-byterover@0.11.0:
+    resolution: {integrity: sha512-O6Jts+nIEdCB7oljhW3UNUk7Su5Nm7EeQvADk/kELNnDaJfRSugAut8//LKxxQmbcOngDXsU9wq1iuteiWMfzA==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      '@deepseek-ai/cordis': ^4.0.1
+      dsh-tingfeng-source-memory-spaces: '*'
+
+  dsh-tingfeng-provider-hindsight@0.11.0:
+    resolution: {integrity: sha512-Z3J8hOlpL3RiL0G7rTHmDSWR5YUEXs/+8vUCvuC+5QCmjFt0QmuMJ2Z/PrBP4tPvV03EsoxSKBFOMIu5Rcmu2Q==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      '@deepseek-ai/cordis': ^4.0.1
+      dsh-tingfeng-source-memory-spaces: '*'
+
+  dsh-tingfeng-provider-holographic@0.11.0:
+    resolution: {integrity: sha512-r6dDeqUejrXS95Utfvbyy2qQLU7a51BfR5+v8j9gF8y0L2mFHeqNWaINanSsRXNAowijcyWCUjbJiHZdoO3yCQ==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      '@deepseek-ai/cordis': ^4.0.1
+      dsh-tingfeng-source-memory-spaces: '*'
+
+  dsh-tingfeng-provider-honcho@0.11.0:
+    resolution: {integrity: sha512-OGAroncM6RZUJla7ecLW8RPmn8/qzbsWKGzmPLfjr2boumLtg7KNMN1/zXPOwR0RU39xqZeXFhrDxYn6JD7cmA==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      '@deepseek-ai/cordis': ^4.0.1
+      dsh-tingfeng-source-memory-spaces: '*'
+
+  dsh-tingfeng-provider-mem0@0.11.0:
+    resolution: {integrity: sha512-q2DOya7rF5b8OoQjJLJpqMQeeDZpj8ixgPMH8mWgnLzrjtigX1C0fYydxkJGQpgIhOqvXHQ+gEuzO18+tbFnvg==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      '@deepseek-ai/cordis': ^4.0.1
+      dsh-tingfeng-source-memory-spaces: '*'
+
+  dsh-tingfeng-provider-openviking@0.11.0:
+    resolution: {integrity: sha512-aq71vOmWF4YEZiDyBnmRC/DHo9CE488EhX0wXGKHVxMT5afkm3AqvTLeXtapfIgn2s+FcUqR2oLsNJ8Ozqxn8A==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      '@deepseek-ai/cordis': ^4.0.1
+      dsh-tingfeng-source-memory-spaces: '*'
+
+  dsh-tingfeng-provider-retaindb@0.11.0:
+    resolution: {integrity: sha512-IYoPRHwTKomB3v8x8Pu705FlFz1mkmXidR9jPydUh3HndFMb6K2AGkN6s8+iM9satbcu1h96EQmVbtqkmG2L8Q==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      '@deepseek-ai/cordis': ^4.0.1
+      dsh-tingfeng-source-memory-spaces: '*'
+
+  dsh-tingfeng-provider-supermemory@0.11.0:
+    resolution: {integrity: sha512-DHoubPRs00BPPnrQ9qoQ8hoMVzj3nbGsphO+IhLSW34WFo6eXk2zDpcEUSEXiouYMsj43JXSncaxFLN1UGkBWA==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      '@deepseek-ai/cordis': ^4.0.1
+      dsh-tingfeng-source-memory-spaces: '*'
 
   dts-resolver@3.0.0:
     resolution: {integrity: sha512-1T1f+z+4tl9XD+m+0HBgWoL/nm0bOIffyWaUuUSBlFg/86IWvfx+wjNaO/ybU0AJzG9/Mi5hBUgGV6zCmWEN7Q==}
@@ -12250,6 +12130,46 @@ snapshots:
       path-type: 4.0.0
 
   dom-accessibility-api@0.5.16: {}
+
+  dsh-tingfeng-provider-byterover@0.11.0(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@plugins+dsh-tingfeng-source-memory-spaces):
+    dependencies:
+      '@deepseek-ai/cordis': 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
+      dsh-tingfeng-source-memory-spaces: link:plugins/dsh-tingfeng-source-memory-spaces
+
+  dsh-tingfeng-provider-hindsight@0.11.0(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@plugins+dsh-tingfeng-source-memory-spaces):
+    dependencies:
+      '@deepseek-ai/cordis': 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
+      dsh-tingfeng-source-memory-spaces: link:plugins/dsh-tingfeng-source-memory-spaces
+
+  dsh-tingfeng-provider-holographic@0.11.0(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@plugins+dsh-tingfeng-source-memory-spaces):
+    dependencies:
+      '@deepseek-ai/cordis': 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
+      dsh-tingfeng-source-memory-spaces: link:plugins/dsh-tingfeng-source-memory-spaces
+
+  dsh-tingfeng-provider-honcho@0.11.0(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@plugins+dsh-tingfeng-source-memory-spaces):
+    dependencies:
+      '@deepseek-ai/cordis': 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
+      dsh-tingfeng-source-memory-spaces: link:plugins/dsh-tingfeng-source-memory-spaces
+
+  dsh-tingfeng-provider-mem0@0.11.0(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@plugins+dsh-tingfeng-source-memory-spaces):
+    dependencies:
+      '@deepseek-ai/cordis': 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
+      dsh-tingfeng-source-memory-spaces: link:plugins/dsh-tingfeng-source-memory-spaces
+
+  dsh-tingfeng-provider-openviking@0.11.0(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@plugins+dsh-tingfeng-source-memory-spaces):
+    dependencies:
+      '@deepseek-ai/cordis': 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
+      dsh-tingfeng-source-memory-spaces: link:plugins/dsh-tingfeng-source-memory-spaces
+
+  dsh-tingfeng-provider-retaindb@0.11.0(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@plugins+dsh-tingfeng-source-memory-spaces):
+    dependencies:
+      '@deepseek-ai/cordis': 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
+      dsh-tingfeng-source-memory-spaces: link:plugins/dsh-tingfeng-source-memory-spaces
+
+  dsh-tingfeng-provider-supermemory@0.11.0(@deepseek-ai/cordis@4.0.5)(dsh-tingfeng-source-memory-spaces@plugins+dsh-tingfeng-source-memory-spaces):
+    dependencies:
+      '@deepseek-ai/cordis': 4.0.5(@deepseek-ai/cordis-plugin-include@1.0.10)(@deepseek-ai/cordis-plugin-loader@1.0.6)
+      dsh-tingfeng-source-memory-spaces: link:plugins/dsh-tingfeng-source-memory-spaces
 
   dts-resolver@3.0.0: {}
 

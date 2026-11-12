@@ -25,13 +25,12 @@ import { strategyDrives, viewStrategy } from './strategy-workflows.ts'
 import { mainStrategyTypeId } from './main-strategy.ts'
 import { AgentMemoryTurn, openAgentTurn, type DelegatedMemoryView } from './agent-memory-turn.ts'
 import { runtimeSnapshotChangeKey } from './snapshot-key.ts'
-import type { AssistantMessageText, LifecycleAgentSnapshot, LifecycleCounters, LifecyclePhase, LifecycleSnapshot, ReviewActivityScore, SkillActivitySnapshot, SupervisedWritebackResult, TaskAgentModelCatalog } from "./protocol.ts"
+import type { AssistantMessageText, LifecycleAgentSnapshot, LifecycleCounters, LifecyclePhase, LifecycleSnapshot, ReviewActivityScore, SupervisedWritebackResult, TaskAgentModelCatalog } from "./protocol.ts"
 import type { PreparedMemoryPlacement } from 'dsh-tingfeng-source-memory-spaces/contracts'
 import type { MemoryWake } from "../core/contracts/index.ts"
 import { agentScope, type MnemonAgentRuntimeSource } from './runtime.ts'
 import { createPluginMessage, MNEMON_PLUGIN_SOURCE } from './plugin-message.ts'
 import { SkillGate } from './skill-gate.ts'
-import type { SkillEvolution } from './skill-evolution.ts'
 import { IdleReviewWatermarkStore } from './idle-review-watermark.ts'
 
 type AgentRuntimeSource = Pick<MnemonAgentRuntimeSource, 'forAgent' | 'executions' | 'onChanged'>
@@ -873,7 +872,6 @@ export class MnemonLifecycle {
   private readonly taskAgentIds = new Set<string>()
   /** Bounded process-local replay fence for finalized-message write actions: the latest text per message. */
   private readonly supervisedWritebacks = new Map<string, { content: string; result: Promise<SupervisedWritebackResult> }>()
-  private skillEvolution: SkillEvolution | undefined
 
   constructor(
     private readonly ctx: HostContextShape,
@@ -883,43 +881,11 @@ export class MnemonLifecycle {
   ) {}
 
   /** Skill evolution observes the same root conversations; set it before `start`. */
-  useSkillEvolution(evolution: SkillEvolution): void {
-    this.skillEvolution = evolution
-  }
 
-  get skills(): SkillEvolution | undefined {
-    return this.skillEvolution
-  }
 
   /** Model work for skill evolution under a fresh task Agent, outside any conversation. */
   runSkillTask<T>(workspaceRoot: string | undefined, signal: AbortSignal, operation: (agent: HostAgent) => Promise<T>, route?: RoutedPick): Promise<T> {
     return this.runTaskAgent('', workspaceRoot, signal, operation, route)
-  }
-
-  /**
-   * What one conversation did with skills, for the bars under its turns. A
-   * conversation reopened from history has no live Agent until it continues,
-   * so its stored log answers instead, read through DSH without making it live.
-   */
-  async skillActivity(sessionId: string): Promise<SkillActivitySnapshot> {
-    const id = sessionId.trim()
-    const unavailable: SkillActivitySnapshot = { available: false, turns: [], reviews: [] }
-    if (id === '' || this.skillEvolution === undefined) return unavailable
-    const agent = this.ctx.agents.get(id)
-    if (agent !== undefined) return this.skillEvolution.activity(agent)
-    const query = this.ctx.get('sessionQuery') as { readSession(sessionId: string): Promise<{ session: HostAgent['session']['header']; events: HostSessionEvent[] }> } | undefined
-    if (query === undefined) return unavailable
-    let log
-    try { log = await query.readSession(id) } catch { return unavailable }
-    // The Skills Source resolves through the conversation's own workspace, as it does for a live Agent.
-    const stored = { id, session: { header: log.session } } as unknown as HostAgent
-    return this.skillEvolution.activity(stored, log.events)
-  }
-
-  /** Review a live conversation's skills now, whatever its score. */
-  reviewSkills(sessionId: string) {
-    if (this.skillEvolution === undefined) throw new Error('skill evolution is unavailable')
-    return this.skillEvolution.reviewNow(this.liveAgent(sessionId))
   }
 
   start(): () => void {
@@ -1447,10 +1413,8 @@ export class MnemonLifecycle {
     let dispose: () => unknown
     dispose = agent.ctx.effect(() => {
       const stop = lifecycle.start()
-      const stopSkills = this.skillEvolution?.watch(agent)
       return () => {
         try {
-          stopSkills?.()
           stop()
         } finally {
           memoryTurn?.dispose()

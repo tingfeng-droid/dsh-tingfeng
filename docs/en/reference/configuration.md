@@ -24,7 +24,6 @@ As DSH does for every plugin that carries its own configuration, the Web interfa
 | Runtime memory's page | User profile scope | `runtimeUserScope` |
 | Memory Spaces' page | Memory providers; Mnemon Native embedding (auto, Ollama or OpenAI-compatible) | The Provider registry in `state/memory-providers.json`; `embedding` |
 | Layered strategy's page | Task Agent model; idle review | `taskAgentModel`; `idleReview` |
-| Skills' page | Self-evolution, backtest drafts, review parameters, the conversation line, the sidebar entry | `skills`; see [Skills settings](#skills-settings) |
 
 Switches and selectors apply at once; typed values such as the storage directory, the embedding connection, review limits and component options wait for **Apply**. A Provider's reusable service fields (endpoints, credentials, executables) live in the Provider registry, not in Mnemon's YAML; enabling or saving a Provider discovers its namespaces into **Memory Spaces → Overview**, and turning it off removes only those local mappings. Other advanced settings are edited in YAML.
 
@@ -139,7 +138,6 @@ mnemon:
 | `conversationInteraction.turnBar` | `true` | boolean | The turn memory bar under replies; applies at once |
 
 | `conversationInteraction.saveAction` | `true` | boolean | The **Save to memory** action and confirmation on finished replies; applies at once |
-| `skills` | see [Skills settings](#skills-settings) | the keys listed there | Skills' self-evolution, its review parameters, the conversation line and the sidebar entry; applies at once without rebuilding the memory runtime |
 
 Every value is saved under the `mnemon` entry and applies live. The UI's `mnemon-ui` settings scope is stored as `conversationInteraction`, its `mnemon-view` scope as `memoryView`, and its `mnemon-skills` scope as `skills`. The storage root switches atomically only after the new runtime graph initializes successfully.
 
@@ -467,42 +465,6 @@ mnemon:
     enabled: true
     instruction: ""
 ```
-
-## Skills settings
-
-Skills keeps its settings under `skills` in the `mnemon` entry, edited on its own page under **Plugins → dsh-mnemon** through the `mnemon-skills` settings scope. Settings apply live once saved, without rebuilding the memory runtime; the destination selector and review parameters wait for **Apply** or **Discard**. The [Skills guide](../guides/skills.md#self-evolution) explains what each does.
-
-| Key | Default | Range | Meaning |
-|---|---:|---|---|
-| `skills.evolution` | `false` | boolean | **Self-evolution**: review conversations and suggest skills. Task and subagent sessions are saved locally; Mnemon does not automatically delete them. |
-| `skills.allowCreate` | `true` | boolean | **Suggest new skills**: allow reviews to propose skills that do not exist yet |
-| `skills.allowUpdate` | `true` | boolean | **Suggest skill improvements**: allow reviews to improve existing skills |
-| `skills.targetScope` | `user` | `storage` / `user` / `project` | **New skill destination**: `user` → `user-dsh`; `project` → `project-dsh`; `storage` follows `storageScope` (`global` / `custom` → user, `workspace` / `workspaces` → project). Apply or Discard on the settings page |
-| `skills.autoBacktest` | `true` | boolean | **Backtest drafts**: compare each new draft with the current version on its test cases |
-| `skills.hints` | `true` | boolean | **In the conversation**: the **Turn skills** line under each turn |
-| `skills.sidebar` | `false` | boolean | **Sidebar entry**: Skills as its own sidebar entry, out of the Memory System |
-| `skills.reviewThreshold` | `5` | 1–50 | **Review threshold**: the activity score a conversation's window must reach before a review |
-| `skills.idleSeconds` | `20` | 0–3600 s | **Idle wait**: how long the conversation must be idle before the review runs |
-| `skills.cooldownSeconds` | `150` | 0–86400 s | **Review interval**: the least time between two reviews of one conversation |
-| `skills.minConfidence` | `0.6` | 0–1 | **Minimum confidence**: suggestions below it are dropped |
-| `skills.expiryDays` | `7` | 1–90 days | **Suggestion expiry**: an untouched suggestion expires after this long |
-| `skills.maxPendingPerSession` | `5` | 1–20 | **Pending per conversation**: past this, the least confident pending suggestions of a conversation expire |
-| `skills.casesPerRun` | `8` | 1–20 | **Cases per backtest**: the most cases one automatic backtest runs |
-
-`skills.targetScope` defaults to `user` to preserve existing installations: upgrading or changing storage scope does not move new skill writes to another root. Choose `storage` explicitly to follow storage scope. New suggestions record their resolved destination; drafts and redrafts keep that destination, and adoption uses the draft unless you explicitly choose another root. Suggestions from older versions without a destination use the current setting when drafted; existing drafts retain their recorded root. Improvements always write back to their original `baseKey`, regardless of this setting or a destination override.
-
-Project roots come from the Skills Source catalog for the selected workspace, following DSH discovery (nearest `.git` ancestor, or the workspace itself); the model task's working directory is not used. A missing workspace/project or an unwritable destination produces a visible review/draft error. Mnemon does not silently fall back to user skills. Adoption checks the final selected project again: a project removed after drafting is not recreated, and you can explicitly select a user root instead. Later filesystem failures are also reported. No skills are migrated, discovery precedence is unchanged, and adoption remains an explicit user action.
-
-Both suggestion switches default to `true`, preserving old configurations. Turn either off independently; turning both off pauses automatic and manual conversation reviews without starting a model call. The switches also filter matching eval cases and results from reviews already running. Existing suggestions and explicit draft, backtest and adopt actions remain available. `skills.evolution` remains the master switch for automatic reviews.
-
-```yaml
-mnemon:
-  skills:
-    evolution: true
-    idleSeconds: 30
-```
-
-The Skills Source's own data (suggestions, cases, recorded conversations, versions, market sources) is not configuration; it lives in the storage root's `skills/` folder, see the [storage model](./storage-model.md#skills).
 
 ## Provider Requirements
 

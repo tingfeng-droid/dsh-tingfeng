@@ -5,7 +5,7 @@ import { join } from 'node:path'
 import { ColdIndexSync } from './cold-index-sync.ts'
 import { describeEntry, parseLibrary, SUMMARY_PROMPT, updateIndex, type IndexEntry } from './cold-index.ts'
 import { Context } from '@deepseek-ai/cordis'
-import { Config as PlainConfig, InteractionConfig, resolveConfig, resolveInteractionConfig, SkillsConfig, type Config as MnemonConfig } from './config.ts'
+import { Config as PlainConfig, InteractionConfig, resolveConfig, resolveInteractionConfig, type Config as MnemonConfig } from './config.ts'
 import { MnemonAutoBackupScheduler } from './auto-backup.ts'
 import { registerCommands } from './commands.ts'
 import type { HostContextShape, HostCredentialsService, HostWorkspaceRegistry } from './dsh.ts'
@@ -13,9 +13,6 @@ import { githubGrantFromRecord, MNEMON_SYNC_GITHUB_CREDENTIAL_KEY, MnemonGitHubA
 import { registerGuidance } from './guidance.ts'
 import { createRuntimeGraph, LiveMnemonRuntime } from './runtime.ts'
 import { MnemonLifecycle, taskRoute } from './lifecycle.ts'
-import { SkillEvolution } from './skill-evolution.ts'
-import { DEFAULT_SKILLS_CONFIG, type ResolvedSkillsConfig } from './protocol.ts'
-import { skillsSourceFor } from './skill-source.ts'
 import { registerRpc } from './rpc.ts'
 import { hasNativeDirectoryPicker } from './directory-picker.ts'
 import { migrateLegacyDisplayMode, registerSettingsRpc } from './settings.ts'
@@ -227,10 +224,6 @@ export function apply(rawContext: unknown, rawConfig: MnemonConfig | LiveHostCon
     applies: 'live',
   })
   // 技能管理's settings: read at every turn and review, so a change applies at once.
-  const skillSettings = hostSettings.register<ResolvedSkillsConfig>('mnemon-skills', SkillsConfig, {
-    base: { ...DEFAULT_SKILLS_CONFIG },
-    applies: 'live',
-  })
   ctx.effect(() => {
     let disposed = false
     const migrate = (): void => {
@@ -266,13 +259,6 @@ export function apply(rawContext: unknown, rawConfig: MnemonConfig | LiveHostCon
   }, () => runtime.config.runtimeMemory.maintenanceMaxTokens,
   (scope, signal, operation) => lifecycle.runRuntimeMaintenanceTask(scope, signal, operation))
   const lifecycle = new MnemonLifecycle(ctx, coordinator, runtime.config, runtime)
-  const skills = new SkillEvolution({
-    settings: () => skillSettings.get(),
-    source: agent => skillsSourceFor(runtime, agent),
-    runTask: (workspaceRoot, signal, operation, route) => lifecycle.runSkillTask(workspaceRoot, signal, operation, route),
-    skillTask: (parent, label, prompt, schema, persona, signal) => coordinator.skillTask(parent, label, prompt, schema, persona, signal, taskRoute(parent)),
-  })
-  lifecycle.useSkillEvolution(skills)
   // Registered before the lifecycle root so teardown runs the other way round:
   // the timer stops first, and only then does the runtime it reads go away.
   ctx.effect(() => {
@@ -283,7 +269,6 @@ export function apply(rawContext: unknown, rawConfig: MnemonConfig | LiveHostCon
     const stop = lifecycle.start()
     return async () => {
       stop()
-      skills.dispose()
       await coordinator.dispose()
       runtime.dispose()
     }

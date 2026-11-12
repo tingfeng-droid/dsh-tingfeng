@@ -23,7 +23,7 @@
 
 
 <p align="center"><strong>面向 DeepSeek Harness 的可组合视图上下文。</strong></p>
-<p align="center">来源与策略可插拔，开箱即用提供分层记忆与自进化技能。</p>
+<p align="center">来源与策略可插拔，开箱即用提供分层记忆。</p>
 
 <p align="center">
   <a href="https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/zh-CN/guides/ui-guide.md#在对话中">
@@ -45,7 +45,6 @@
 - **每一轮都拿到合适的记忆。** 偏好和工作中的事实常驻上下文；项目档案与长期证据只在问题需要时才检索。
 - **看得见这一轮用了什么。** 每条回复下方的回合记忆栏列出这一轮读到和写入的档案与记忆，点一下就在记忆系统中打开它；记忆系统展示全部已保存的内容，并可直接编辑。
 - **一键存入记忆。** 对话里出现值得保留的事实，点击回复下的脑形图标，由任务 Agent 去重、提炼并写入合适的记忆空间，也可以直接存到你选择的位置：工作记忆、用户画像或某个记忆空间。回执写明存到了哪里。
-- **越用越好的技能。** 技能管理把 DSH 的技能集中到一处：它能复盘你的真实对话，写出更好的 `SKILL.md`，先回测再交给你采纳；还能从 skills.sh、GitHub 和发布 Agent Skills 的网站安装更多技能。
 - **在插件页组合。** 选择一个主策略和若干可选增强，切换时无需迁移任何数据；每个组件都有自己的设置页。
 - **数据放在你想放的地方。** 默认由 Mnemon Native 在本地保存，也可以接入八种第三方 Provider；存储范围可选全局、按工作区、集中存储或你指定的目录，并支持 ZIP 备份。
 - **可以扩展。** Source 与 Strategy 都是基于公开 SDK 的普通 DSH 插件；安装的组件与随附组件拥有同样的页面和开关。
@@ -83,22 +82,6 @@
 | **记忆空间** | 长期事实、决策、实体及其关系 | 按需从已启用的 Provider 召回 |
 
 默认的**分层策略**让运行时记忆常驻，另外两类按需读取；**通用策略**在同一份预算内提供全部可用来源，由模型决定如何使用。**记忆空间**是由 Provider 承载、可以独立命名和激活的长期证据范围，英文界面称 memory space。
-
-## 越用越好的技能
-
-**技能管理**是一个实验性组件，用来管理 DSH 从项目和用户目录加载的 `SKILL.md` 技能。它的页面在记忆系统里，也可以作为独立的侧边栏入口。
-
-| 回合复盘提出改进 | 回测之后由你采纳 |
-|---|---|
-| [![回复下方的本回合技能一行：release-notes · 建议 1](https://raw.githubusercontent.com/tingfeng-droid/dsh-tingfeng/main/docs/assets/skills-v0.5.34/zh-CN/chat-skills.jpg)](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/zh-CN/guides/skills.md#对话中) | [![release-notes 的草案：回测“当前 40 → 草案 93 +53”与差异](https://raw.githubusercontent.com/tingfeng-droid/dsh-tingfeng/main/docs/assets/skills-v0.5.34/zh-CN/skills-draft.jpg)](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/zh-CN/guides/skills.md#进化) |
-
-- **管理。** 让技能不被模型加载或不出现在 `/` 菜单里，一键在对话中使用，直接编辑，并能回到任意历史版本。
-- **进化。** 开启自进化后，对话结束会在后台复盘，寻找多次纠正、“以后都这样做”的指示、工具失败和可复用的流程。每条建议都标出所依据的步骤；任务 Agent 写出新的 `SKILL.md`，先与当前版本回测对比，再由你采纳。没有你的**采纳**，什么都不会改。
-- **测试。** 每个技能都有自己的用例，来自复盘、记录的对话或手写，任意版本都能在这些用例上回测打分。
-- **安装。** 市场可以搜索 skills.sh 的开放索引，读取任意 GitHub 仓库、任何按 Agent Skills 发现协议发布技能的网站，以及技能目录；每次安装前都能预览，有安全审核的会一并显示。
-- **对话中。** 每个回合下方的一行列出这一回合用到的技能和复盘提出的建议，点一下就能打开。
-
-自进化默认关闭，在**插件 → 可组合记忆 → 技能管理**中开启。[技能管理指南](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/zh-CN/guides/skills.md)逐一介绍了每个页面。
 
 ## 快速开始
 
@@ -218,14 +201,13 @@ Starter 固定一组经过测试、各自独立版本的包。同一时间只运
 | [dsh-tingfeng-source-runtime](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-source-runtime/README.md) | 运行时记忆：USER.md、MEMORY.md、修订与本地存储 | 开启 |
 | [dsh-tingfeng-source-documents](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-source-documents/README.md) | 项目档案：Markdown、检索、修订与归档 | 开启 |
 | [dsh-tingfeng-source-memory-spaces](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-source-memory-spaces/README.md) | 记忆空间：长期证据及其 Provider | 开启 |
-| [dsh-tingfeng-source-skills](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-source-skills/README.md) | 技能管理（实验性）：DSH 技能的版本、来自真实对话的自进化、测试与回测，以及汇集 skills.sh、GitHub 与 Agent Skills 网站的市场 | 开启（自进化默认关闭） |
 | [dsh-tingfeng-strategy-default-three-tier](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-strategy-default-three-tier/README.md) | 分层策略：运行时记忆常驻，其余按需读取 | 选中 |
 | [dsh-tingfeng-strategy-general](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-strategy-general/README.md) | 通用策略：全部可用来源共享一份预算 | 关闭 |
 | [dsh-tingfeng-strategy-auto-capture](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-strategy-auto-capture/README.md) | 主动记录：在回合中提示保留有用的事实 | 关闭 |
 | [dsh-tingfeng-strategy-light-context](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-strategy-light-context/README.md) | 轻量上下文：为常驻内容设置共同上限 | 关闭 |
 | [dsh-tingfeng-strategy-scoped](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-strategy-scoped/README.md) | 范围组合：按顺序选择来源，并限定可写子集 | 关闭 |
 
-记忆空间 Provider：[Mnemon Native](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-provider-mnemon-native/README.md)（默认，本地）· [OpenViking](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-provider-openviking/README.md) · [Honcho](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-provider-honcho/README.md) · [Mem0](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-provider-mem0/README.md) · [Hindsight](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-provider-hindsight/README.md) · [Holographic](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-provider-holographic/README.md) · [RetainDB](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-provider-retaindb/README.md) · [ByteRover](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-provider-byterover/README.md) · [Supermemory](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-provider-supermemory/README.md)。第三方 Provider 在配置前保持关闭；图谱、删除与枚举能力因后端而异。详见 [Provider 指南](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/zh-CN/guides/memory-providers.md)。
+记忆空间 Provider：**[Mnemon Native](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-provider-mnemon-native/README.md)**（默认，本地，随包安装）。外部 Provider（OpenViking、Honcho、Mem0、Hindsight、Holographic、RetainDB、ByteRover、Supermemory）各自独立发布，需要时单独安装，**不在本仓库、也不随包附带**。详见 [Provider 指南](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/zh-CN/guides/memory-providers.md)。
 
 ## 自己动手扩展
 

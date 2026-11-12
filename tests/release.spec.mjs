@@ -69,9 +69,12 @@ describe('selective, channel-safe official release', () => {
   it('validates every real package without requiring one shared version', async () => {
     const packages = await readReleasePackages(root)
     const plan = createReleasePlan(packages)
-    expect(plan.composition).toHaveLength(19)
+    // The Starter plus its nine embedded packages. Pinned as a fact about the
+    // composition: a release that silently lost a member is what this guards.
+    expect(plan.composition).toHaveLength(10)
     expect(plan.distTag).toBe('latest')
     expect(plan.composition.at(-1).manifest.name).toBe('dsh-tingfeng')
+    // Only Providers still in the workspace carry a generated version literal.
     for (const { directory, manifest } of packages.filter(packageItem => packageItem.manifest.name.startsWith('dsh-tingfeng-provider-'))) {
       const source = await readFile(join(directory, 'src/index.ts'), 'utf8')
       expect(source).toContain(`version: '${manifest.version}'`)

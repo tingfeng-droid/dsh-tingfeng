@@ -22,7 +22,7 @@ Thanks to the upstream author for the original work.
 </p>
 
 <p align="center"><strong>Composable, view-based context for DeepSeek Harness.</strong></p>
-<p align="center">Pluggable sources and strategies, with layered memory and self-evolving skills out of the box.</p>
+<p align="center">Pluggable sources and strategies, with layered memory out of the box.</p>
 
 <p align="center">
   <a href="https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/en/guides/ui-guide.md#in-a-conversation">
@@ -44,7 +44,6 @@ An Agent that starts every session from scratch keeps asking what it was already
 - **The right memory for each turn.** Preferences and working facts stay in context. Project documents and long-term evidence are searched only when a question needs them.
 - **You can see what a turn used.** Under each reply, the turn memory bar lists the documents and memories the turn read and wrote, and one click opens each in the Memory System. The Memory System shows everything that is stored and lets you edit it.
 - **Save to memory in one click.** When a conversation turns up a fact worth keeping, the brain mark under the reply hands it to a task Agent, which removes duplicates, distils it and writes it to the right Memory Space, or saves it where you choose: working memory, your profile or a Memory Space. The receipt says where it went.
-- **Skills that improve with use.** Skills keeps every DSH skill in one place. It can review your real conversations, draft a better `SKILL.md` and backtest it before you adopt it, and it installs more skills from skills.sh, GitHub and sites that publish Agent Skills.
 - **Compose it on the Plugins page.** Choose a main strategy and optional enhancements, and switch them without moving any data. Every component has its own page for its settings.
 - **Keep data where you want it.** Local by default with Mnemon Native, or one of eight third-party Providers. Storage can be global, per workspace, centralized or in a directory you choose, with ZIP backup.
 - **Extend it.** Sources and Strategies are ordinary DSH plugins built on public SDKs. An installed component gets the same pages and switches as the shipped ones.
@@ -82,22 +81,6 @@ Every step is explained in the UI guide; all screens, recordings and the capture
 | **Memory Spaces** | Durable facts, decisions, entities and their relationships | Recalled on demand from the enabled Providers |
 
 The default **Layered strategy** keeps runtime memory resident and reads the other two on demand. The **General strategy** offers every available source within one budget and lets the model decide how to use each. A **memory space** is one named, Provider-backed scope for long-term evidence; the Chinese product term is 记忆空间.
-
-## Skills that improve with use
-
-**Skills** is an experimental component for the `SKILL.md` skills DSH loads from your project and your home folder. Its page sits in the Memory System, or in the sidebar on its own.
-
-| A turn's review suggests an improvement | You adopt it after a backtest |
-|---|---|
-| [![The Turn skills line under a reply: release-notes, suggested 1](https://raw.githubusercontent.com/tingfeng-droid/dsh-tingfeng/main/docs/assets/skills-v0.5.34/en/chat-skills.jpg)](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/en/guides/skills.md#in-a-conversation) | [![A draft of release-notes with its backtest, Current 40 → Draft 93 +53, and the diff](https://raw.githubusercontent.com/tingfeng-droid/dsh-tingfeng/main/docs/assets/skills-v0.5.34/en/skills-draft.jpg)](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/en/guides/skills.md#evolution) |
-
-- **Manage.** Switch a skill off for the model or the `/` menu, use it in the conversation in one click, edit it, and go back to any earlier version.
-- **Evolve.** With self-evolution on, finished conversations are reviewed in the background for corrections, "from now on" instructions, failed tools and reusable procedures. A suggestion cites the steps it rests on; a task Agent drafts the new `SKILL.md`, which is backtested against the current version before you adopt it. Nothing changes without your **Adopt**.
-- **Test.** Each skill has its own cases, from reviews, from recorded conversations or written by hand, and a backtest scores any version on them.
-- **Install.** The market searches skills.sh's open index and reads any GitHub repository, any site publishing an Agent Skills discovery index, and curated catalogs; every install is previewed, with security reviews where they exist.
-- **In the conversation.** A line under each turn names the skills it used and what its review suggested, each one click from its page.
-
-Self-evolution stays off until you turn it on under **Plugins → dsh-tingfeng → Skills**. The [Skills guide](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/en/guides/skills.md) walks through every screen.
 
 ## Quick start
 
@@ -217,14 +200,13 @@ The Starter pins a tested combination of independently versioned packages. One m
 | [dsh-tingfeng-source-runtime](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-source-runtime/README.md) | Runtime memory: USER.md, MEMORY.md, revisions and local storage | On |
 | [dsh-tingfeng-source-documents](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-source-documents/README.md) | Project Documents: Markdown, search, revisions and archiving | On |
 | [dsh-tingfeng-source-memory-spaces](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-source-memory-spaces/README.md) | Memory Spaces: durable evidence and their Providers | On |
-| [dsh-tingfeng-source-skills](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-source-skills/README.md) | Skills (experimental): DSH skills with versions, self-evolution from real conversations, tests and backtests, and a market of skills.sh, GitHub and Agent Skills sites | On (self-evolution off) |
 | [dsh-tingfeng-strategy-default-three-tier](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-strategy-default-three-tier/README.md) | Layered strategy: resident runtime memory, the rest on demand | Selected |
 | [dsh-tingfeng-strategy-general](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-strategy-general/README.md) | General strategy: every available source in one budget | Off |
 | [dsh-tingfeng-strategy-auto-capture](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-strategy-auto-capture/README.md) | Active capture: in-turn guidance to keep useful facts | Off |
 | [dsh-tingfeng-strategy-light-context](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-strategy-light-context/README.md) | Light context: a shared ceiling on resident context | Off |
 | [dsh-tingfeng-strategy-scoped](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-strategy-scoped/README.md) | Scoped composition: ordered sources and a writable subset | Off |
 
-Memory Spaces Providers: [Mnemon Native](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-provider-mnemon-native/README.md) (default, local) · [OpenViking](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-provider-openviking/README.md) · [Honcho](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-provider-honcho/README.md) · [Mem0](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-provider-mem0/README.md) · [Hindsight](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-provider-hindsight/README.md) · [Holographic](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-provider-holographic/README.md) · [RetainDB](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-provider-retaindb/README.md) · [ByteRover](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-provider-byterover/README.md) · [Supermemory](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-provider-supermemory/README.md). Third-party Providers stay off until configured; graph, deletion and enumeration capabilities differ by backend. See [Providers](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/en/guides/memory-providers.md).
+Memory Spaces Providers: **[Mnemon Native](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/plugins/dsh-tingfeng-provider-mnemon-native/README.md)** (default, local, shipped in the package). The external Providers (OpenViking, Honcho, Mem0, Hindsight, Holographic, RetainDB, ByteRover, Supermemory) each publish on their own and install separately — they are neither in this repository nor bundled. See the [Provider guide](https://github.com/tingfeng-droid/dsh-tingfeng/blob/main/docs/en/guides/memory-providers.md).
 
 ## Build your own
 

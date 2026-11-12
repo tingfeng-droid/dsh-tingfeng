@@ -4,12 +4,10 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-libra
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { MnemonChangeSignal } from '../src/client/change-signal.ts'
 import { MnemonWorkbench } from '../src/client/MnemonWorkbench.tsx'
-import { SkillTurnTail } from '../src/client/SkillTurnTail.tsx'
 import { translateEn as t } from '../src/client/locales.ts'
 import type { MemorySourcePageProps, MemorySourcePageDirectory } from '../src/client/source-pages.tsx'
 import type { MnemonSourceManagementClient } from '../src/client/source-contracts.ts'
-import { DEFAULT_SKILLS_CONFIG } from '../src/host/protocol.ts'
-import type { ClientConnectionHandle, Config, SkillActivitySnapshot, SkillsConfig } from '../src/host/protocol.ts'
+import type { ClientConnectionHandle, Config } from '../src/host/protocol.ts'
 import { settingsScope } from './helpers/settings-scope.ts'
 
 const scope = settingsScope<Config>({ status: 'ready', value: { storageScope: 'custom' }, base: {}, user: {}, revision: 0, writable: true, mode: 'host' })
@@ -41,7 +39,7 @@ function transport() {
     if (endpoint === 'status-summary') return { ok: true, value: { healthy: true, writeEnabled: true, version: 'test', memoryBodies: [] } }
     if (endpoint === 'source-management-read') return { ok: true, value: { revision: 'r1', value: `${input.sessionId}/${input.workspaceId}` } }
     if (endpoint === 'task-agent-models') return { ok: true, value: { models: [] } }
-    if (endpoint === 'skill-activity') return { ok: true, value: { available: true, turns: [], reviews: [] } as SkillActivitySnapshot }
+    if (endpoint === 'skill-activity') return { ok: true, value: { available: true, turns: [], reviews: [] } }
     if (endpoint === 'source-assistance') return { ok: true, value: { revision: 'r2', value: null } }
     if (endpoint === 'source-management-mutate') return { ok: true, value: { revision: 'r2', value: null } }
     throw new Error('Unexpected read: ' + endpoint)
@@ -50,49 +48,6 @@ function transport() {
 }
 afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.useRealTimers() })
 describe('retained hidden workbench', () => {
-  it.each(['mutate', 'assistance'] as const)('refreshes empty skill history after a successful %s without a new conversation event', async mode => {
-    vi.useFakeTimers({ shouldAdvanceTime: true })
-    const { connection, call } = transport()
-    let reviewed = false
-    let denied = false
-    const original = call.getMockImplementation()!
-    call.mockImplementation(async (channel, endpoint, input) => {
-      if (endpoint === 'skill-activity') return { ok: true, value: { available: true, turns: [], reviews: reviewed ? [{ turn: 1, state: 'suggested', suggestions: [{ id: 's1', skillName: 'new-skill', action: 'create', status: 'pending' }] }] : [] } as SkillActivitySnapshot }
-      if (endpoint === 'source-management-mutate' || endpoint === 'source-assistance') {
-        if (denied) throw new Error('Denied')
-        reviewed = true
-      }
-      return original(channel, endpoint, input)
-    })
-    const locale = { active: 'en' as const, locales: [], revision: 0 }
-    const localeRuntime = { getSnapshot: () => locale, subscribe: () => () => {} }
-    const content = (open: boolean) => <>
-      <MnemonWorkbench connection={connection} settingsScope={scope} sourcePageDirectory={directory} renderSlot={sourceSlot} focus={focus} sessionId="A" active={open} />
-      {!open && <SkillTurnTail turn={{ turn: 1, status: 'closed' }} seq={10} sessionId="A" connection={connection} localeRuntime={localeRuntime} t={t} />}
-    </>
-    const view = render(content(false))
-    await act(async () => { await vi.advanceTimersByTimeAsync(10_000) })
-    const before = call.mock.calls.filter(([, endpoint]) => endpoint === 'skill-activity').length
-    view.rerender(content(true))
-    await screen.findByText('A/undefined')
-    const write = () => mode === 'mutate' ? retained!.mutate('suggestion-update', {}, { confirmed: true })
-      : retained!.assistance!.execute('skill-review-now', {}, { expectedRevision: 'r1', confirmed: true })
-    denied = true
-    await act(async () => { await expect(write()).rejects.toThrow('Denied') })
-    view.rerender(content(false))
-    await act(async () => { await vi.advanceTimersByTimeAsync(100) })
-    expect(call.mock.calls.filter(([, endpoint]) => endpoint === 'skill-activity')).toHaveLength(before)
-    view.rerender(content(true))
-    await screen.findByText('A/undefined')
-    denied = false
-    await act(async () => { await write() })
-    await act(async () => { await vi.advanceTimersByTimeAsync(100) })
-    expect(call.mock.calls.filter(([, endpoint]) => endpoint === 'skill-activity')).toHaveLength(before)
-    view.rerender(content(false))
-    await act(async () => { await vi.advanceTimersByTimeAsync(100) })
-    expect(await screen.findByRole('button', { name: t('skillTail.suggested', { count: 1 }) })).not.toBeNull()
-    expect(call.mock.calls.filter(([, endpoint]) => endpoint === 'skill-activity')).toHaveLength(before + 1)
-  })
 
   it('does no background document reads and resumes on the latest context when the document becomes visible', async () => {
     const visible = vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden')
@@ -322,8 +277,6 @@ describe('retained hidden workbench', () => {
       deferred = true
       return await new Promise(resolve => { finish = () => resolve(result) })
     })
-    const preferencesMutate = vi.fn(async () => {})
-    const skillsScope = settingsScope<SkillsConfig>({ status: 'ready', value: DEFAULT_SKILLS_CONFIG, base: {}, user: {}, revision: 0, writable: true, mode: 'host' }, preferencesMutate)
     let bound: MemorySourcePageProps | undefined
     function LegacySource(props: MemorySourcePageProps) {
       bound = props
@@ -338,14 +291,13 @@ describe('retained hidden workbench', () => {
           await props.management!.models!()
           await props.management!.assistance!.execute('task', null, { confirmed: true, expectedRevision: 'r1' })
           await props.management!.mutate('save', null, { confirmed: true })
-          await props.preferences!.replace({ evolution: false })
           setState('done')
         })().catch(reason => setState(String(reason)))
       }, [props.management])
       return <output aria-label="Legacy workflow">{state}:{props.sessionId}</output>
     }
     const legacySlot: typeof sourceSlot = (_name, props) => <LegacySource {...props as unknown as MemorySourcePageProps} />
-    const props = { connection, settingsScope: scope, sourcePageDirectory: directory, renderSlot: legacySlot, focus, skillsScope, workspaceId: 'one' }
+    const props = { connection, settingsScope: scope, sourcePageDirectory: directory, renderSlot: legacySlot, focus, workspaceId: 'one' }
     const view = render(<MnemonWorkbench {...props} sessionId="A" />)
     await waitFor(() => expect(finish).toBeTypeOf('function'))
     const before = call.mock.calls.length
@@ -354,7 +306,6 @@ describe('retained hidden workbench', () => {
     expect(call.mock.calls).toHaveLength(before)
     await act(async () => { finish!() })
     await screen.findByText('done:A')
-    expect(preferencesMutate).toHaveBeenCalledOnce()
     const continuation = call.mock.calls.slice(before)
     expect(continuation.map(([, endpoint]) => endpoint)).toEqual(['source-management-read', 'task-agent-models', 'source-assistance', 'source-management-mutate'])
     expect(continuation.every(([, endpoint, input]) => input?.workspaceId === 'one' && (endpoint === 'task-agent-models' ? input?.sessionId === undefined : input?.sessionId === 'A'))).toBe(true)
@@ -362,17 +313,12 @@ describe('retained hidden workbench', () => {
     view.rerender(<MnemonWorkbench {...props} sessionId="B" />)
     await screen.findByText('done:B')
     const writes = call.mock.calls.length
-    const preferenceWrites = preferencesMutate.mock.calls.length
     await expect(stale.management!.mutate('save', null, { confirmed: true })).rejects.toThrow(/context/iu)
-    await expect(stale.preferences!.replace({ evolution: true })).rejects.toThrow(/context/iu)
     expect(call.mock.calls).toHaveLength(writes)
-    expect(preferencesMutate.mock.calls).toHaveLength(preferenceWrites)
     const latest = bound!
     view.unmount()
     await expect(latest.management!.mutate('save', null, { confirmed: true })).rejects.toThrow(/unmounted/iu)
-    await expect(latest.preferences!.replace({ evolution: true })).rejects.toThrow(/unmounted/iu)
     expect(call.mock.calls).toHaveLength(writes)
-    expect(preferencesMutate.mock.calls).toHaveLength(preferenceWrites)
   })
 
   it('keeps the same-context draft through hidden A/B/A and refreshes on reopening', async () => {

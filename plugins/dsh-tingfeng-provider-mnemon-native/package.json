@@ -1,6 +1,6 @@
 {
   "name": "dsh-tingfeng-provider-mnemon-native",
-  "version": "0.11.2",
+  "version": "0.12.0",
   "description": "Native Mnemon CLI Provider child for Memory Spaces.",
   "license": "MIT",
   "type": "module",

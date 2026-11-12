@@ -252,7 +252,6 @@ Skills manages files DSH already reads; it never joins a turn's View. The skills
 | `market/registries.json`, `market/cache/<id>.json` | The sources added in the market and the last list each published | Until removed; refreshed after six hours |
 | `trash/` | Skill folders that were deleted, or replaced by an update or a restore | Until you delete them by hand |
 
-The folder is written under the storage lock with atomic replacement, and it follows the storage scope like the other Sources. It is not part of a Mnemon Pack, so neither ZIP backup nor Git sync carries it; the skills themselves are ordinary files in their roots. Its settings are configuration, under `skills` in the `mnemon` entry; see [Skills settings](./configuration.md#skills-settings).
 
 ## Four Relationship Types
 

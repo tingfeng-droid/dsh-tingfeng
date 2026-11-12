@@ -24,7 +24,6 @@ Web profile 的 patch 通常是 `~/.dsh/profiles/web/cordis.patch.yml`。旧宿�
 | 运行时记忆页面 | 用户画像范围 | `runtimeUserScope` |
 | 记忆空间页面 | 记忆 Provider；Mnemon Native 嵌入（自动、Ollama 或 OpenAI 兼容） | `state/memory-providers.json` 中的 Provider 注册表；`embedding` |
 | 分层策略页面 | 任务 Agent 模型；空闲审查 | `taskAgentModel`；`idleReview` |
-| 技能管理页面 | 自进化、草案自动回测、复盘参数、对话提示、侧边栏入口 | `skills`；见[技能管理设置](#技能管理设置) |
 
 开关与选择器立即生效；存储目录、嵌入连接、审查参数与组件选项等需要输入的值要点击**应用**。Provider 可复用的服务字段（服务地址、凭据、可执行文件）保存在 Provider 注册表中，而不是 Mnemon 的 YAML；启用或保存 Provider 时，会把它已有的命名空间发现到**记忆空间 → 概览**，关闭时只移除这些本地映射。其他高级项需要直接修改 YAML。
 
@@ -138,7 +137,6 @@ mnemon:
 | `remoteAccess` | `read-only` | `read-only` / `trusted-host` | 非 loopback Mnemon 管理授权，仅启动时读取，由 API Gateway 映射执行 |
 | `conversationInteraction.turnBar` | `true` | boolean | 回复下方的回合记忆栏，立即生效 |
 | `conversationInteraction.saveAction` | `true` | boolean | 已完成回复上的**存入记忆**操作及其确认框，立即生效 |
-| `skills` | 见[技能管理设置](#技能管理设置) | 该节列出的各键 | 技能管理的自进化、复盘参数、对话提示与侧边栏入口；立即生效，不重建记忆运行图 |
 
 所有值都保存在 `mnemon` 条目下并实时生效：界面的 `mnemon-ui` 设置范围保存为 `conversationInteraction`，`mnemon-view` 设置范围保存为 `memoryView`，`mnemon-skills` 设置范围保存为 `skills`。存储根只会在新运行图初始化成功后原子切换。
 
@@ -466,42 +464,6 @@ mnemon:
     enabled: true
     instruction: ""
 ```
-
-## 技能管理设置
-
-技能管理的设置保存在 `mnemon` 条目的 `skills` 下，通过 `mnemon-skills` 设置范围在**插件 → 可组合记忆**里它自己的页面上编辑。设置保存后立即作用于运行中的自进化和客户端，不重建记忆运行图；目标选择与复盘参数需要点击**应用**或**放弃**。各项含义见[技能管理指南](../guides/skills.md#自进化)。
-
-| 键 | 默认值 | 范围 | 含义 |
-|---|---:|---|---|
-| `skills.evolution` | `false` | boolean | **自进化**：后台复盘并建议改进技能；会创建落盘的任务及子代理会话，Mnemon 不自动删除这些记录 |
-| `skills.allowCreate` | `true` | boolean | **新建技能建议**：允许复盘提出尚不存在的新技能 |
-| `skills.allowUpdate` | `true` | boolean | **改进已有技能**：允许复盘提出已有技能的改进 |
-| `skills.targetScope` | `user` | `storage` / `user` / `project` | **新技能写入位置**：`user` → `user-dsh`；`project` → `project-dsh`；`storage` 跟随 `storageScope`（`global` / `custom` → 用户，`workspace` / `workspaces` → 项目）。设置页面支持应用或放弃 |
-| `skills.autoBacktest` | `true` | boolean | **草案自动回测**：草案写好后用测试用例与当前版本对比 |
-| `skills.hints` | `true` | boolean | **对话提示**：在每个回合下方显示**本回合技能** |
-| `skills.sidebar` | `false` | boolean | **侧边栏入口**：技能管理单独显示在侧边栏，不再放在记忆系统里 |
-| `skills.reviewThreshold` | `5` | 1–50 | **复盘阈值**：对话窗口的活动积分达到它才会复盘 |
-| `skills.idleSeconds` | `20` | 0–3600 秒 | **空闲等待**：对话空闲多久后开始复盘 |
-| `skills.cooldownSeconds` | `150` | 0–86400 秒 | **复盘间隔**：同一段对话两次复盘之间的最短时间 |
-| `skills.minConfidence` | `0.6` | 0–1 | **最低置信度**：低于它的建议不予收下 |
-| `skills.expiryDays` | `7` | 1–90 天 | **建议有效期**：未处理的建议超过这个时间即过期 |
-| `skills.maxPendingPerSession` | `5` | 1–20 | **单个对话待处理上限**：超出后，这段对话里置信度最低的待处理建议过期 |
-| `skills.casesPerRun` | `8` | 1–20 | **每次回测用例数**：一次自动回测最多运行的用例数 |
-
-`skills.targetScope` 默认保留 `user`，兼容现有安装：升级或修改存储范围不会把新技能写到另一个根目录。需要跟随存储范围时显式选择 `storage`。新建议记录解析后的目标；草案及重新起草保留该目标，采纳沿用草案的目标，除非用户手动选择其他位置。旧版本中没有目标字段的建议在起草时使用当前设置；已有草案保留记录的目标。改进已有技能始终写回原 `baseKey`，不受设置或目标覆盖影响。
-
-项目根来自所选工作区的 Skills Source 目录，遵循 DSH 的发现规则（最近的 `.git` 祖先目录，否则为工作区本身），不使用模型任务的工作目录。缺少工作区/项目或目标不可写时，复盘/起草会显示明确错误，不静默降级到用户技能。采纳时重新检查最终选择的项目：不会重建起草后被删除的项目，用户可以明确改选用户根目录；后续文件系统错误也会显示。不会迁移技能或改变发现优先顺序，采纳仍由用户明确操作。
-
-两个建议开关默认均为 `true`，保留旧配置的行为，可分别关闭；两项均关闭时暂停自动和手动会话复盘，不再发起模型调用。开关同时约束对应的评测用例和已在运行的复盘结果。已有建议以及明确发起的生成草案、回测和采纳操作仍可使用。`skills.evolution` 继续作为自动复盘的总开关。
-
-```yaml
-mnemon:
-  skills:
-    evolution: true
-    idleSeconds: 30
-```
-
-技能管理 Source 自己的数据（建议、用例、记录的对话、版本、市场来源）不是配置，保存在存储根目录的 `skills/` 文件夹中，见[存储模型](./storage-model.md#技能管理)。
 
 ## Provider 要求
 

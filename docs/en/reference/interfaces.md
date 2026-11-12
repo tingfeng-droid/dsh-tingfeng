@@ -281,7 +281,7 @@ A reconciliation never writes memory by itself: the model returns a plan, the pl
 
 ### Settings channel
 
-`/dsh-tingfeng-settings` offers `get` and `mutate` for three namespaces: `mnemon` owns Host and storage settings, `mnemon-ui` owns `turnBar` and `saveAction`, saved as `conversationInteraction`, and `mnemon-skills` owns Skills' settings, saved as `skills` (see [Skills settings](./configuration.md#skills-settings)); a `mnemon-skills` change applies without rebuilding the memory runtime. Mutations carry settings revisions so concurrent edits are not overwritten. dsh-mnemon's page under Plugins (`plugins.bundle.config`) reads and writes through this channel on loopback and remote pages alike. On loopback pages it also follows DSH's `ctx.configForms` revision of the `mnemon` entry and re-reads the channel when another page or a profile reload changes it.
+`/dsh-tingfeng-settings` offers `get` and `mutate` for two namespaces: `mnemon` owns Host and storage settings, `mnemon-ui` owns `turnBar` and `saveAction`, saved as `conversationInteraction`, and /configuration.md#skills-settings)); a `mnemon-skills` change applies without rebuilding the memory runtime. Mutations carry settings revisions so concurrent edits are not overwritten. dsh-mnemon's page under Plugins (`plugins.bundle.config`) reads and writes through this channel on loopback and remote pages alike. On loopback pages it also follows DSH's `ctx.configForms` revision of the `mnemon` entry and re-reads the channel when another page or a profile reload changes it.
 
 ### Memory composition channels
 

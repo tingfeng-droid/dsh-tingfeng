@@ -2,9 +2,9 @@ import { Context, type Fiber } from '@deepseek-ai/cordis'
 import { createVolatile } from '@deepseek-ai/cosmokit'
 import z from '@deepseek-ai/schemastery'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { Config, InteractionConfig, SkillsConfig } from '../src/host/config.ts'
+import { Config, InteractionConfig } from '../src/host/config.ts'
 import type { HostContextShape, HostSettingsService } from '../src/host/dsh.ts'
-import { DEFAULT_SKILLS_CONFIG, type SettingsOperation } from '../src/host/protocol.ts'
+import { type SettingsOperation } from '../src/host/protocol.ts'
 import { ProfileMnemonSettings } from '../src/host/settings-service.ts'
 import { legacySchema, schema as ViewSchema } from '../src/host/view-preferences.ts'
 
@@ -183,20 +183,6 @@ describe('profile settings facade', () => {
     expect(firstListener).not.toHaveBeenCalled()
     f.commit(first, config, [[]])
     expect(firstListener.mock.calls.map(([ns]) => ns)).toEqual(['mnemon', 'mnemon-ui', viewNamespace])
-  })
-
-  it('keeps 技能管理 settings in their own live namespace, apart from the runtime', async () => {
-    const f = fixture()
-    const target = await f.mount('skills-mnemon')
-    registerNamespaces(target)
-    target.settings.register('mnemon-skills', SkillsConfig, { base: { ...DEFAULT_SKILLS_CONFIG }, applies: 'live' })
-    await target.settings.mutate('mnemon-skills', [{ op: 'set', path: ['evolution'], value: true }, { op: 'set', path: ['allowCreate'], value: false }], 3)
-    expect(f.forms.mutate).toHaveBeenLastCalledWith('skills-mnemon', [{ op: 'set', path: ['skills', 'evolution'], value: true }, { op: 'set', path: ['skills', 'allowCreate'], value: false }], 3)
-    const listener = vi.fn()
-    target.settings.onUpdated(listener)
-    f.commit(target, { skills: createVolatile({ ...DEFAULT_SKILLS_CONFIG, evolution: true, allowCreate: false }) }, [['skills', 'evolution'], ['skills', 'allowCreate']])
-    // Turning self-evolution on reaches 技能管理 alone; the memory runtime is not rebuilt for it.
-    expect(listener).toHaveBeenCalledExactlyOnceWith('mnemon-skills', expect.objectContaining({ evolution: true, allowCreate: false, allowUpdate: true, hints: true }))
   })
 
   it('disposes its presentation and subscriptions with the owning fiber', async () => {

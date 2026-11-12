@@ -4,7 +4,7 @@ import { useCallback, useEffect, useId, useMemo, useRef, useState, useSyncExtern
 import { IconChevronLeftOutline14, IconRefreshOutlineRegular, IconSettingsOutlineRegular } from './ui-icons.ts'
 import type { PropsRenderSlots } from '@deepseek-ai/dsh-client-ui-slots'
 
-import { DEFAULT_SKILLS_CONFIG, type ClientConnectionHandle, type ClientSettingsScope, type ClientSettingsSnapshot, type Config, type JsonValue, type LifecycleAgentSnapshot, type MemorySourceManagementInstance, type SkillsConfig, type StorageAreaInventory, type StorageScopeKind, type VersionRestartStatus } from "../host/protocol.ts"
+import { type ClientConnectionHandle, type ClientSettingsScope, type ClientSettingsSnapshot, type Config, type JsonValue, type LifecycleAgentSnapshot, type MemorySourceManagementInstance, type StorageAreaInventory, type StorageScopeKind, type VersionRestartStatus } from "../host/protocol.ts"
 import type { MemoryPluginEntryView, MemoryViewDashboard } from '../host/view-protocol.ts'
 import type { MemoryCompositionStatus } from '../host/protocol.ts'
 import { MnemonClient } from "./api.ts"
@@ -13,7 +13,6 @@ import { StatusPage, storageScopeLabel, type ComponentCard, type LayerState } fr
 import { SourceManagementPage } from './SourceManagementPage.tsx'
 import { useWorkspaceStatus } from './use-workspace-status.ts'
 import { useSourceCatalog } from './use-source-catalog.ts'
-import { invalidateSkillActivity } from './SkillTurnTail.tsx'
 import { managedSourceTypeId, sourcePageEntryId, stoppedSourceTypeId, useWorkspaceNavigation, type Page, type SourceNavigationEntry } from './use-workspace-navigation.ts'
 import { requestComponentPage } from './component-page-request.ts'
 import { translateZh, type MnemonTranslate } from "./locales.ts"
@@ -70,13 +69,9 @@ interface MnemonWorkbenchProps {
   /** Source types whose pages live in an entry of their own, such as 技能管理's. */
   hiddenSourceTypes?: readonly string[]
   /** 技能管理's settings, so its page can show and switch evolution. */
-  skillsScope?: ClientSettingsScope<SkillsConfig>
 }
 
 /** 技能管理's Source type. */
-const SKILLS_SOURCE_TYPE = 'skills'
-const NO_SKILLS_SNAPSHOT: ClientSettingsSnapshot<SkillsConfig> = { status: 'unavailable', writable: false, mode: 'host' }
-const NO_SKILLS_SCOPE: Pick<ClientSettingsScope<SkillsConfig>, 'subscribe' | 'getSnapshot'> = { subscribe: () => () => {}, getSnapshot: () => NO_SKILLS_SNAPSHOT }
 
 const NO_ACTION_SEAT: Pick<MnemonActionSeat, 'subscribe' | 'getSnapshot'> = { subscribe: () => () => {}, getSnapshot: () => undefined }
 const NO_CHANGE_SIGNAL: Pick<MnemonChangeSignal, 'subscribe' | 'getSnapshot'> = { subscribe: () => () => {}, getSnapshot: () => 0 }
@@ -233,7 +228,7 @@ export function MnemonWorkbench(props: MnemonWorkbenchProps): JSX.Element {
   return <I18nContext.Provider value={t}><LocaleContext.Provider value={props.locale ?? 'zh'}><MnemonWorkspace {...visibleProps.current} active={active} /></LocaleContext.Provider></I18nContext.Provider>
 }
 
-function MnemonWorkspace({ connection, settingsScope, sessionId, workspaceId, workspaceSelection, surface = 'sidebar', active = true, titleBar = false, onClose, configuration, componentChanges, sourcePageDirectory = EMPTY_SOURCE_PAGE_DIRECTORY, renderSlot, focus, hiddenSourceTypes, skillsScope }: MnemonWorkbenchProps): JSX.Element {
+function MnemonWorkspace({ connection, settingsScope, sessionId, workspaceId, workspaceSelection, surface = 'sidebar', active = true, titleBar = false, onClose, configuration, componentChanges, sourcePageDirectory = EMPTY_SOURCE_PAGE_DIRECTORY, renderSlot, focus, hiddenSourceTypes }: MnemonWorkbenchProps): JSX.Element {
   const t = useT()
   const locale = useLocale()
   const configurationSeat = configuration ?? NO_ACTION_SEAT
@@ -249,10 +244,6 @@ function MnemonWorkspace({ connection, settingsScope, sessionId, workspaceId, wo
   const subscribeSourcePages = useCallback((listener: () => void) => sourcePageDirectory.subscribe(listener), [sourcePageDirectory])
   const getSourcePages = useCallback(() => sourcePageDirectory.getSnapshot(), [sourcePageDirectory])
   const allSourcePageEntries = useSyncExternalStore(subscribeSourcePages, getSourcePages, getSourcePages)
-  const skillsSeat = skillsScope ?? NO_SKILLS_SCOPE
-  const subscribeSkills = useCallback((listener: () => void) => skillsSeat.subscribe(listener), [skillsSeat])
-  const getSkillsSnapshot = useCallback(() => skillsSeat.getSnapshot(), [skillsSeat])
-  const skillsSnapshot = useSyncExternalStore(subscribeSkills, getSkillsSnapshot, getSkillsSnapshot)
   // The Source types this view shows: the focused one alone, or all but those with an entry of their own.
   const focusType = focus?.sourceTypeId
   const hiddenKey = hiddenSourceTypes?.join('\u0000') ?? ''
@@ -289,7 +280,6 @@ function MnemonWorkspace({ connection, settingsScope, sessionId, workspaceId, wo
   const { status, statusLoading, statusError, loadStatus } = useWorkspaceStatus(client, viewContextKey, active)
   const [revision, setRevision] = useState(0)
   const sourceChanged = useCallback((sourceTypeId: string) => {
-    if (sourceTypeId === 'skills') invalidateSkillActivity(connection)
   }, [connection])
   const { sourceCatalogState, sourceCatalog, sourceInstances, sourceManagementClients, visibleSourcePages, managedSourceTypes: allManagedSourceTypes } = useSourceCatalog(client, taskClient, revision, viewContextKey, sourcePageEntries, active, sourceChanged)
   const managedSourceTypes = useMemo(() => allManagedSourceTypes.filter(([sourceTypeId]) => shows(sourceTypeId)), [allManagedSourceTypes, shows])
@@ -419,18 +409,8 @@ function MnemonWorkspace({ connection, settingsScope, sessionId, workspaceId, wo
     if (selected === undefined || renderSlot === undefined) return null
     if (disabledTypes.has(sourceTypeId)) return <SourceDisabledPage title={sourceName(sourceTypeId, selected.management.label)} onOpenConfiguration={openConfiguration} />
     const management = sourceManagementClients.get(selected.sourceInstanceKey)
-    const skillsPreferences = sourceTypeId !== SKILLS_SOURCE_TYPE || skillsScope === undefined || skillsSnapshot.status !== 'ready' ? undefined : {
-      value: { evolution: skillsSnapshot.value?.evolution ?? DEFAULT_SKILLS_CONFIG.evolution } as JsonValue,
-      writable: skillsSnapshot.writable,
-      replace: async (value: JsonValue) => {
-        assertCurrentView()
-        const evolution = jsonRecord(value)?.evolution
-        if (typeof evolution !== 'boolean') throw new Error('Skills preferences take evolution as a boolean')
-        await skillsScope.mutate([{ op: 'set', path: ['evolution'], value: evolution }])
-      },
-    }
     const openSettings = openConfiguration === undefined ? undefined : () => { requestComponentPage(selected.packageName); openConfiguration() }
-    const preferences = skillsPreferences ?? (!isDefaultSourceInstance(selected.sourceInstanceKey, 'memory-spaces') ? undefined : {
+    const preferences = !isDefaultSourceInstance(selected.sourceInstanceKey, 'memory-spaces') ? undefined : {
       value: JSON.parse(JSON.stringify({ persistenceStrategy: { ...settingsSnapshot.value?.persistenceStrategy, providerConnections: {} } })) as JsonValue,
       writable: settingsSnapshot.writable,
       replace: async (value: JsonValue) => {
@@ -443,7 +423,7 @@ function MnemonWorkspace({ connection, settingsScope, sessionId, workspaceId, wo
         for (const [id, fields] of Object.entries(connections)) merged[id] = { ...merged[id], ...jsonRecord(fields) } as NonNullable<typeof merged[string]>
         await settingsScope.mutate([{ op: 'set', path: ['persistenceStrategy'], value: { ...strategy, providerConnections: merged } }])
       },
-    })
+    }
     return renderSlot(MNEMON_SOURCE_PAGE_SLOT, {
       sourceTypeId, sourceInstanceKey: selected.sourceInstanceKey, sourceInstances: instances, writable: writeEnabled, locale, active,
       ...(management === undefined ? {} : { management }),

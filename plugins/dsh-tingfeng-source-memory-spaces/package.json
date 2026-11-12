@@ -1,6 +1,6 @@
 {
   "name": "dsh-tingfeng-source-memory-spaces",
-  "version": "0.11.2",
+  "version": "0.12.0",
   "description": "Memory Spaces Source and its private Provider SDK.",
   "license": "MIT",
   "type": "module",
@@ -59,7 +59,7 @@
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.1",
-    "dsh-tingfeng": "^0.11.2",
+    "dsh-tingfeng": "^0.12.0",
     "react": "^18.2.0"
   },
   "devDependencies": {
@@ -69,15 +69,7 @@
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
     "dsh-tingfeng": "workspace:*",
-    "dsh-tingfeng-provider-byterover": "workspace:*",
-    "dsh-tingfeng-provider-hindsight": "workspace:*",
-    "dsh-tingfeng-provider-holographic": "workspace:*",
-    "dsh-tingfeng-provider-honcho": "workspace:*",
-    "dsh-tingfeng-provider-mem0": "workspace:*",
     "dsh-tingfeng-provider-mnemon-native": "workspace:*",
-    "dsh-tingfeng-provider-openviking": "workspace:*",
-    "dsh-tingfeng-provider-retaindb": "workspace:*",
-    "dsh-tingfeng-provider-supermemory": "workspace:*",
     "jsdom": "^26.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -107,7 +99,15 @@
     "diff": "^9.0.0",
     "immer": "^10.1.1",
     "simple-icons": "16.31.0",
-    "zustand": "~4.4.7"
+    "zustand": "~4.4.7",
+    "dsh-tingfeng-provider-byterover": "0.11.0",
+    "dsh-tingfeng-provider-hindsight": "0.11.0",
+    "dsh-tingfeng-provider-holographic": "0.11.0",
+    "dsh-tingfeng-provider-honcho": "0.11.0",
+    "dsh-tingfeng-provider-mem0": "0.11.0",
+    "dsh-tingfeng-provider-openviking": "0.11.0",
+    "dsh-tingfeng-provider-retaindb": "0.11.0",
+    "dsh-tingfeng-provider-supermemory": "0.11.0"
   },
   "peerDependenciesMeta": {
     "react": {

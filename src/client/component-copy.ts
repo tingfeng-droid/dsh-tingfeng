@@ -5,8 +5,14 @@ import type { MnemonTranslate } from './locales.ts'
 /** Packages the dsh-tingfeng Starter installs; any other component came from an installed extension. */
 const SHIPPED_PACKAGES: ReadonlySet<string> = new Set(STARTER_COMPONENT_ROWS.map(row => row.packageName))
 
-/** Shipped components still taking shape: their row and page say so, and they may change more than the rest. */
-const EXPERIMENTAL_PACKAGES: ReadonlySet<string> = new Set(['dsh-tingfeng-source-skills'])
+/**
+ * Shipped components still taking shape: their row and page say so, and they may
+ * change more than the rest. Empty right now — the Skills Source that carried
+ * the marking was removed with the evolution feature, and a set that names a
+ * package the Starter no longer ships would mark nothing while reading as if it
+ * did.
+ */
+const EXPERIMENTAL_PACKAGES: ReadonlySet<string> = new Set()
 
 /** Whether a component is marked experimental. */
 export function isExperimental(entry: Pick<MemoryPluginEntryView, 'packageName'>): boolean {

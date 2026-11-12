@@ -144,8 +144,9 @@ describe('interaction surfaces binding', () => {
     for (const id of peerIds) registerSlot({ name: slot, id, priority: 1 })
     const peers = [...core.entriesOfSlot(slot)]
     const ids = () => core.entriesOfSlot(slot).map(entry => entry.options.id)
-    // The memory line, then the skills line: each follows its own settings.
-    const tails = ['dsh-tingfeng/turn-tail', 'dsh-tingfeng/skill-tail']
+    // The memory line follows its own setting. The skills line that used to sit
+    // beside it left with the evolution feature.
+    const tails = ['dsh-tingfeng/turn-tail']
 
     apply(ctx)
     // The default-on entries must wait for the Host settings snapshot.
@@ -158,16 +159,16 @@ describe('interaction surfaces binding', () => {
       interactionScope: { mutate: (ops: unknown[]) => Promise<void> }
     }
     await settings.interactionScope.mutate([{ op: 'set', path: ['turnBar'], value: false }])
-    expect(ids()).toEqual(['dsh-tingfeng/skill-tail', ...peerIds])
+    expect(ids()).toEqual([...peerIds])
     await settings.interactionScope.mutate([{ op: 'set', path: ['turnBar'], value: true }])
     expect(ids()).toEqual([...tails, ...peerIds])
-    expect(core.entries(slot)).toHaveLength(4)
+    expect(core.entries(slot)).toHaveLength(3)
 
     dispose()
     expect(core.entriesOfSlot(slot)).toEqual(peers)
     apply(ctx)
     await waitFor(() => expect(ids()).toEqual([...tails, ...peerIds]))
-    expect(core.entries(slot)).toHaveLength(4)
+    expect(core.entries(slot)).toHaveLength(3)
     dispose()
     expect(core.entriesOfSlot(slot)).toEqual(peers)
   })

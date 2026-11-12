@@ -4,7 +4,6 @@ import { memoryPlugin as documents } from 'dsh-tingfeng-source-documents'
 import { memoryPlugin as spaces } from 'dsh-tingfeng-source-memory-spaces'
 import { NATIVE_PROVIDER_ID } from 'dsh-tingfeng-source-memory-spaces/contracts'
 import { memoryPlugin as runtime } from 'dsh-tingfeng-source-runtime'
-import { memoryPlugin as skills } from 'dsh-tingfeng-source-skills'
 import { memoryPlugin as capture } from 'dsh-tingfeng-strategy-auto-capture'
 import { memoryPlugin as threeTier } from 'dsh-tingfeng-strategy-default-three-tier'
 import { memoryPlugin as general } from 'dsh-tingfeng-strategy-general'
@@ -14,7 +13,7 @@ import { STARTER_COMPONENT_ROWS, STARTER_ENHANCEMENT_PACKAGES, STARTER_SELF_REGI
 import type { MemoryPluginEntryView } from '../src/host/view-protocol.ts'
 import { isShipped } from '../src/client/component-copy.ts'
 
-const components = [runtime, documents, spaces, skills, threeTier, general, capture, light, scoped]
+const components = [runtime, documents, spaces, threeTier, general, capture, light, scoped]
 const read = (path: string): Record<string, unknown> => JSON.parse(readFileSync(new URL(`../${path}`, import.meta.url), 'utf8')) as Record<string, unknown>
 
 describe('component package metadata', () => {
