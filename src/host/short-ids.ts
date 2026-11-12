@@ -233,10 +233,28 @@ export class ShortIdStore {
   ensure(rows: readonly { readonly id: string; readonly store: string; readonly title: string }[]): number {
     const current = this.load()
     const taken = new Set(Object.values(current.map).map(entry => `${entry.store}\u0000${entry.id}`))
+    const live = new Set(rows.map(row => `${row.store}\u0000${row.id}`))
     const map: Record<string, ShortIdRecord> = { ...current.map }
     const at = new Date().toISOString()
     let next = current.next
     let added = 0
+    // `rows` is the whole library, so a handle whose row is not in it points at
+    // nothing: the CLI has no update, so every rewrite is a new row and the old
+    // one is soft-deleted. Without this sweep those handles accumulate — one
+    // library here reached 69 rows for 68 entries, 24 of them dead — and each one
+    // is a handle the reader can type that answers nothing.
+    let dropped = 0
+    // Refuse to sweep against an empty library: a failed read or a Provider that
+    // answered nothing would otherwise look exactly like "every row is gone" and
+    // wipe the whole table. The index an empty library renders is one line, so
+    // nothing is lost by leaving the handles for the next real build.
+    if (rows.length > 0) {
+      for (const [handle, entry] of Object.entries(map)) {
+        if (live.has(`${entry.store}\u0000${entry.id}`)) continue
+        delete map[handle]
+        dropped += 1
+      }
+    }
     for (const row of rows) {
       const key = `${row.store}\u0000${row.id}`
       if (taken.has(key)) continue
@@ -246,7 +264,7 @@ export class ShortIdStore {
       next += 1
       added += 1
     }
-    if (added > 0) this.write({ version: 1, next, map })
+    if (added > 0 || dropped > 0) this.write({ version: 1, next, map })
     return added
   }
 

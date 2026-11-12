@@ -1,6 +1,6 @@
 {
   "name": "dsh-tingfeng-strategy-auto-capture",
-  "version": "0.12.0",
+  "version": "0.12.1",
   "description": "Additive in-turn durable-memory capture guidance; no background tasks or new write authority.",
   "license": "MIT",
   "type": "module",
@@ -34,7 +34,7 @@
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.1",
-    "dsh-tingfeng": "^0.12.0"
+    "dsh-tingfeng": "^0.12.1"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

@@ -295,3 +295,61 @@ describe('the pairing that makes a fresh install usable', () => {
     expect(blockProblem(block, entries.length)).toBeUndefined()
   })
 })
+
+describe('sweeping handles whose row is gone', () => {
+  it('drops a handle the library no longer has, and keeps every handle it does', () => {
+    const s = store()
+    s.ensure([
+      { id: 'uuid-a', store: 'default', title: '甲' },
+      { id: 'uuid-b', store: 'default', title: '乙' },
+    ])
+    expect(s.handles().size).toBe(2)
+    // A rewrite is a new row, so `uuid-a` is gone and `uuid-c` arrives.
+    s.ensure([
+      { id: 'uuid-b', store: 'default', title: '乙' },
+      { id: 'uuid-c', store: 'default', title: '丙' },
+    ])
+    const after = s.handles()
+    expect(after.size).toBe(2)
+    expect([...after.keys()].sort()).toEqual(['uuid-b', 'uuid-c'])
+  })
+
+  it('does not reuse the number it dropped', () => {
+    const s = store()
+    s.ensure([{ id: 'uuid-a', store: 'default', title: '甲' }])
+    expect(s.handles().get('uuid-a')).toBe('Z001')
+    s.ensure([{ id: 'uuid-b', store: 'default', title: '乙' }])
+    // A retired number stays retired: a reader who saved `Z001` must not land on
+    // an unrelated row later.
+    expect(s.handles().get('uuid-b')).toBe('Z002')
+  })
+
+  it('leaves a handle alone when the row is still there under another title', () => {
+    const s = store()
+    s.ensure([{ id: 'uuid-a', store: 'default', title: '甲' }])
+    s.ensure([{ id: 'uuid-a', store: 'default', title: '甲（改过标题）' }])
+    expect(s.handles().get('uuid-a')).toBe('Z001')
+  })
+
+  it('sweeps nothing when the library reads empty', () => {
+    const s = store()
+    s.ensure([{ id: 'uuid-a', store: 'default', title: '甲' }])
+    // An empty result is far more likely to be a failed read than a library that
+    // lost every row, and the handles must survive it.
+    expect(s.ensure([])).toBe(0)
+    expect(s.handles().size).toBe(1)
+  })
+
+  it('keeps one store\'s handles when only the other store\'s rows changed', () => {
+    const s = store()
+    s.ensure([
+      { id: 'uuid-a', store: 'default', title: '甲' },
+      { id: 'uuid-x', store: 'other', title: '丁' },
+    ])
+    s.ensure([{ id: 'uuid-a', store: 'default', title: '甲' }])
+    // Rows are identified by store and id together, so a same-id row in another
+    // store is a different handle.
+    expect(s.handles().size).toBe(1)
+    expect(s.handles().get('uuid-a')).toBe('Z001')
+  })
+})
