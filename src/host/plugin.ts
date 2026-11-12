@@ -1,8 +1,9 @@
 import { execFileSync } from 'node:child_process'
+import { findMnemonCommand } from 'dsh-tingfeng-source-memory-spaces/native-cli'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { ColdIndexSync } from './cold-index-sync.ts'
-import { parseLibrary, SUMMARY_PROMPT, updateIndex, type IndexEntry } from './cold-index.ts'
+import { describeEntry, parseLibrary, SUMMARY_PROMPT, updateIndex, type IndexEntry } from './cold-index.ts'
 import { Context } from '@deepseek-ai/cordis'
 import { Config as PlainConfig, InteractionConfig, resolveConfig, resolveInteractionConfig, SkillsConfig, type Config as MnemonConfig } from './config.ts'
 import { MnemonAutoBackupScheduler } from './auto-backup.ts'
@@ -108,7 +109,8 @@ function coldIndexSync(
   if (!settings.enabled) return undefined
   const markers = { begin: settings.beginMarker, end: settings.endMarker }
   const collect = async (): Promise<IndexEntry[]> => {
-    const command = config.cliPath ?? 'mnemon'
+    // Same discovery as every other CLI call — see the note in tools.ts cliLookup.
+    const command = findMnemonCommand({ ...(config.cliPath === undefined ? {} : { cliPath: config.cliPath }) }) ?? 'mnemon'
     const argv = ['--data-dir', dataDir, 'recall', '', '--basic', '--limit', '100000', '--readonly']
     const stdout = execFileSync(command, argv, {
       encoding: 'utf8',
@@ -117,7 +119,24 @@ function coldIndexSync(
       maxBuffer: 64 * 1024 * 1024,
       windowsHide: true,
     })
-    return parseLibrary(stdout)
+    const entries = parseLibrary(stdout)
+    // Fill handles for rows that predate the feature. Doing it here rather than
+    // only on write is what makes a fresh install on an existing library come out
+    // numbered instead of showing a column of blanks that a reader has to skip,
+    // and what keeps the index from being refused for rows the table has no
+    // handle for. Idempotent, so later builds cost one read and no write.
+    if (shortIds !== undefined) {
+      try {
+        shortIds.ensure(entries.map(entry => {
+          const { title } = describeEntry(entry)
+          return { id: entry.id, store: entry.store, title }
+        }))
+      } catch {
+        // A damaged or unwritable table must not stop the index from being built:
+        // the entries are still in the library, only their handles are missing.
+      }
+    }
+    return entries
   }
   const summarize = settings.summary.provider === 'ollama'
     ? async (content: string): Promise<string | undefined> => {

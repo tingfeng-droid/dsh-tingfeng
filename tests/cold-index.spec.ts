@@ -354,14 +354,35 @@ describe('blockProblem', () => {
     expect(blockProblem(good, 4)).toContain('row(s)')
   })
 
+  // The two cases below are in the shape the renderer actually produces: a handle
+  // cell is a code span, so a missing one is "`—`" — not a bare "—". Testing the
+  // bare form passed while the guard was empty, because `\`—\` !== '—'`.
   it('refuses a row whose handle is the em dash placeholder', () => {
-    const block = good.replace('`Z002`', '—')
+    const block = good.replace('`Z002`', '`—`')
     expect(blockProblem(block, 3)).toContain('missing handle')
   })
 
   it('refuses a row with an empty handle cell', () => {
     const block = good.replace('`Z002`', '')
     expect(blockProblem(block, 3)).toContain('missing handle')
+  })
+
+  it('refuses a bare em dash too, which older blocks may still carry', () => {
+    const block = good.replace('`Z002`', '—')
+    expect(blockProblem(block, 3)).toContain('missing handle')
+  })
+
+  it('catches the placeholder through the renderer itself, not only by hand', async () => {
+    // End-to-end over the real path: render with no handles, then check. This is
+    // the pairing that was broken — the hand-written block above disagreed with
+    // what `renderBlock` emits, so only a render-then-check test can hold them
+    // together.
+    const entries = [
+      { id: 'uuid-a', content: '【甲 · 总主题：组】\n正文甲', store: 'default' },
+      { id: 'uuid-b', content: '【乙 · 总主题：组】\n正文乙', store: 'default' },
+    ]
+    const block = await renderBlock(entries, { markers: { begin: 'AUTO-GENERATED:BEGIN', end: 'AUTO-GENERATED:END' }, handles: new Map([['uuid-a', 'Z001']]), maxDescription: 60 })
+    expect(blockProblem(block, entries.length)).toContain('missing handle')
   })
 
   it('refuses a description that only repeats the title', () => {

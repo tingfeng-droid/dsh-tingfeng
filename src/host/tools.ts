@@ -6,6 +6,7 @@ import type { HostContextShape, ToolDefinition, ToolExecution } from './dsh.ts'
 import type { DocumentMutation } from 'dsh-tingfeng-source-documents/contracts'
 import type { RuntimeMemoryImportance, RuntimeMemoryTarget } from 'dsh-tingfeng-source-runtime/contracts'
 import { CATEGORIES, EDGE_TYPES, SOURCES, type Category, type EdgeType, type Source } from 'dsh-tingfeng-source-memory-spaces/contracts'
+import { findMnemonCommand } from 'dsh-tingfeng-source-memory-spaces/native-cli'
 import { assertParticipation } from './access.ts'
 import type { MemoryCapability, MemoryJsonValue, MemoryMutationReceipt } from '../core/contracts/index.ts'
 import { isHandleQuery, lookupHandle } from './handle-lookup.ts'
@@ -225,8 +226,12 @@ function registerViewTools(ctx: HostContextShape, { runtimeFor, config, composab
 function cliLookup(runtimeFor: (exec: ToolExecution) => MnemonRuntimeGraph, dataDir: string) {
   return (exec: ToolExecution) => {
     const config = runtimeFor(exec).config
+    // Go through the same discovery the rest of the plugin uses. A bare 'mnemon'
+    // handed straight to execFileSync only works where the CLI is on PATH — on a
+    // Windows profile that keeps it under its own tools directory it is simply not
+    // found, even though every other CLI path in the plugin resolves fine.
     return {
-      command: config.cliPath ?? 'mnemon',
+      command: findMnemonCommand({ ...(config.cliPath === undefined ? {} : { cliPath: config.cliPath }) }) ?? 'mnemon',
       dataDir,
       timeoutMs: config.timeoutMs,
       env: { MNEMON_EMBED_MODEL: config.embedding.model },

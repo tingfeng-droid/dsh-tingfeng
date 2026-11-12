@@ -204,3 +204,94 @@ describe('writing', () => {
     expect(s.assign('uuid-f', 'default', '第六条').handle).toBe('Z006')
   })
 })
+
+describe('filling handles for rows that predate the feature', () => {
+  /**
+   * Installing the plugin onto an existing library is the case these cover: the
+   * table starts empty, every row is already in the library, and an index built
+   * straight from the table would show them all with no handle. `assign` only
+   * runs when a row is written, so without `ensure` those rows would never be
+   * numbered.
+   */
+  it('numbers every row it is given, in the order given', () => {
+    const s = store()
+    const added = s.ensure([
+      { id: 'uuid-a', store: 'default', title: '甲' },
+      { id: 'uuid-b', store: 'default', title: '乙' },
+    ])
+    expect(added).toBe(2)
+    expect(s.handles().get('uuid-a')).toBe('Z001')
+    expect(s.handles().get('uuid-b')).toBe('Z002')
+  })
+
+  it('leaves existing handles alone and only fills the gaps', () => {
+    const s = store()
+    s.assign('uuid-a', 'default', '甲')
+    s.assign('uuid-b', 'default', '乙')
+    const added = s.ensure([
+      { id: 'uuid-a', store: 'default', title: '甲' },
+      { id: 'uuid-b', store: 'default', title: '乙' },
+      { id: 'uuid-c', store: 'default', title: '丙' },
+    ])
+    expect(added).toBe(1)
+    expect(s.handles().get('uuid-a')).toBe('Z001')
+    expect(s.handles().get('uuid-b')).toBe('Z002')
+    expect(s.handles().get('uuid-c')).toBe('Z003')
+  })
+
+  it('is idempotent: a second pass adds nothing and rewrites nothing', () => {
+    const s = store()
+    const rows = [{ id: 'uuid-a', store: 'default', title: '甲' }]
+    s.ensure(rows)
+    const before = fs.readFileSync(s.file, 'utf8')
+    expect(s.ensure(rows)).toBe(0)
+    expect(fs.readFileSync(s.file, 'utf8')).toBe(before)
+  })
+
+  it('distinguishes the same id in two stores', () => {
+    const s = store()
+    const added = s.ensure([
+      { id: 'same', store: 'default', title: '甲' },
+      { id: 'same', store: 'other', title: '乙' },
+    ])
+    expect(added).toBe(2)
+  })
+
+  it('does not renumber when the library shrinks and grows back', () => {
+    const s = store()
+    s.ensure([{ id: 'uuid-a', store: 'default', title: '甲' }])
+    s.release('uuid-a', 'default')
+    s.ensure([{ id: 'uuid-a', store: 'default', title: '甲' }])
+    // The number is spent, not returned: reusing it would make a handle in an
+    // older conversation name a different row.
+    expect(s.handles().get('uuid-a')).toBe('Z002')
+  })
+})
+
+describe('the pairing that makes a fresh install usable', () => {
+  /**
+   * The end-to-end shape of the bug: render an index from a table that has no
+   * handles for the rows it is about to list, then check the block with the same
+   * rules that decide whether it may be written. Before `ensure` existed this
+   * produced a block the writer refused, which meant an install onto an existing
+   * library could never build an index at all — and the refusal was itself
+   * invisible until the comparison was corrected.
+   */
+  it('a backfilled table yields a block that passes its own check', async () => {
+    const { renderBlock, blockProblem, describeEntry } = await import('../src/host/cold-index.ts')
+    const entries = [
+      { id: 'uuid-a', content: '【甲 · 总主题：组】\n正文甲讲的是甲', store: 'default' },
+      { id: 'uuid-b', content: '【乙 · 总主题：组】\n正文乙讲的是乙', store: 'default' },
+    ]
+    const s = store()
+    // Empty table, rows already in the library — the install-on-existing case.
+    expect(s.handles().size).toBe(0)
+    s.ensure(entries.map(entry => ({ id: entry.id, store: entry.store, title: describeEntry(entry).title })))
+    const block = await renderBlock(entries, {
+      markers: { begin: 'AUTO-GENERATED:BEGIN', end: 'AUTO-GENERATED:END' },
+      handles: s.handles(),
+      maxDescription: 60,
+    })
+    expect(blockProblem(block, entries.length)).toBeUndefined()
+  })
+})

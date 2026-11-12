@@ -359,7 +359,13 @@ export function blockProblem(block: string, entries: number): string | undefined
     const handle = cells[1] ?? ''
     const title = cells[2] ?? ''
     const description = cells[3] ?? ''
-    if (handle === '—' || handle === '') duplicated.push(title)
+    // The renderer wraps a handle in backticks, so an absent one arrives as
+    // "`—`" rather than "—". Comparing the raw cell let every unnumbered row
+    // through: the check existed, the table it inspected used a shape it could
+    // never match, and the guard against writing an index with missing handles
+    // was empty. Strip the code-span markup before deciding.
+    const bareHandle = handle.replace(/^`|`$/gu, '').trim()
+    if (bareHandle === '—' || bareHandle === '') duplicated.push(title)
     const bare = title.replace(/^\*\*|\*\*$/gu, '').trim()
     if (description !== '' && bare !== '' && description === bare) duplicated.push(title)
   }

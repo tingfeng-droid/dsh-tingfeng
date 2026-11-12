@@ -177,7 +177,7 @@ jobs:
       - name: Smoke-test a real Registry upgrade from v0.5.29
         run: >-
           node scripts/verify-headless-profile.mjs
-          --upgrade-from dsh-tingfeng@0.5.29
+          --upgrade-from dsh-tingfeng@0.6.2
           --upgrade-registry https://registry.npmjs.org
           --package dsh-mnemon@${{ needs.prepare.outputs.version }}
           --registry https://registry.npmjs.org

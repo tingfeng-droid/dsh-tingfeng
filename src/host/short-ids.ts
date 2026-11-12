@@ -217,6 +217,39 @@ export class ShortIdStore {
     return { handle, file }
   }
 
+  /**
+   * Give every listed row a handle if it has none, in one read and one write.
+   *
+   * A profile that installs this plugin onto a library it already has starts with
+   * rows that were written before handles existed. Only `assign` was available,
+   * and it is called when a row is written — so those rows would never get a
+   * handle, and an index built from the table would show them all as blanks
+   * forever. Installing the feature is exactly the moment to fill them in.
+   *
+   * Idempotent: rows that already have a handle keep it, so running this on every
+   * index build costs nothing after the first pass and never renumbers. Ordering
+   * follows the caller's list so the numbers match the order a reader sees.
+   */
+  ensure(rows: readonly { readonly id: string; readonly store: string; readonly title: string }[]): number {
+    const current = this.load()
+    const taken = new Set(Object.values(current.map).map(entry => `${entry.store}\u0000${entry.id}`))
+    const map: Record<string, ShortIdRecord> = { ...current.map }
+    const at = new Date().toISOString()
+    let next = current.next
+    let added = 0
+    for (const row of rows) {
+      const key = `${row.store}\u0000${row.id}`
+      if (taken.has(key)) continue
+      const handle = formatShortId(this.options, next)
+      map[handle] = { id: row.id, store: row.store, title: row.title, at }
+      taken.add(key)
+      next += 1
+      added += 1
+    }
+    if (added > 0) this.write({ version: 1, next, map })
+    return added
+  }
+
   /** Drop the handle pointing at one row, if any. */
   release(id: string, store: string): ShortIdFile {
     const current = this.load()
