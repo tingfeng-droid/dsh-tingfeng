@@ -1,6 +1,6 @@
 {
   "name": "dsh-tingfeng-strategy-general",
-  "version": "0.12.3",
+  "version": "0.12.4",
   "description": "Role-agnostic main Strategy for Mnemon: every available Source, one shared budget, and the model decides how to use each one.",
   "license": "MIT",
   "type": "module",

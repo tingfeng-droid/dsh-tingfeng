@@ -252,6 +252,20 @@ export function liveRootAgents(agents: HostAgentsService): HostAgent[] {
   return []
 }
 
+/**
+ * Provider names a subagent run may pick from, on either DSH release.
+ *
+ * 0.2.2-rc.2 dropped `list()` and offers no replacement, only `getProvider`.
+ * Every caller here looks for the same two built-ins (`fork`, `spawn`), so the
+ * fallback asks for exactly those rather than guessing at the whole catalog.
+ */
+export const SUBAGENT_PROVIDER_CANDIDATES: readonly string[] = ['fork', 'spawn']
+
+export function subagentProviderNames(service: HostSubagentsService): string[] {
+  if (typeof service.list === 'function') return service.list()
+  return SUBAGENT_PROVIDER_CANDIDATES.filter(name => service.getProvider(name) !== undefined)
+}
+
 export interface HostWorkspace {
   readonly id: string
   readonly path: string
@@ -310,7 +324,8 @@ export interface HostSubagentActivation {
 }
 
 export interface HostSubagentsService {
-  list(): string[]
+  /** DSH 0.2.2-rc.2 removed it; probe with `getProvider` instead. */
+  list?(): string[]
   getProvider(name: string): HostSubagentProvider | undefined
   /** One-shot runs, on DSH 0.2.0. */
   start?(name: string, request: HostSubagentStartRequest): Promise<HostSubagentRun>

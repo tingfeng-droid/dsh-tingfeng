@@ -11,6 +11,7 @@ import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import { type ToolExecutionInput } from '@deepseek-ai/dsh-tools'
 import { expect, it } from 'vitest'
 import type { HostAgent, HostContextShape } from '../src/host/dsh.ts'
+import { subagentProviderNames } from '../src/host/dsh.ts'
 import { MnemonLifecycle } from '../src/host/lifecycle.ts'
 import { MnemonSubagentCoordinator } from '../src/host/subagent.ts'
 import { registerTools } from '../src/host/tools.ts'
@@ -140,7 +141,7 @@ it.each(['native', 'ptc'].flatMap(mode => ['fork', 'spawn'].map(provider => ({ m
       return run
     }
     const service = {
-      list: () => host.subagents.list(), getProvider: (name: string) => host.subagents.getProvider(name),
+      list: () => subagentProviderNames(host.subagents), getProvider: (name: string) => host.subagents.getProvider(name),
       ...(typeof host.subagents.start === 'function'
         ? { start: (...args: Parameters<NonNullable<typeof host.subagents.start>>) => holdBack(host.subagents.start!(...args)) }
         : {}),

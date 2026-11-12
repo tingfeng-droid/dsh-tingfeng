@@ -1,6 +1,7 @@
 import { memoryTool } from './memory-tools.ts'
 import { randomUUID } from 'node:crypto'
 import type { HostAgent, HostSubagentResult, HostSubagentRun, HostSubagentsService, ToolDefinition, ToolExecution } from "./dsh.ts"
+import { subagentProviderNames } from "./dsh.ts"
 import type { DocumentMutation, DocumentSearchResult, DocumentSnapshot, DocumentView } from 'dsh-tingfeng-source-documents/contracts'
 import type { RuntimeMemoryMutation, RuntimeMemoryMutationResult, RuntimeMemorySnapshot } from 'dsh-tingfeng-source-runtime/contracts'
 /** Which Provider and model one delegated run may use. */
@@ -1098,7 +1099,7 @@ This is the only completion channel for this run. Do not finish with a plain-tex
   }
 
   private provider(preferred: 'spawn' | 'fork'): string {
-    const names = this.subagents.list()
+    const names = subagentProviderNames(this.subagents)
     const compatible = (name: string): boolean => {
       const provider = this.subagents.getProvider(name)
       return provider?.capabilities.depthLimit === true && childComposition(this.subagents, provider) !== undefined

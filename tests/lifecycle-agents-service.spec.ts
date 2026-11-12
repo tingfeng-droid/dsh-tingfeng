@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { liveRootAgents, type HostAgentsService } from '../src/host/dsh.ts'
+import { liveRootAgents, subagentProviderNames, type HostAgentsService } from '../src/host/dsh.ts'
 
 /**
  * The Agents service changed shape between DSH releases: 0.2.2-rc.1 exposed
@@ -22,5 +22,22 @@ describe('liveRootAgents', () => {
 
   it('returns nothing when the service offers neither, instead of throwing', () => {
     expect(liveRootAgents({} as HostAgentsService)).toEqual([])
+  })
+})
+
+describe('subagentProviderNames', () => {
+  it('uses list() when the release still has it', () => {
+    const service = { list: () => ['fork', 'spawn', 'other'], getProvider: () => ({}) } as never
+    expect(subagentProviderNames(service)).toEqual(['fork', 'spawn', 'other'])
+  })
+
+  it('asks for the built-ins by name when 0.2.2-rc.2 dropped list()', () => {
+    const present = new Set(['spawn'])
+    const service = { getProvider: (name: string) => (present.has(name) ? {} : undefined) } as never
+    expect(subagentProviderNames(service)).toEqual(['spawn'])
+  })
+
+  it('reports nothing when neither provider is installed', () => {
+    expect(subagentProviderNames({ getProvider: () => undefined } as never)).toEqual([])
   })
 })
