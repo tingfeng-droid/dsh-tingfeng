@@ -1,6 +1,6 @@
 {
   "name": "dsh-tingfeng-provider-supermemory",
-  "version": "0.11.0",
+  "version": "0.11.1",
   "description": "Supermemory Provider child for the Memory Spaces Source.",
   "license": "MIT",
   "type": "module",
