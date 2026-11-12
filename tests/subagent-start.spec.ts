@@ -45,9 +45,15 @@ describe('Starting a delegated child on the running DSH (#356)', () => {
 
     const run = await startSubagent(host.subagents, agents, 'spawn', input)
 
+    // Both shapes travel in one call: 0.2.2-rc.2 reads the top level, earlier
+    // releases read `request`. See tests/subagent-start-spec.spec.ts.
     expect(host.startActivation).toHaveBeenCalledWith({
       provider: 'spawn',
       label: 'Consolidate local user profile',
+      prompt: input.prompt,
+      parent: input.parent,
+      agentOptions: { maxTokens: 8_192 },
+      maxDepth: 1,
       request: {
         prompt: input.prompt,
         parent: input.parent,

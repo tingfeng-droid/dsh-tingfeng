@@ -1,6 +1,6 @@
 {
   "name": "dsh-tingfeng-strategy-auto-capture",
-  "version": "0.12.4",
+  "version": "0.12.5",
   "description": "Additive in-turn durable-memory capture guidance; no background tasks or new write authority.",
   "license": "MIT",
   "type": "module",

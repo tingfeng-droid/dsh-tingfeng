@@ -7,7 +7,7 @@ export { MnemonNativeProvider, descriptor }
 export const definition = defineMemorySpaceProviderDefinition({
   manifest: {
     apiVersion: MEMORY_SPACE_PROVIDER_API_VERSION, kind: 'provider',
-    typeId: descriptor.id, packageName: 'dsh-tingfeng-provider-mnemon-native', version: '0.12.4',
+    typeId: descriptor.id, packageName: 'dsh-tingfeng-provider-mnemon-native', version: '0.12.5',
     label: descriptor.label, icon: descriptor.icon, summary: descriptor.summary,
     ...(descriptor.summaryI18nKey === undefined ? {} : { summaryI18nKey: descriptor.summaryI18nKey }),
     origin: descriptor.origin, locality: descriptor.kind, workspaceBinding: descriptor.workspaceBinding,

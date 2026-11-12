@@ -79,7 +79,18 @@ async function startOnHost(
 ): Promise<HostSubagentRun> {
   if (typeof subagents.startActivation === 'function') {
     const { label, signal, ...task } = request
-    const activation = await subagents.startActivation({ provider, label, request: task, signal, delivery: 'caller' })
+    // DSH 0.2.2-rc.2 flattened the start spec: it reads `spec.parent`,
+    // `spec.prompt`, `spec.outputSchema` and `spec.maxDepth` at the top level,
+    // while 0.2.1 and earlier read them from `spec.request`. Sending both
+    // shapes keeps one call site working on either release; a release that
+    // still reads `spec.request` ignores the extra keys. Without this, rc.2
+    // reaches `spec.parent.id` with `parent` undefined and fails with
+    // "Cannot read properties of undefined (reading 'id')".
+    const activation = await subagents.startActivation({
+      provider, label, signal, delivery: 'caller',
+      ...task,
+      request: task,
+    })
     // A second dispose from the caller reports any failure of this one.
     const stop = () => { activation.dispose().catch(() => {}) }
     try {
