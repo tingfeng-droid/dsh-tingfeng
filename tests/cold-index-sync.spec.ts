@@ -92,9 +92,23 @@ describe('flush', () => {
     expect(write).toHaveBeenCalledTimes(1)
   })
 
-  it('reports nothing when there was nothing to write', async () => {
-    const s = sync()
+  it('writes even when nothing armed it, which is what a first build asks for', async () => {
+    // Nothing called `notify`, so no change is marked pending — that is exactly
+    // the startup case. `flush` is the caller saying "write now", and answering
+    // "nothing was pending" made the first build a no-op that reported success.
+    const write = vi.fn(async () => update())
+    const s = sync({ write })
+    const result = await s.flush()
+    expect(write).toHaveBeenCalledTimes(1)
+    expect(result).toBeDefined()
+  })
+
+  it('writes nothing once disposed, even when asked', async () => {
+    const write = vi.fn(async () => update())
+    const s = sync({ write })
+    s.dispose()
     expect(await s.flush()).toBeUndefined()
+    expect(write).not.toHaveBeenCalled()
   })
 
   it('reports the run a caller can show', async () => {

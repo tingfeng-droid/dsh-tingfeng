@@ -96,6 +96,12 @@ export class ColdIndexSync {
       clearTimeout(this.timer)
       this.timer = undefined
     }
+    // A caller that asked for a write gets one. `run` answers "is there a change
+    // waiting?", which is the right question for a timer but the wrong one here:
+    // at startup nothing has been marked pending yet, so the first build was
+    // asked for and then silently skipped — the index kept its old bytes and the
+    // table kept every handle whose row was gone, with no error to show for it.
+    if (!this.disposed && this.running === undefined) this.pending = true
     return this.run()
   }
 

@@ -300,9 +300,13 @@ export function apply(rawContext: unknown, rawConfig: MnemonConfig | LiveHostCon
       // startup, and a quiet period would just postpone the very first index a
       // new install is waiting to see. Not awaited — a slow summarising model
       // must not hold up the host coming up.
-      void index.flush().catch(() => {
+      void index.flush().catch((error: unknown) => {
         // A failed first build is not a reason to fail the start: the timer is
         // still armed by every later write, and the previous index stays valid.
+        // It is, however, a reason to say so — an empty catch here made a first
+        // build that never ran indistinguishable from one that ran and failed,
+        // and that cost a restart to find out which.
+        console.warn('dsh-tingfeng: the first cold-library index build failed', error)
       })
     }
     return registerTools(ctx, runtime, coordinator, extensions, loader?.await?.(), shortIds, index === undefined ? undefined : () => { index.notify() }, dataDir)

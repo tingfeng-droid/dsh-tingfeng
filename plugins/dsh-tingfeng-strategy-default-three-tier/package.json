@@ -1,6 +1,6 @@
 {
   "name": "dsh-tingfeng-strategy-default-three-tier",
-  "version": "0.12.1",
+  "version": "0.12.2",
   "description": "Explicit three-tier View Strategy for Composable View Memory.",
   "license": "MIT",
   "type": "module",
@@ -32,7 +32,7 @@
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.1",
-    "dsh-tingfeng": "^0.12.1"
+    "dsh-tingfeng": "^0.12.2"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
