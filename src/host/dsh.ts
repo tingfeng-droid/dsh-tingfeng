@@ -229,9 +229,27 @@ export interface HostAgentsService {
   get(id: string): HostAgent | undefined
   /** Public DSH runtime ownership, independent of persisted session lineage. */
   isOwnedBy?(id: string, parent: HostAgent): boolean
-  roots(): HostAgent[]
+  /** DSH 0.2.2-rc.2 replaced `roots()` with `list()`; either may be present. */
+  roots?(): HostAgent[]
+  /** Every live Agent in registration order, including subagents (0.2.2-rc.2+). */
+  list?(): HostAgent[]
   /** Factory for an owned, clean top-level Agent. */
   create(options: CreateHostAgentOptions): Promise<HostAgentHandle>
+}
+
+/**
+ * Live root Agents under either DSH release.
+ *
+ * 0.2.2-rc.1 exposed `roots()` (already filtered to owners-less Agents) and
+ * 0.2.2-rc.2 replaced it with `list()` (every live Agent). Callers here only
+ * need "which Agents exist", because `install` already routes subagents through
+ * `installChild` by their session origin; so `list()` is a safe substitute, and
+ * `roots()` stays first for the release that still has it.
+ */
+export function liveRootAgents(agents: HostAgentsService): HostAgent[] {
+  if (typeof agents.roots === 'function') return agents.roots()
+  if (typeof agents.list === 'function') return agents.list()
+  return []
 }
 
 export interface HostWorkspace {

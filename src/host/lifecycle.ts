@@ -12,6 +12,7 @@ import type {
   HostSessionEvent,
   HostUserMessage,
 } from "./dsh.ts"
+import { liveRootAgents } from "./dsh.ts"
 import type { Insight, RememberRequest, SearchRequest } from 'dsh-tingfeng-source-memory-spaces/contracts'
 import type { RuntimeMemoryMutation } from 'dsh-tingfeng-source-runtime/contracts'
 import type { DocumentMutation } from 'dsh-tingfeng-source-documents/contracts'
@@ -894,7 +895,7 @@ export class MnemonLifecycle {
       for (const { lifecycle } of this.owners.values()) lifecycle.configurationChanged()
     })
     const stopCreated = this.ctx.on('agent/created', (({ agent, source }: SessionStartPayload) => { this.install(agent, source) }) as never)
-    for (const agent of this.ctx.agents.roots()) this.install(agent, 'adopted')
+    for (const agent of liveRootAgents(this.ctx.agents)) this.install(agent, 'adopted')
     return () => {
       stopChanged?.()
       stopCreated()
@@ -1407,7 +1408,7 @@ export class MnemonLifecycle {
       this.installChild(agent)
       return
     }
-    if (!this.ctx.agents.roots().includes(agent)) return
+    if (!liveRootAgents(this.ctx.agents).includes(agent)) return
     const memoryTurn = this.runtimeSource === undefined ? undefined : new AgentMemoryTurn(agent, this.runtimeSource)
     const lifecycle = new MnemonAgentLifecycle(agent, this.coordinator, this.config, this.counters, source, memoryTurn, () => this.runtimeSource?.forAgent(agent).directory)
     let dispose: () => unknown

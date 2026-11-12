@@ -1,6 +1,6 @@
 {
   "name": "dsh-tingfeng",
-  "version": "0.12.2",
+  "version": "0.12.3",
   "description": "Composable, view-based context for DeepSeek Harness. Pluggable sources and strategies, with layered memory and self-evolving skills out of the box.",
   "keywords": [
     "deepseek-harness",
@@ -227,15 +227,15 @@
   "dependencies": {
     "@deepseek-ai/cosmokit": "^1.8.5",
     "@deepseek-ai/schemastery": "^3.18.4",
-    "dsh-tingfeng-provider-mnemon-native": "0.12.2",
-    "dsh-tingfeng-source-documents": "0.12.2",
-    "dsh-tingfeng-source-memory-spaces": "0.12.2",
-    "dsh-tingfeng-source-runtime": "0.12.2",
-    "dsh-tingfeng-strategy-auto-capture": "0.12.2",
-    "dsh-tingfeng-strategy-default-three-tier": "0.12.2",
-    "dsh-tingfeng-strategy-general": "0.12.2",
-    "dsh-tingfeng-strategy-light-context": "0.12.2",
-    "dsh-tingfeng-strategy-scoped": "0.12.2",
+    "dsh-tingfeng-provider-mnemon-native": "0.12.3",
+    "dsh-tingfeng-source-documents": "0.12.3",
+    "dsh-tingfeng-source-memory-spaces": "0.12.3",
+    "dsh-tingfeng-source-runtime": "0.12.3",
+    "dsh-tingfeng-strategy-auto-capture": "0.12.3",
+    "dsh-tingfeng-strategy-default-three-tier": "0.12.3",
+    "dsh-tingfeng-strategy-general": "0.12.3",
+    "dsh-tingfeng-strategy-light-context": "0.12.3",
+    "dsh-tingfeng-strategy-scoped": "0.12.3",
     "fflate": "^0.8.3",
     "yaml": "^2.9.0",
     "zod": "^4.4.3"
