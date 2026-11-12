@@ -1,6 +1,6 @@
 {
   "name": "dsh-tingfeng-source-memory-spaces",
-  "version": "0.11.1",
+  "version": "0.11.2",
   "description": "Memory Spaces Source and its private Provider SDK.",
   "license": "MIT",
   "type": "module",
@@ -59,7 +59,7 @@
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.1",
-    "dsh-tingfeng": "^0.11.1",
+    "dsh-tingfeng": "^0.11.2",
     "react": "^18.2.0"
   },
   "devDependencies": {

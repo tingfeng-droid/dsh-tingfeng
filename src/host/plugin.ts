@@ -305,6 +305,20 @@ export function apply(rawContext: unknown, rawConfig: MnemonConfig | LiveHostCon
       // Registered before the tools so teardown cancels the timer first, and
       // after the runtime it reads so teardown runs the other way round.
       ctx.effect(() => () => { index.dispose() }, 'dsh-tingfeng: cold-library index timer')
+      // Build once at startup. `notify` only ever came from a write, so a profile
+      // that installed the feature onto a library it already had would keep
+      // showing a column of blanks until someone happened to write something —
+      // and on a fresh install that can be days. Building the index is the step
+      // an install owes the reader, so it runs without waiting for a write.
+      //
+      // `flush` rather than `notify`: there is no burst of edits to coalesce at
+      // startup, and a quiet period would just postpone the very first index a
+      // new install is waiting to see. Not awaited — a slow summarising model
+      // must not hold up the host coming up.
+      void index.flush().catch(() => {
+        // A failed first build is not a reason to fail the start: the timer is
+        // still armed by every later write, and the previous index stays valid.
+      })
     }
     return registerTools(ctx, runtime, coordinator, extensions, loader?.await?.(), shortIds, index === undefined ? undefined : () => { index.notify() }, dataDir)
   }, 'dsh-tingfeng: Source tool lifecycle')
