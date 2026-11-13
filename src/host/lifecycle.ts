@@ -31,7 +31,7 @@ import type { PreparedMemoryPlacement } from 'dsh-tingfeng-source-memory-spaces/
 import type { MemoryWake } from "../core/contracts/index.ts"
 import { agentScope, type MnemonAgentRuntimeSource } from './runtime.ts'
 import { createPluginMessage, MNEMON_PLUGIN_SOURCE } from './plugin-message.ts'
-import { retireSupersededSnapshots } from './memory-snapshot.ts'
+import { retireSupersededSnapshots, stepAtIndex } from './memory-snapshot.ts'
 import { SkillGate } from './skill-gate.ts'
 import { IdleReviewWatermarkStore } from './idle-review-watermark.ts'
 
@@ -601,13 +601,20 @@ class MnemonAgentLifecycle {
    * without `append`, a view that moved under a rewind, or a rejected
    * replacement all leave the older snapshot in place, and the cost of that is
    * one stale copy rather than a broken turn.
+   *
+   * The step annotation comes from the nearest `step/start`, not from this
+   * event: DSH writes `turn`/`step` only on the events that open or close a
+   * step, never on `user/message`. Reading them off the snapshot is why the
+   * first release of this never ran — a unit test that built its own events
+   * could not see the gap. An absent annotation is not a reason to skip the
+   * retirement.
    */
   private retireSnapshotsAfter(event: HostSessionEvent): void {
-    const turn = eventTurn(event)
-    const step = typeof event.data.step === 'number' ? event.data.step : undefined
-    if (turn === undefined || step === undefined) return
     try {
-      this.counters.retiredSnapshots += retireSupersededSnapshots(this.agent.session, turn, step).length
+      const seq = event.seq
+      if (typeof seq !== 'number') return
+      const where = stepAtIndex(this.agent.session, seq)
+      this.counters.retiredSnapshots += retireSupersededSnapshots(this.agent.session, where).length
     } catch {
       // Defensive only: the helper swallows its own failures.
     }

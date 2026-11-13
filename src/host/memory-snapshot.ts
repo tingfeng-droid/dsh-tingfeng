@@ -54,6 +54,30 @@ export function visibleSnapshots(session: Pick<HostSession, 'surface' | 'eventAt
  * Retire every visible snapshot except the newest, so exactly one projection
  * reaches the model.
  *
+ * The step a visible event belongs to, for the annotation on its retirement.
+ *
+ * `user/message` carries no `turn` or `step` of its own — DSH only writes them
+ * on the events that open or close a step — so the value is taken from the
+ * nearest `step/start` at or before `seq`. When there is none (an inherited
+ * prefix, a rewind, a hand-built session) the annotation is simply dropped: DSH
+ * does not validate it, and a retirement without it still covers the node.
+ */
+export function stepAtIndex(session: Pick<HostSession, 'snapshotEvents'>, seq: number): { turn: number; step: number } | undefined {
+  let found: { turn: number; step: number } | undefined
+  for (const event of session.snapshotEvents()) {
+    const at = event.seq
+    if (typeof at !== 'number' || at > seq) continue
+    if (event.type !== 'step/start') continue
+    const { turn, step } = event.data as { turn?: unknown; step?: unknown }
+    if (typeof turn === 'number' && typeof step === 'number') found = { turn, step }
+  }
+  return found
+}
+
+/**
+ * Retire every visible snapshot except the newest, so exactly one projection
+ * reaches the model.
+ *
  * The user's rule is "keep one": the newest text is the accurate one, and an
  * older copy is not a fallback but stale context that costs tokens and can
  * contradict the current file. Retirement is a `replace` of that one visible
@@ -62,23 +86,23 @@ export function visibleSnapshots(session: Pick<HostSession, 'surface' | 'eventAt
  * audit. Names match the upstream plugin (`memory-snapshot-retired`) so the two
  * remain legible side by side.
  *
- * Returns the seqs it retired. Never throws: a host without `append`, a read
- * that races a rewind, or a rejected replacement leaves the extra snapshot
- * visible, which is the safe direction — a turn must not fail because cleanup
- * did.
+ * `where` is only the step annotation; a caller that cannot resolve one may
+ * omit it. Returns the seqs it retired. Never throws: a host without `append`,
+ * a read that races a rewind, or a rejected replacement leaves the extra
+ * snapshot visible, which is the safe direction — a turn must not fail because
+ * cleanup did.
  */
-export function retireSupersededSnapshots(session: HostSession, turn: number, step: number): number[] {
+export function retireSupersededSnapshots(session: HostSession, where?: { turn: number; step: number }): number[] {
   const append = session.append
   if (typeof append !== 'function') return []
   const snapshots = visibleSnapshots(session)
   if (snapshots.length <= 1) return []
   const retired: number[] = []
-  // Oldest first, but never the last one: it is the copy this turn delivered.
+  // Oldest first, but never the last one: it is the projection this step sends.
   for (const snapshot of snapshots.slice(0, -1)) {
     try {
       append.call(session, 'developer/message', {
-        turn,
-        step,
+        ...(where ?? {}),
         message: {
           id: randomUUID(),
           role: 'developer',

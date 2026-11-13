@@ -265,6 +265,31 @@ afterEach(() => vi.useRealTimers())
 
 describe('Mnemon DSH lifecycle integration', () => {
 
+  it('retires a superseded memory snapshot through the real session/event listener', () => {
+    // The host writes no `turn` and no `step` on a user message; 0.12.7 read
+    // them off the snapshot event, found nothing, and returned before retiring
+    // anything. Only driving the listener the agent actually registers can see
+    // that: a direct helper call bypasses the whole bug.
+    const value = fixture()
+    const older = { type: 'user/message', data: { id: 'old', role: 'user', content: [{ type: 'text', text: 'snapshot-old' }], source: { kind: MNEMON_PLUGIN_SOURCE, form: 'snapshot' } } }
+    const newer = { type: 'user/message', data: { id: 'new', role: 'user', content: [{ type: 'text', text: 'snapshot-new' }], source: { kind: MNEMON_PLUGIN_SOURCE, form: 'snapshot' } } }
+    // `seq` is the array index: that is how sessionLog resolves eventAt().
+    const at = value.events.length
+    value.events.push({ type: 'step/start', seq: at, data: { turn: 1, step: 1 } } as never, { ...older, seq: at + 1 } as never)
+    value.events.push({ type: 'step/start', seq: at + 2, data: { turn: 2, step: 1 } } as never, { ...newer, seq: at + 3 } as never)
+    // The snapshot event carries exactly the fields the host gives it.
+    expect('turn' in newer.data).toBe(false)
+    expect('step' in newer.data).toBe(false)
+
+    value.agentListeners.get('session/event')?.(value.agent.session, { ...newer, seq: at + 3 })
+
+    // The retired count is only reachable through the listener, so a non-zero
+    // value proves the caller resolved the step and reached the helper.
+    expect(value.lifecycle.snapshot().counters.retiredSnapshots).toBe(1)
+    value.stop()
+  })
+
+
   it('emits producer-owned guided context accepted by the published legacy Session migration', async () => {
     const value = fixture(resolveConfig({ recallMode: 'guided', writebackMode: 'guided' }))
     const decision = await value.preStep([userMessage()], 1)

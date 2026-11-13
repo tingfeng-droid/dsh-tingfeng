@@ -15,31 +15,31 @@ importers:
         specifier: ^3.18.4
         version: 3.18.5
       dsh-tingfeng-provider-mnemon-native:
-        specifier: 0.12.7
+        specifier: 0.12.8
         version: link:plugins/dsh-tingfeng-provider-mnemon-native
       dsh-tingfeng-source-documents:
-        specifier: 0.12.7
+        specifier: 0.12.8
         version: link:plugins/dsh-tingfeng-source-documents
       dsh-tingfeng-source-memory-spaces:
-        specifier: 0.12.7
+        specifier: 0.12.8
         version: link:plugins/dsh-tingfeng-source-memory-spaces
       dsh-tingfeng-source-runtime:
-        specifier: 0.12.7
+        specifier: 0.12.8
         version: link:plugins/dsh-tingfeng-source-runtime
       dsh-tingfeng-strategy-auto-capture:
-        specifier: 0.12.7
+        specifier: 0.12.8
         version: link:plugins/dsh-tingfeng-strategy-auto-capture
       dsh-tingfeng-strategy-default-three-tier:
-        specifier: 0.12.7
+        specifier: 0.12.8
         version: link:plugins/dsh-tingfeng-strategy-default-three-tier
       dsh-tingfeng-strategy-general:
-        specifier: 0.12.7
+        specifier: 0.12.8
         version: link:plugins/dsh-tingfeng-strategy-general
       dsh-tingfeng-strategy-light-context:
-        specifier: 0.12.7
+        specifier: 0.12.8
         version: link:plugins/dsh-tingfeng-strategy-light-context
       dsh-tingfeng-strategy-scoped:
-        specifier: 0.12.7
+        specifier: 0.12.8
         version: link:plugins/dsh-tingfeng-strategy-scoped
       fflate:
         specifier: ^0.8.3
