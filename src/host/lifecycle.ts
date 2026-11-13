@@ -31,7 +31,7 @@ import type { PreparedMemoryPlacement } from 'dsh-tingfeng-source-memory-spaces/
 import type { MemoryWake } from "../core/contracts/index.ts"
 import { agentScope, type MnemonAgentRuntimeSource } from './runtime.ts'
 import { createPluginMessage, MNEMON_PLUGIN_SOURCE } from './plugin-message.ts'
-import { retireSupersededSnapshots, stepAtIndex } from './memory-snapshot.ts'
+import { retireSupersededSnapshots, stepAtIndex, visibleSnapshots } from './memory-snapshot.ts'
 import { SkillGate } from './skill-gate.ts'
 import { IdleReviewWatermarkStore } from './idle-review-watermark.ts'
 
@@ -576,6 +576,24 @@ class MnemonAgentLifecycle {
   }
 
   private sessionEvent(session: HostAgent['session'], event: HostSessionEvent): void {
+    // `[retire-diag]` is temporary instrumentation for the 0.12.9 field report:
+    // retirement never ran on a real host while every part looked right in
+    // tests. It prints one line per snapshot event so the next report can say
+    // which gate stopped it, instead of another round of inference.
+    if (event.type === 'user/message' && isOwnSnapshotMessage(event)) {
+      try {
+        const seq = event.seq
+        const where = typeof seq === 'number' ? stepAtIndex(this.agent.session, seq) : undefined
+        console.warn('[retire-diag] snapshot event',
+          'same=' + String(session === this.agent.session),
+          'seq=' + String(seq),
+          'where=' + JSON.stringify(where),
+          'visible=' + String(typeof seq === 'number' ? visibleSnapshots(this.agent.session).length : -1),
+          'hasAppend=' + String(typeof (this.agent.session as { append?: unknown }).append === 'function'))
+      } catch (error) {
+        console.warn('[retire-diag] threw', String(error))
+      }
+    }
     if (session !== this.agent.session) return
     // Retire the previous projection the moment this step's snapshot lands.
     // DSH appends `decision.messages` after `step/start` and before it builds

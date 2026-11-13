@@ -1,6 +1,6 @@
 {
   "name": "dsh-tingfeng-strategy-scoped",
-  "version": "0.12.8",
+  "version": "0.12.9",
   "description": "Additive Source selection and write narrowing for any Mnemon main Strategy.",
   "license": "MIT",
   "type": "module",
