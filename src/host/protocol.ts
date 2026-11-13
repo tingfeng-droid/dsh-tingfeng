@@ -679,6 +679,8 @@ export interface LifecycleCounters {
   failures: number
   /** Superseded memory snapshots removed from the model-visible surface. */
   retiredSnapshots: number
+  /** Replacement attempts the host refused; a silent catch hid these twice. */
+  retirementFailures: number
 }
 
 export interface LifecycleAgentSnapshot {

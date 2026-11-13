@@ -34,7 +34,7 @@ import type { PreparedMemoryPlacement } from 'dsh-tingfeng-source-memory-spaces/
 import type { MemoryWake } from "../core/contracts/index.ts"
 import { agentScope, type MnemonAgentRuntimeSource } from './runtime.ts'
 import { createPluginMessage, MNEMON_PLUGIN_SOURCE } from './plugin-message.ts'
-import { retireSupersededSnapshots, stepAtIndex, visibleSnapshots } from './memory-snapshot.ts'
+import { openStep, retireSupersededSnapshots, visibleSnapshots } from './memory-snapshot.ts'
 import { SkillGate } from './skill-gate.ts'
 import { IdleReviewWatermarkStore } from './idle-review-watermark.ts'
 
@@ -260,6 +260,8 @@ class MnemonAgentLifecycle {
    * property the model acts on, and `replace` can change it.
    */
   private injectedMemoryKey: string | undefined
+  /** First refusal the host returned for a retirement, kept for diagnosis. */
+  private lastRetirementFailure: string | undefined
   /**
    * Durable seq of the newest `compaction/summary` already accounted for.
    *
@@ -523,6 +525,9 @@ class MnemonAgentLifecycle {
     // point in a session, and each change must supersede the previous snapshot.
     // Appended last so the snapshot sits at the bottom of this plugin's block.
     const snapshot = this.memorySnapshotMessage()
+    // Retire the older projections only when this step is about to send a fresh
+    // one; otherwise the visible copies are the model's only memory.
+    if (snapshot !== undefined) this.retireSnapshotsBefore()
     const withSnapshot = (messages: HostUserMessage[]): HostUserMessage[] =>
       snapshot === undefined ? messages : [...messages, snapshot]
 
@@ -604,11 +609,10 @@ class MnemonAgentLifecycle {
     if (event.type === 'user/message' && isOwnSnapshotMessage(event)) {
       try {
         const seq = event.seq
-        const where = typeof seq === 'number' ? stepAtIndex(this.agent.session, seq) : undefined
         const line = `[retire-diag] ${new Date().toISOString()}`
           + ` same=${String(session === this.agent.session)}`
           + ` seq=${String(seq)}`
-          + ` where=${JSON.stringify(where)}`
+          + ` openStep=${JSON.stringify(openStep(this.agent.session) ?? null)}`
           + ` visible=${String(typeof seq === 'number' ? visibleSnapshots(this.agent.session).length : -1)}`
           + ` hasAppend=${String(typeof (this.agent.session as { append?: unknown }).append === 'function')}`
         console.warn(line)
@@ -625,7 +629,6 @@ class MnemonAgentLifecycle {
     // `preStep` would be too early (the new snapshot is not on the surface yet,
     // so "keep one" would keep the wrong copy) and doing it after the request
     // would waste the tokens this exists to save.
-    if (event.type === 'user/message' && isOwnSnapshotMessage(event)) this.retireSnapshotsAfter(event)
     if (event.type !== 'turn/end') return
     const turn = eventTurn(event)
     const current = this.memoryTurn?.current
@@ -635,29 +638,55 @@ class MnemonAgentLifecycle {
   }
 
   /**
-   * Leave exactly one memory projection visible after this step's snapshot.
+   * Leave exactly one memory projection visible, called from `preStep`.
    *
-   * Called once per snapshot the session accepts, so the surviving copy is the
-   * one this step is about to send. Retirement never fails the step: a host
-   * without `append`, a view that moved under a rewind, or a rejected
-   * replacement all leave the older snapshot in place, and the cost of that is
-   * one stale copy rather than a broken turn.
+   * Two host rules force this placement, both learned from field reports:
    *
-   * The step annotation comes from the nearest `step/start`, not from this
-   * event: DSH writes `turn`/`step` only on the events that open or close a
-   * step, never on `user/message`. Reading them off the snapshot is why the
-   * first release of this never ran — a unit test that built its own events
-   * could not see the gap. An absent annotation is not a reason to skip the
-   * retirement.
+   * 1. `session/event` delivers inside `commit()`, which sets
+   *    `entry.appending = true` before the callback and clears it in a `finally`
+   *    afterwards, so an `append` from that callback throws
+   *    `session append cannot reenter while another append is being published`.
+   *    That is why 0.12.7–0.12.10 retired nothing: every replacement threw and a
+   *    bare `catch {}` swallowed it. `preStep` is not inside a publication.
+   * 2. A `developer/message` must carry `turn`/`step` matching the step open at
+   *    that moment, and a retirement always happens after the step that carried
+   *    the snapshot closed. The tombstone is therefore a `user/message` with an
+   *    empty content array and this plugin's own source, which needs no step
+   *    annotation and is still a valid surface event.
+   *
+   * Only called when this step is about to append a fresh snapshot, so the old
+   * copies are not the model's only memory: retiring them leaves zero, and the
+   * new one lands immediately after.
+   *
+   * Never fails the step. The failure is counted and recorded, never silently
+   * dropped — a bare `catch` here cost two rounds of field reports.
    */
-  private retireSnapshotsAfter(event: HostSessionEvent): void {
+  private retireSnapshotsBefore(): void {
     try {
-      const seq = event.seq
-      if (typeof seq !== 'number') return
-      const where = stepAtIndex(this.agent.session, seq)
-      this.counters.retiredSnapshots += retireSupersededSnapshots(this.agent.session, where).length
+      const result = retireSupersededSnapshots(this.agent.session)
+      this.counters.retiredSnapshots += result.retired.length
+      if (result.failure !== undefined) this.noteRetirementFailure(result.failure)
+    } catch (error) {
+      this.noteRetirementFailure(error instanceof Error ? error.message : String(error))
+    }
+  }
+
+  /**
+   * Record why a retirement was refused, in the same channel that made the
+   * field diagnosis possible.
+   *
+   * A silent `catch` here cost two rounds of reports: the replacement was
+   * rejected on every attempt and nothing anywhere said so.
+   */
+  private noteRetirementFailure(reason: string): void {
+    this.counters.retirementFailures += 1
+    this.lastRetirementFailure ??= reason
+    try {
+      const line = `[retire-diag] ${new Date().toISOString()} refusal=${reason}`
+      console.warn(line)
+      appendFileSync(retireDiagnosticsPath(), line + '\n', 'utf8')
     } catch {
-      // Defensive only: the helper swallows its own failures.
+      // Diagnostics must never fail a turn.
     }
   }
 
@@ -958,7 +987,7 @@ export class MnemonLifecycle {
   private readonly owners = new Map<HostAgent, { lifecycle: MnemonAgentLifecycle; dispose: () => unknown }>()
   private readonly children = new Map<HostAgent, () => unknown>()
   private readonly memoryTurns = new Map<HostAgent, AgentMemoryTurn>()
-  private readonly counters: LifecycleCounters = { primes: 0, recallCues: 0, writebackCues: 0, supervisedRequests: 0, failures: 0, retiredSnapshots: 0 }
+  private readonly counters: LifecycleCounters = { primes: 0, recallCues: 0, writebackCues: 0, supervisedRequests: 0, failures: 0, retiredSnapshots: 0, retirementFailures: 0 }
   /** Creation ids reserved before DSH publishes clean task-root Agents. */
   private readonly taskAgentIds = new Set<string>()
   /** Bounded process-local replay fence for finalized-message write actions: the latest text per message. */

@@ -265,28 +265,23 @@ afterEach(() => vi.useRealTimers())
 
 describe('Mnemon DSH lifecycle integration', () => {
 
-  it('retires a superseded memory snapshot through the real session/event listener', () => {
-    // The host writes no `turn` and no `step` on a user message; 0.12.7 read
-    // them off the snapshot event, found nothing, and returned before retiring
-    // anything. Only driving the listener the agent actually registers can see
-    // that: a direct helper call bypasses the whole bug.
+  it('retires a superseded memory snapshot through the real pre-step path', () => {
+    // Two host rules shape this, both from field reports: a replacement cannot be
+    // appended from a `session/event` callback (DSH rejects appends while it is
+    // publishing), and a `developer/message` tombstone needs `turn`/`step` that
+    // match the open step, which no longer exists once the snapshot's step has
+    // closed. So the retirement runs from `preStep` and writes a `user/message`
+    // tombstone. Only driving that real path can see either rule.
     const value = fixture()
-    const older = { type: 'user/message', data: { id: 'old', role: 'user', content: [{ type: 'text', text: 'snapshot-old' }], source: { kind: MNEMON_PLUGIN_SOURCE, form: 'snapshot' } } }
-    const newer = { type: 'user/message', data: { id: 'new', role: 'user', content: [{ type: 'text', text: 'snapshot-new' }], source: { kind: MNEMON_PLUGIN_SOURCE, form: 'snapshot' } } }
-    // `seq` is the array index: that is how sessionLog resolves eventAt().
+    const make = (text: string) => ({ type: 'user/message', data: { id: text, role: 'user', content: [{ type: 'text', text }], source: { kind: MNEMON_PLUGIN_SOURCE, form: 'snapshot' } } })
     const at = value.events.length
-    value.events.push({ type: 'step/start', seq: at, data: { turn: 1, step: 1 } } as never, { ...older, seq: at + 1 } as never)
-    value.events.push({ type: 'step/start', seq: at + 2, data: { turn: 2, step: 1 } } as never, { ...newer, seq: at + 3 } as never)
-    // The snapshot event carries exactly the fields the host gives it.
-    expect('turn' in newer.data).toBe(false)
-    expect('step' in newer.data).toBe(false)
+    value.events.push({ ...make('snapshot-older'), seq: at } as never, { ...make('snapshot-old'), seq: at + 1 } as never)
 
-    value.agentListeners.get('session/event')?.(value.agent.session, { ...newer, seq: at + 3 })
-
-    // The retired count is only reachable through the listener, so a non-zero
-    // value proves the caller resolved the step and reached the helper.
-    expect(value.lifecycle.snapshot().counters.retiredSnapshots).toBe(1)
-    value.stop()
+    // The step that sends a fresh snapshot retires what was visible before it.
+    return value.preStep([userMessage()], 1).then(() => {
+      expect(value.lifecycle.snapshot().counters.retiredSnapshots).toBeGreaterThan(0)
+      value.stop()
+    })
   })
 
 

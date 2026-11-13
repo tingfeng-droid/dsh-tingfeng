@@ -1,7 +1,7 @@
 import { createRequire } from 'node:module'
 import { realpathSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { retireSupersededSnapshots, stepAtIndex, visibleSnapshots } from '../src/host/memory-snapshot.ts'
+import { retireSupersededSnapshots, openStep, visibleSnapshots } from '../src/host/memory-snapshot.ts'
 import { MNEMON_PLUGIN_SOURCE } from '../src/host/plugin-message.ts'
 
 const requireDsh = createRequire(realpathSync(new URL('../node_modules/@deepseek-ai/dsh/package.json', import.meta.url)))
@@ -49,7 +49,7 @@ describe('memory snapshot retirement', () => {
     const middle = turn(session, [{ text: 'snapshot-two' }])
     const newest = turn(session, [{ text: 'snapshot-three' }])
 
-    const retired = retireSupersededSnapshots(session, { turn: 4, step: 1 })
+    const retired = retireSupersededSnapshots(session).retired
 
     expect(retired).toEqual([...older, ...middle])
     expect(visibleSnapshots(session).map(snapshot => snapshot.text)).toEqual(['snapshot-three'])
@@ -64,7 +64,7 @@ describe('memory snapshot retirement', () => {
     turn(session, [{ text: 'snapshot-one' }])
     turn(session, [{ text: 'snapshot-two' }])
 
-    expect(retireSupersededSnapshots(session, { turn: 6, step: 1 })).toHaveLength(1)
+    expect(retireSupersededSnapshots(session).retired).toHaveLength(1)
 
     // The retirement is the only thing that changed; every non-snapshot message
     // is still visible, including our own instructions and recall turns.
@@ -79,25 +79,25 @@ describe('memory snapshot retirement', () => {
   it('does nothing when only one snapshot is visible', async () => {
     const session = await realSession()
     turn(session, [{ text: 'only-snapshot' }])
-    expect(retireSupersededSnapshots(session, { turn: 2, step: 1 })).toEqual([])
+    expect(retireSupersededSnapshots(session).retired).toEqual([])
     expect(visibleSnapshots(session)).toHaveLength(1)
   })
 
   it('does nothing on an empty surface', async () => {
     const session = await realSession()
-    expect(retireSupersededSnapshots(session, { turn: 1, step: 1 })).toEqual([])
+    expect(retireSupersededSnapshots(session).retired).toEqual([])
   })
 
   it('skips rather than throws when the host offers no append', () => {
     const session = { surface: { nodes: [1, 2] }, eventAt: () => undefined } as never
-    expect(retireSupersededSnapshots(session, { turn: 1, step: 1 })).toEqual([])
+    expect(retireSupersededSnapshots(session).retired).toEqual([])
   })
 
   it('never retires the copy delivered by this turn', async () => {
     const session = await realSession()
     turn(session, [{ text: 'old' }])
     const newest = turn(session, [{ text: 'new' }])
-    retireSupersededSnapshots(session, { turn: 3, step: 1 })
+    retireSupersededSnapshots(session).retired
     expect(session.surface.nodes).toContain(newest[0])
     expect(visibleSnapshots(session).map(snapshot => snapshot.text)).toEqual(['new'])
   })
@@ -106,9 +106,9 @@ describe('memory snapshot retirement', () => {
     const session = await realSession()
     turn(session, [{ text: 'a' }])
     const b = turn(session, [{ text: 'b' }])
-    expect(retireSupersededSnapshots(session, { turn: 2, step: 1 })).toEqual([1])
+    expect(retireSupersededSnapshots(session).retired).toEqual([1])
     // The replaced node left the surface, so a second pass finds nothing to do.
-    expect(retireSupersededSnapshots(session, { turn: 3, step: 1 })).toEqual([])
+    expect(retireSupersededSnapshots(session).retired).toEqual([])
     expect(session.surface.nodes).toContain(b[0])
   })
 
@@ -116,7 +116,7 @@ describe('memory snapshot retirement', () => {
     const session = await realSession()
     turn(session, [{ text: 'audit-me' }])
     turn(session, [{ text: 'newest' }])
-    retireSupersededSnapshots(session, { turn: 3, step: 1 })
+    retireSupersededSnapshots(session).retired
     const kept = session.snapshotEvents().filter((event: { type: string }) => event.type === 'user/message')
     expect(kept.some((event: { data: { content: Array<{ text?: string }> } }) => event.data.content[0]?.text === 'audit-me')).toBe(true)
   })
@@ -142,7 +142,7 @@ describe('memory snapshot retirement on the host\u2019s real event shape', () =>
       expect('step' in event.data).toBe(false)
     }
 
-    const retired = retireSupersededSnapshots(session, stepAtIndex(session, newer[0]!))
+    const retired = retireSupersededSnapshots(session).retired
     expect(retired).toEqual(older)
     expect(visibleSnapshots(session).map(snapshot => snapshot.text)).toEqual(['snapshot-b'])
   })
@@ -151,8 +151,8 @@ describe('memory snapshot retirement on the host\u2019s real event shape', () =>
     const session = await realSession()
     const older = realShapeSnapshot(session, 'a', 3)
     const newer = realShapeSnapshot(session, 'b', 4)
-    expect(stepAtIndex(session, newer[0]!)).toEqual({ turn: 4, step: 1 })
-    retireSupersededSnapshots(session, stepAtIndex(session, newer[0]!))
+    expect(openStep(session)).toEqual({ turn: 4, step: 1 })
+    retireSupersededSnapshots(session).retired
     expect(session.surface.nodes).not.toContain(older[0])
   })
 
@@ -168,8 +168,8 @@ describe('memory snapshot retirement on the host\u2019s real event shape', () =>
       source: { kind: MNEMON_PLUGIN_SOURCE, form: 'snapshot' },
     } as never, { surfaceOp: 'append' } as never) as { seq: number }
 
-    expect(stepAtIndex(session, second.seq)).toBeUndefined()
-    expect(retireSupersededSnapshots(session, stepAtIndex(session, second.seq))).toEqual([first.seq])
+    expect(openStep(session)).toBeUndefined()
+    expect(retireSupersededSnapshots(session).retired).toEqual([first.seq])
     expect(visibleSnapshots(session).map(snapshot => snapshot.text)).toEqual(['orphan-b'])
   })
 
@@ -178,7 +178,7 @@ describe('memory snapshot retirement on the host\u2019s real event shape', () =>
     const seqs = ['one', 'two', 'three', 'four', 'five'].map((text, index) => realShapeSnapshot(session, text, index + 1))
     const all = seqs.flat()
     expect(visibleSnapshots(session)).toHaveLength(5)
-    const retired = retireSupersededSnapshots(session, stepAtIndex(session, all.at(-1)!))
+    const retired = retireSupersededSnapshots(session).retired
     expect(retired).toHaveLength(4)
     expect(visibleSnapshots(session).map(snapshot => snapshot.text)).toEqual(['snapshot-five'])
   })
@@ -258,7 +258,7 @@ describe('retirement reaches the helper through the lifecycle wiring', () => {
     expect('turn' in snapshotEvent.data).toBe(false)
     expect('step' in snapshotEvent.data).toBe(false)
 
-    const retired = retireSupersededSnapshots(session as never, stepAtIndex(session as never, snapshotEvent.seq!))
+    const retired = retireSupersededSnapshots(session as never).retired
     expect(retired).toEqual([older])
     expect(visibleSnapshots(session as never).map(snapshot => snapshot.text)).toEqual(['new'])
     expect(surfaceNodes).not.toContain(older)

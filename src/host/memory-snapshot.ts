@@ -62,16 +62,18 @@ export function visibleSnapshots(session: Pick<HostSession, 'surface' | 'eventAt
  * prefix, a rewind, a hand-built session) the annotation is simply dropped: DSH
  * does not validate it, and a retirement without it still covers the node.
  */
-export function stepAtIndex(session: Pick<HostSession, 'snapshotEvents'>, seq: number): { turn: number; step: number } | undefined {
-  let found: { turn: number; step: number } | undefined
+export function openStep(session: Pick<HostSession, 'snapshotEvents'>): { turn: number; step: number } | undefined {
+  let opened: { turn: number; step: number } | undefined
   for (const event of session.snapshotEvents()) {
-    const at = event.seq
-    if (typeof at !== 'number' || at > seq) continue
-    if (event.type !== 'step/start') continue
-    const { turn, step } = event.data as { turn?: unknown; step?: unknown }
-    if (typeof turn === 'number' && typeof step === 'number') found = { turn, step }
+    if (event.type === 'step/start') {
+      const { turn, step } = event.data as { turn?: unknown; step?: unknown }
+      if (typeof turn === 'number' && typeof step === 'number') opened = { turn, step }
+      continue
+    }
+    // DSH opens one step at a time: the next `step/end` closes what was opened.
+    if (event.type === 'step/end') opened = undefined
   }
-  return found
+  return opened
 }
 
 /**
@@ -87,34 +89,44 @@ export function stepAtIndex(session: Pick<HostSession, 'snapshotEvents'>, seq: n
  * remain legible side by side.
  *
  * `where` is only the step annotation; a caller that cannot resolve one may
- * omit it. Returns the seqs it retired. Never throws: a host without `append`,
- * a read that races a rewind, or a rejected replacement leaves the extra
- * snapshot visible, which is the safe direction — a turn must not fail because
- * cleanup did.
+ * omit it. Returns the seqs it retired and the first error it hit. Never
+ * throws: a host without `append`, a read that races a rewind, or a rejected
+ * replacement leaves the extra snapshot visible, which is the safe direction —
+ * a turn must not fail because cleanup did. The first error is reported rather
+ * than swallowed, because "safe to ignore" is not "invisible": two field
+ * reports were spent on a silent `catch`.
  */
-export function retireSupersededSnapshots(session: HostSession, where?: { turn: number; step: number }): number[] {
+export function retireSupersededSnapshots(session: HostSession): {
+  retired: number[]
+  failure?: string
+} {
   const append = session.append
-  if (typeof append !== 'function') return []
+  if (typeof append !== 'function') return { retired: [] }
   const snapshots = visibleSnapshots(session)
-  if (snapshots.length <= 1) return []
+  if (snapshots.length <= 1) return { retired: [] }
   const retired: number[] = []
+  let failure: string | undefined
   // Oldest first, but never the last one: it is the projection this step sends.
   for (const snapshot of snapshots.slice(0, -1)) {
     try {
-      append.call(session, 'developer/message', {
-        ...(where ?? {}),
-        message: {
-          id: randomUUID(),
-          role: 'developer',
-          content: [],
-          source: { kind: MNEMON_PLUGIN_SOURCE, form: 'memory-snapshot-retired' },
-        },
+      // A `user/message` tombstone, not a `developer/message` one. DSH requires
+      // `turn`/`step` on a developer message and validates them against the step
+      // that is open *right now*; a retirement necessarily happens after the
+      // step that carried the snapshot has closed, so a developer tombstone can
+      // only ever be rejected (`turn must be a non-negative safe integer`).
+      // `user/message` carries no step annotation, an empty content array is
+      // valid, and `replace` on it covers the snapshot exactly the same way.
+      append.call(session, 'user/message', {
+        id: randomUUID(),
+        role: 'user',
+        content: [],
+        source: { kind: MNEMON_PLUGIN_SOURCE, form: 'memory-snapshot-retired' },
       }, { surfaceOp: { op: 'replace', startSeq: snapshot.seq, endSeq: snapshot.seq }, sourceEventSeqs: [snapshot.seq] })
       retired.push(snapshot.seq)
-    } catch {
-      // Keep going: one refused replacement must not abandon the rest, and the
-      // caller has already decided that cleanup never fails a turn.
+    } catch (error) {
+      // Keep going: one refused replacement must not abandon the rest.
+      failure ??= error instanceof Error ? error.message : String(error)
     }
   }
-  return retired
+  return { retired, ...(failure === undefined ? {} : { failure }) }
 }
