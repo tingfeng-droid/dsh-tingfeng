@@ -3,11 +3,12 @@ import { RUNTIME_MEMORY_PROTOCOL, ROUTING_GUIDANCE, THREE_TIER_REMINDERS } from 
 
 describe('default three-tier instructions', () => {
   it('owns the unchanged runtime write protocol, separate from Source snapshots', () => {
-    // 4,154 bytes after 7c9fa21 moved the wording patch into the source layer;
-    // that commit changed the protocol text but not this assertion. Keep this in
-    // lockstep with the text: the point is to catch an accidental reword, so a
-    // deliberate edit must update both together.
-    expect(Buffer.byteLength(RUNTIME_MEMORY_PROTOCOL, 'utf8')).toBe(4_154)
+    // 3,566 bytes after 2026-11-13 replaced the proactive-save sentence with the
+    // ask-first rule and removed repeated or redundant protocol lines; the
+    // earlier 4,154 came from 7c9fa21 and 4,239 from the ask-first edit alone.
+    // Keep this in lockstep with the text: the point is to catch an accidental
+    // reword, so a deliberate edit must update both together.
+    expect(Buffer.byteLength(RUNTIME_MEMORY_PROTOCOL, 'utf8')).toBe(3_566)
     expect(RUNTIME_MEMORY_PROTOCOL).toContain('Manage hot memory exclusively with mnemon_runtime_memory')
     expect(RUNTIME_MEMORY_PROTOCOL).toContain('Use action="add" only for a new independent fact')
     expect(RUNTIME_MEMORY_PROTOCOL).toContain('Use action="replace" with a short unique old_text')

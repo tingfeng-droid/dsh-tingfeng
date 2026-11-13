@@ -171,9 +171,10 @@ function shellWritesGatedFile(command: string): boolean {
 
 /** What the model reads instead of a result, and the one thing it may do next. */
 export const GATE_INSTRUCTION =
-  'Refused: writing memory, a rule, or the index requires reading the curator skill first. '
-  + 'Call the `skill` tool with name `memory-curator`, then repeat this exact call. '
-  + 'The gate refuses once per turn, so the repeat goes through.'
+  'Refused: the user requires reading the skill before any write to memory, a rule, or the index. '
+  + 'Call the `skill` tool with name `memory-curator`, then follow what it says exactly — do not treat reading it as a formality to clear this gate. '
+  + 'After the change is made, check it again against the criteria the skill sets. '
+  + 'Only when it meets them may you repeat this exact call.'
 
 export interface SkillGateOptions {
   /**

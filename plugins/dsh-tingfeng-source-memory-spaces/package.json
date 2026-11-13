@@ -1,6 +1,6 @@
 {
   "name": "dsh-tingfeng-source-memory-spaces",
-  "version": "0.12.5",
+  "version": "0.12.6",
   "description": "Memory Spaces Source and its private Provider SDK.",
   "license": "MIT",
   "type": "module",
