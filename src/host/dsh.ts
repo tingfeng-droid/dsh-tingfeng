@@ -157,8 +157,20 @@ export interface HostSession {
   requestHeader?(): { config?: { provider?: string; model?: string; reasoningEffort?: string } } | undefined
   /** Model-visible event sequences, in order; rewinds and compaction replace them. */
   surface: { readonly nodes: readonly number[] }
-  /** DSH's append, as its own request-error recoveries use it before retrying a step. */
-  append?(type: string, data: unknown, options?: { surfaceOp?: 'append' }): unknown
+  /**
+   * DSH's append, as its own request-error recoveries use it before retrying a step.
+   *
+   * `surfaceOp: 'append'` (the default shape) adds the new event to the visible
+   * surface. `{ op: 'replace', startSeq, endSeq }` covers one visible node with
+   * the new event, which is how a superseded memory snapshot stops reaching the
+   * model; DSH keeps the replaced event in its append-only audit. Both shapes
+   * exist on DSH 0.2.2-rc.2 (its `SurfaceOp` union); a host without `append`
+   * leaves this undefined and callers skip the write rather than fail a turn.
+   */
+  append?(type: string, data: unknown, options?: {
+    surfaceOp?: 'append' | { op: 'replace'; startSeq: number; endSeq: number }
+    sourceEventSeqs?: readonly number[]
+  }): unknown
 }
 
 export type HostPreStepDecision = { kind: 'reject' } | { kind: 'enter'; messages: HostUserMessage[] }

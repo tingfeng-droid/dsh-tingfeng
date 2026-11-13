@@ -31,6 +31,7 @@ import type { PreparedMemoryPlacement } from 'dsh-tingfeng-source-memory-spaces/
 import type { MemoryWake } from "../core/contracts/index.ts"
 import { agentScope, type MnemonAgentRuntimeSource } from './runtime.ts'
 import { createPluginMessage, MNEMON_PLUGIN_SOURCE } from './plugin-message.ts'
+import { retireSupersededSnapshots } from './memory-snapshot.ts'
 import { SkillGate } from './skill-gate.ts'
 import { IdleReviewWatermarkStore } from './idle-review-watermark.ts'
 
@@ -111,6 +112,18 @@ function isMnemonMessageSource(source: unknown): boolean {
 function isOwnUserMessageEvent(event: HostSessionEvent | undefined): boolean {
   if (event?.type !== 'user/message') return false
   return isMnemonMessageSource(event.data.source)
+}
+
+/**
+ * Whether this event is the memory projection this plugin shows the model.
+ *
+ * Narrower than {@link isOwnUserMessageEvent} on purpose: a `recall` or
+ * `instructions` message also belongs to this plugin, but it is an ordinary turn
+ * with its own content, not a snapshot that a newer projection supersedes.
+ */
+function isOwnSnapshotMessage(event: HostSessionEvent): boolean {
+  if (!isOwnUserMessageEvent(event)) return false
+  return (event.data.source as { form?: unknown }).form === 'snapshot'
 }
 
 function eventTurn(event: HostSessionEvent): number | undefined {
@@ -563,12 +576,41 @@ class MnemonAgentLifecycle {
   }
 
   private sessionEvent(session: HostAgent['session'], event: HostSessionEvent): void {
-    if (session !== this.agent.session || event.type !== 'turn/end') return
+    if (session !== this.agent.session) return
+    // Retire the previous projection the moment this step's snapshot lands.
+    // DSH appends `decision.messages` after `step/start` and before it builds
+    // the request, so this is the one point where the new copy is visible, the
+    // old ones still are, and the model has not been asked yet. Doing it in
+    // `preStep` would be too early (the new snapshot is not on the surface yet,
+    // so "keep one" would keep the wrong copy) and doing it after the request
+    // would waste the tokens this exists to save.
+    if (event.type === 'user/message' && isOwnSnapshotMessage(event)) this.retireSnapshotsAfter(event)
+    if (event.type !== 'turn/end') return
     const turn = eventTurn(event)
     const current = this.memoryTurn?.current
     const pinned = turn === undefined || current?.turn !== turn ? undefined : current
     if (pinned === undefined) return
     this.releaseView(turn)
+  }
+
+  /**
+   * Leave exactly one memory projection visible after this step's snapshot.
+   *
+   * Called once per snapshot the session accepts, so the surviving copy is the
+   * one this step is about to send. Retirement never fails the step: a host
+   * without `append`, a view that moved under a rewind, or a rejected
+   * replacement all leave the older snapshot in place, and the cost of that is
+   * one stale copy rather than a broken turn.
+   */
+  private retireSnapshotsAfter(event: HostSessionEvent): void {
+    const turn = eventTurn(event)
+    const step = typeof event.data.step === 'number' ? event.data.step : undefined
+    if (turn === undefined || step === undefined) return
+    try {
+      this.counters.retiredSnapshots += retireSupersededSnapshots(this.agent.session, turn, step).length
+    } catch {
+      // Defensive only: the helper swallows its own failures.
+    }
   }
 
   private scheduleIdleReview(turn: number): void {
@@ -868,7 +910,7 @@ export class MnemonLifecycle {
   private readonly owners = new Map<HostAgent, { lifecycle: MnemonAgentLifecycle; dispose: () => unknown }>()
   private readonly children = new Map<HostAgent, () => unknown>()
   private readonly memoryTurns = new Map<HostAgent, AgentMemoryTurn>()
-  private readonly counters: LifecycleCounters = { primes: 0, recallCues: 0, writebackCues: 0, supervisedRequests: 0, failures: 0 }
+  private readonly counters: LifecycleCounters = { primes: 0, recallCues: 0, writebackCues: 0, supervisedRequests: 0, failures: 0, retiredSnapshots: 0 }
   /** Creation ids reserved before DSH publishes clean task-root Agents. */
   private readonly taskAgentIds = new Set<string>()
   /** Bounded process-local replay fence for finalized-message write actions: the latest text per message. */

@@ -677,6 +677,8 @@ export interface LifecycleCounters {
   writebackCues: number
   supervisedRequests: number
   failures: number
+  /** Superseded memory snapshots removed from the model-visible surface. */
+  retiredSnapshots: number
 }
 
 export interface LifecycleAgentSnapshot {

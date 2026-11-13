@@ -6,7 +6,7 @@ declare module '@deepseek-ai/dsh-llm' {
   interface MessageSourceMap {
     'dsh-mnemon': {
       kind: 'dsh-mnemon'
-      form: 'recall' | 'instructions' | 'snapshot'
+      form: 'recall' | 'instructions' | 'snapshot' | 'memory-snapshot-retired'
       sections?: readonly { name: string; text: string }[]
     }
   }
