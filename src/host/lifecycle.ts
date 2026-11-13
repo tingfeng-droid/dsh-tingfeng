@@ -1,4 +1,7 @@
 import { randomUUID } from 'node:crypto'
+import { appendFileSync } from 'node:fs'
+import { homedir, tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { stat } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import type { ResolvedConfig } from './config.ts'
@@ -124,6 +127,20 @@ function isOwnUserMessageEvent(event: HostSessionEvent | undefined): boolean {
 function isOwnSnapshotMessage(event: HostSessionEvent): boolean {
   if (!isOwnUserMessageEvent(event)) return false
   return (event.data.source as { form?: unknown }).form === 'snapshot'
+}
+
+/**
+ * Where the temporary `[retire-diag]` lines are written.
+ *
+ * Under the home directory on every platform: a Windows desktop build has no
+ * stdout consumer, so the file is the only channel a field report can read.
+ */
+function retireDiagnosticsPath(): string {
+  try {
+    return join(homedir(), '.dsh', 'tingfeng-retire-diag.log')
+  } catch {
+    return join(tmpdir(), 'tingfeng-retire-diag.log')
+  }
 }
 
 function eventTurn(event: HostSessionEvent): number | undefined {
@@ -576,20 +593,26 @@ class MnemonAgentLifecycle {
   }
 
   private sessionEvent(session: HostAgent['session'], event: HostSessionEvent): void {
-    // `[retire-diag]` is temporary instrumentation for the 0.12.9 field report:
+    // `[retire-diag]` is temporary instrumentation for the field report that
     // retirement never ran on a real host while every part looked right in
-    // tests. It prints one line per snapshot event so the next report can say
+    // tests. It records one line per snapshot event so the next report can say
     // which gate stopped it, instead of another round of inference.
+    //
+    // It writes a file as well as stderr: on a Windows desktop build the
+    // Electron main process has no stdout consumer, so `console.warn` goes
+    // nowhere and a report cannot read back what it printed.
     if (event.type === 'user/message' && isOwnSnapshotMessage(event)) {
       try {
         const seq = event.seq
         const where = typeof seq === 'number' ? stepAtIndex(this.agent.session, seq) : undefined
-        console.warn('[retire-diag] snapshot event',
-          'same=' + String(session === this.agent.session),
-          'seq=' + String(seq),
-          'where=' + JSON.stringify(where),
-          'visible=' + String(typeof seq === 'number' ? visibleSnapshots(this.agent.session).length : -1),
-          'hasAppend=' + String(typeof (this.agent.session as { append?: unknown }).append === 'function'))
+        const line = `[retire-diag] ${new Date().toISOString()}`
+          + ` same=${String(session === this.agent.session)}`
+          + ` seq=${String(seq)}`
+          + ` where=${JSON.stringify(where)}`
+          + ` visible=${String(typeof seq === 'number' ? visibleSnapshots(this.agent.session).length : -1)}`
+          + ` hasAppend=${String(typeof (this.agent.session as { append?: unknown }).append === 'function')}`
+        console.warn(line)
+        appendFileSync(retireDiagnosticsPath(), line + '\n', 'utf8')
       } catch (error) {
         console.warn('[retire-diag] threw', String(error))
       }

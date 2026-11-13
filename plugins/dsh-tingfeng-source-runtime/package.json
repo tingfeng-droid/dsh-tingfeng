@@ -1,6 +1,6 @@
 {
   "name": "dsh-tingfeng-source-runtime",
-  "version": "0.12.9",
+  "version": "0.12.10",
   "description": "Self-contained runtime Source for Composable View Memory.",
   "license": "MIT",
   "type": "module",

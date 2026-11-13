@@ -1,6 +1,6 @@
 {
   "name": "dsh-tingfeng-strategy-default-three-tier",
-  "version": "0.12.9",
+  "version": "0.12.10",
   "description": "Explicit three-tier View Strategy for Composable View Memory.",
   "license": "MIT",
   "type": "module",
