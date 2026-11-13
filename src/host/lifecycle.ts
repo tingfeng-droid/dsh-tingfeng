@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import { appendFileSync } from 'node:fs'
+import { readFileSync, writeFileSync } from 'node:fs'
 import { homedir, tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { stat } from 'node:fs/promises'
@@ -34,7 +34,7 @@ import type { PreparedMemoryPlacement } from 'dsh-tingfeng-source-memory-spaces/
 import type { MemoryWake } from "../core/contracts/index.ts"
 import { agentScope, type MnemonAgentRuntimeSource } from './runtime.ts'
 import { createPluginMessage, MNEMON_PLUGIN_SOURCE } from './plugin-message.ts'
-import { openStep, retireSupersededSnapshots, visibleSnapshots } from './memory-snapshot.ts'
+import { retireSupersededSnapshots } from './memory-snapshot.ts'
 import { SkillGate } from './skill-gate.ts'
 import { IdleReviewWatermarkStore } from './idle-review-watermark.ts'
 
@@ -117,25 +117,16 @@ function isOwnUserMessageEvent(event: HostSessionEvent | undefined): boolean {
   return isMnemonMessageSource(event.data.source)
 }
 
-/**
- * Whether this event is the memory projection this plugin shows the model.
- *
- * Narrower than {@link isOwnUserMessageEvent} on purpose: a `recall` or
- * `instructions` message also belongs to this plugin, but it is an ordinary turn
- * with its own content, not a snapshot that a newer projection supersedes.
- */
-function isOwnSnapshotMessage(event: HostSessionEvent): boolean {
-  if (!isOwnUserMessageEvent(event)) return false
-  return (event.data.source as { form?: unknown }).form === 'snapshot'
-}
+/** Refusal log cap: past this, the file restarts from the newest line. */
+const RETIREMENT_DIAGNOSTICS_LIMIT = 64 * 1024
 
 /**
- * Where the temporary `[retire-diag]` lines are written.
+ * Where the retirement refusal lines are written.
  *
  * Under the home directory on every platform: a Windows desktop build has no
  * stdout consumer, so the file is the only channel a field report can read.
  */
-function retireDiagnosticsPath(): string {
+function retirementDiagnosticsPath(): string {
   try {
     return join(homedir(), '.dsh', 'tingfeng-retire-diag.log')
   } catch {
@@ -606,29 +597,6 @@ class MnemonAgentLifecycle {
   }
 
   private sessionEvent(session: HostAgent['session'], event: HostSessionEvent): void {
-    // `[retire-diag]` is temporary instrumentation for the field report that
-    // retirement never ran on a real host while every part looked right in
-    // tests. It records one line per snapshot event so the next report can say
-    // which gate stopped it, instead of another round of inference.
-    //
-    // It writes a file as well as stderr: on a Windows desktop build the
-    // Electron main process has no stdout consumer, so `console.warn` goes
-    // nowhere and a report cannot read back what it printed.
-    if (event.type === 'user/message' && isOwnSnapshotMessage(event)) {
-      try {
-        const seq = event.seq
-        const line = `[retire-diag] ${new Date().toISOString()}`
-          + ` same=${String(session === this.agent.session)}`
-          + ` seq=${String(seq)}`
-          + ` openStep=${JSON.stringify(openStep(this.agent.session) ?? null)}`
-          + ` visible=${String(typeof seq === 'number' ? visibleSnapshots(this.agent.session).length : -1)}`
-          + ` hasAppend=${String(typeof (this.agent.session as { append?: unknown }).append === 'function')}`
-        console.warn(line)
-        appendFileSync(retireDiagnosticsPath(), line + '\n', 'utf8')
-      } catch (error) {
-        console.warn('[retire-diag] threw', String(error))
-      }
-    }
     if (session !== this.agent.session) return
     // Retire the previous projection the moment this step's snapshot lands.
     // DSH appends `decision.messages` after `step/start` and before it builds
@@ -680,11 +648,16 @@ class MnemonAgentLifecycle {
   }
 
   /**
-   * Record why a retirement was refused, in the same channel that made the
-   * field diagnosis possible.
+   * Record why a retirement was refused.
    *
-   * A silent `catch` here cost two rounds of reports: the replacement was
-   * rejected on every attempt and nothing anywhere said so.
+   * Only failures reach this file. The per-snapshot tracing that located the
+   * reentrancy bug is gone — it wrote on every projection (1229 lines, 136 KB in
+   * under a day) and would have buried the one line that matters. What stays is
+   * the line that made the diagnosis possible at all: a refused replacement,
+   * counted and named, so "safe to ignore" never becomes "invisible" again.
+   *
+   * The file is capped: once it passes the limit it is rewritten from this one
+   * line, so a repeating refusal cannot grow it without bound.
    */
   private noteRetirementFailure(reason: string): void {
     this.counters.retirementFailures += 1
@@ -692,7 +665,15 @@ class MnemonAgentLifecycle {
     try {
       const line = `[retire-diag] ${new Date().toISOString()} refusal=${reason}`
       console.warn(line)
-      appendFileSync(retireDiagnosticsPath(), line + '\n', 'utf8')
+      const path = retirementDiagnosticsPath()
+      let existing = ''
+      try {
+        existing = readFileSync(path, 'utf8')
+      } catch {
+        existing = ''
+      }
+      // Over the cap, start again from this line rather than growing without bound.
+      writeFileSync(path, (existing.length > RETIREMENT_DIAGNOSTICS_LIMIT ? '' : existing) + line + '\n', 'utf8')
     } catch {
       // Diagnostics must never fail a turn.
     }

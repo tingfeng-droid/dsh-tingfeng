@@ -51,16 +51,13 @@ export function visibleSnapshots(session: Pick<HostSession, 'surface' | 'eventAt
 }
 
 /**
- * Retire every visible snapshot except the newest, so exactly one projection
- * reaches the model.
+ * The step DSH currently has open, or undefined between steps.
  *
- * The step a visible event belongs to, for the annotation on its retirement.
- *
- * `user/message` carries no `turn` or `step` of its own — DSH only writes them
- * on the events that open or close a step — so the value is taken from the
- * nearest `step/start` at or before `seq`. When there is none (an inherited
- * prefix, a rewind, a hand-built session) the annotation is simply dropped: DSH
- * does not validate it, and a retirement without it still covers the node.
+ * Kept for callers that need it; the retirement no longer does, because DSH
+ * demands `turn`/`step` on a `developer/message` tombstone and refuses one
+ * written after its step has closed — so a retirement cannot use this at all.
+ * The underlying fact still matters: `user/message` carries no `turn`/`step` of
+ * its own, because DSH writes them only on the events that open or close a step.
  */
 export function openStep(session: Pick<HostSession, 'snapshotEvents'>): { turn: number; step: number } | undefined {
   let opened: { turn: number; step: number } | undefined
@@ -77,24 +74,28 @@ export function openStep(session: Pick<HostSession, 'snapshotEvents'>): { turn: 
 }
 
 /**
- * Retire every visible snapshot except the newest, so exactly one projection
- * reaches the model.
+ * Retire every visible memory snapshot, leaving the surface clear for the one
+ * the caller appends immediately afterwards.
  *
- * The user's rule is "keep one": the newest text is the accurate one, and an
- * older copy is not a fallback but stale context that costs tokens and can
- * contradict the current file. Retirement is a `replace` of that one visible
- * node with an empty developer message, so the conversation between them stays
- * exactly where it is and DSH's append-only log keeps the original text for
- * audit. Names match the upstream plugin (`memory-snapshot-retired`) so the two
- * remain legible side by side.
+ * The user's rule is "keep one", and the one that counts is the projection this
+ * step is about to send — not the newest copy already visible, which is a step
+ * behind. Keeping that older one left two on the surface and was reported from
+ * the field as "stable at 2 instead of 1". So every visible copy goes.
  *
- * `where` is only the step annotation; a caller that cannot resolve one may
- * omit it. Returns the seqs it retired and the first error it hit. Never
- * throws: a host without `append`, a read that races a rewind, or a rejected
- * replacement leaves the extra snapshot visible, which is the safe direction —
- * a turn must not fail because cleanup did. The first error is reported rather
- * than swallowed, because "safe to ignore" is not "invisible": two field
- * reports were spent on a silent `catch`.
+ * Each retirement replaces one visible node with an empty `user/message`
+ * tombstone, so the conversation around it stays exactly where it is and DSH's
+ * append-only log keeps the original text for audit. A `developer/message`
+ * tombstone cannot be used: DSH demands `turn`/`step` on it and validates them
+ * against the step open right now, which has already closed by the time a
+ * snapshot is superseded. Names match the upstream plugin
+ * (`memory-snapshot-retired`) so the two stay legible side by side.
+ *
+ * Returns the seqs it retired and the first refusal it hit. Never throws: a
+ * host without `append`, a read that races a rewind, or a rejected replacement
+ * leaves the extra snapshot visible, which is the safe direction — a turn must
+ * not fail because cleanup did. The first refusal is reported rather than
+ * swallowed: "safe to ignore" is not "invisible", and two field reports were
+ * spent on a silent `catch`.
  */
 export function retireSupersededSnapshots(session: HostSession): {
   retired: number[]
