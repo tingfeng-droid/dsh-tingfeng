@@ -103,11 +103,14 @@ export function retireSupersededSnapshots(session: HostSession): {
   const append = session.append
   if (typeof append !== 'function') return { retired: [] }
   const snapshots = visibleSnapshots(session)
-  if (snapshots.length <= 1) return { retired: [] }
+  if (snapshots.length === 0) return { retired: [] }
   const retired: number[] = []
   let failure: string | undefined
-  // Oldest first, but never the last one: it is the projection this step sends.
-  for (const snapshot of snapshots.slice(0, -1)) {
+  // Every visible copy goes, including the newest: the caller only reaches here
+  // when this step is about to append a fresh snapshot, and that one lands right
+  // after this returns. Keeping the newest would leave two on the surface — the
+  // old one that was newest a moment ago, plus the new one.
+  for (const snapshot of snapshots) {
     try {
       // A `user/message` tombstone, not a `developer/message` one. DSH requires
       // `turn`/`step` on a developer message and validates them against the step

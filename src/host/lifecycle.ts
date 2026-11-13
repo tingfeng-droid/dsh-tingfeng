@@ -525,9 +525,6 @@ class MnemonAgentLifecycle {
     // point in a session, and each change must supersede the previous snapshot.
     // Appended last so the snapshot sits at the bottom of this plugin's block.
     const snapshot = this.memorySnapshotMessage()
-    // Retire the older projections only when this step is about to send a fresh
-    // one; otherwise the visible copies are the model's only memory.
-    if (snapshot !== undefined) this.retireSnapshotsBefore()
     const withSnapshot = (messages: HostUserMessage[]): HostUserMessage[] =>
       snapshot === undefined ? messages : [...messages, snapshot]
 
@@ -536,14 +533,25 @@ class MnemonAgentLifecycle {
       this.counters.primes += 1
       this.mark('prime')
     }
-    if (this.cueAlreadyVisible()) return { kind: 'enter', messages: withSnapshot(decision.messages) }
+    const deliver = (messages: HostUserMessage[]): HostPreStepDecision => {
+      const outgoing = withSnapshot(messages)
+      // Retire only after the batch is known to carry this step's own snapshot:
+      // the retirement removes every visible copy, including the newest, because
+      // the fresh one lands right after this returns. Guarding on the assembled
+      // batch rather than on `snapshot !== undefined` keeps that true even if a
+      // future branch returns early without it.
+      if (snapshot !== undefined && outgoing.includes(snapshot)) this.retireSnapshotsBefore()
+      return { kind: 'enter', messages: outgoing }
+    }
+
+    if (this.cueAlreadyVisible()) return deliver(decision.messages)
     const reminder = guidedReminder(this.config, this.memoryTurn?.current?.context.view.guidance)
-    if (reminder === undefined) return { kind: 'enter', messages: withSnapshot(decision.messages) }
+    if (reminder === undefined) return deliver(decision.messages)
     this.guidedTurns.add(payload.turn)
     if (this.config.recallMode === 'guided') this.counters.recallCues += 1
     if (this.config.writebackMode === 'guided' && this.config.writeEnabled) this.counters.writebackCues += 1
     this.mark(this.config.recallMode === 'guided' ? 'recall' : 'writeback')
-    return { kind: 'enter', messages: withSnapshot([...decision.messages, createPluginMessage(reminder, 'instructions')]) }
+    return deliver([...decision.messages, createPluginMessage(reminder, 'instructions')])
   }
 
   private async assemblePrompt(assembly: PromptAssembly, context: PromptAssemblyContext, next: () => Promise<PromptAssembly>): Promise<PromptAssembly> {

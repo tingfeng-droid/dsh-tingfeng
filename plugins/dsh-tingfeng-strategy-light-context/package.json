@@ -1,6 +1,6 @@
 {
   "name": "dsh-tingfeng-strategy-light-context",
-  "version": "0.12.11",
+  "version": "0.12.12",
   "description": "Additive shared projection budget cap for any Mnemon main Strategy.",
   "license": "MIT",
   "type": "module",

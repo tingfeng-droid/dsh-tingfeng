@@ -1,6 +1,6 @@
 {
   "name": "dsh-tingfeng-source-documents",
-  "version": "0.12.11",
+  "version": "0.12.12",
   "description": "Self-contained documents Source for Composable View Memory.",
   "license": "MIT",
   "type": "module",

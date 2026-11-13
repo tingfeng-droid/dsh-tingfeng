@@ -51,9 +51,9 @@ describe('memory snapshot retirement', () => {
 
     const retired = retireSupersededSnapshots(session).retired
 
-    expect(retired).toEqual([...older, ...middle])
-    expect(visibleSnapshots(session).map(snapshot => snapshot.text)).toEqual(['snapshot-three'])
-    for (const seq of newest) expect(session.surface.nodes).toContain(seq)
+    // Every visible copy goes: the caller appends a fresh one right after this.
+    expect(retired).toEqual([...older, ...middle, ...newest])
+    expect(visibleSnapshots(session)).toEqual([])
   })
 
   it('leaves other producers and other forms untouched', async () => {
@@ -64,7 +64,7 @@ describe('memory snapshot retirement', () => {
     turn(session, [{ text: 'snapshot-one' }])
     turn(session, [{ text: 'snapshot-two' }])
 
-    expect(retireSupersededSnapshots(session).retired).toHaveLength(1)
+    expect(retireSupersededSnapshots(session).retired).toHaveLength(2)
 
     // The retirement is the only thing that changed; every non-snapshot message
     // is still visible, including our own instructions and recall turns.
@@ -72,15 +72,15 @@ describe('memory snapshot retirement', () => {
     expect(visible).toContain('someone-else')
     expect(visible).toContain('our-instructions')
     expect(visible).toContain('our-recall')
-    expect(visible).toContain('snapshot-two')
+    expect(visible).not.toContain('snapshot-two')
     expect(visible).not.toContain('snapshot-one')
   })
 
-  it('does nothing when only one snapshot is visible', async () => {
+  it('retires the only visible snapshot too, because a fresh one follows', async () => {
     const session = await realSession()
     turn(session, [{ text: 'only-snapshot' }])
-    expect(retireSupersededSnapshots(session).retired).toEqual([])
-    expect(visibleSnapshots(session)).toHaveLength(1)
+    expect(retireSupersededSnapshots(session).retired).toHaveLength(1)
+    expect(visibleSnapshots(session)).toEqual([])
   })
 
   it('does nothing on an empty surface', async () => {
@@ -93,23 +93,21 @@ describe('memory snapshot retirement', () => {
     expect(retireSupersededSnapshots(session).retired).toEqual([])
   })
 
-  it('never retires the copy delivered by this turn', async () => {
+  it('leaves the surface ready for exactly one fresh projection', async () => {
     const session = await realSession()
     turn(session, [{ text: 'old' }])
-    const newest = turn(session, [{ text: 'new' }])
-    retireSupersededSnapshots(session).retired
-    expect(session.surface.nodes).toContain(newest[0])
-    expect(visibleSnapshots(session).map(snapshot => snapshot.text)).toEqual(['new'])
+    turn(session, [{ text: 'new' }])
+    retireSupersededSnapshots(session)
+    expect(visibleSnapshots(session)).toEqual([])
   })
 
   it('does not retire a snapshot twice across consecutive turns', async () => {
     const session = await realSession()
     turn(session, [{ text: 'a' }])
     const b = turn(session, [{ text: 'b' }])
-    expect(retireSupersededSnapshots(session).retired).toEqual([1])
-    // The replaced node left the surface, so a second pass finds nothing to do.
+    expect(retireSupersededSnapshots(session).retired).toEqual([1, b[0]])
+    // Both nodes left the surface, so a second pass finds nothing to do.
     expect(retireSupersededSnapshots(session).retired).toEqual([])
-    expect(session.surface.nodes).toContain(b[0])
   })
 
   it('keeps the original text in the append-only log for audit', async () => {
@@ -143,8 +141,8 @@ describe('memory snapshot retirement on the host\u2019s real event shape', () =>
     }
 
     const retired = retireSupersededSnapshots(session).retired
-    expect(retired).toEqual(older)
-    expect(visibleSnapshots(session).map(snapshot => snapshot.text)).toEqual(['snapshot-b'])
+    expect(retired).toEqual([...older, ...newer])
+    expect(visibleSnapshots(session)).toEqual([])
   })
 
   it('finds the step through the nearest step/start, which is where the host records it', async () => {
@@ -169,8 +167,8 @@ describe('memory snapshot retirement on the host\u2019s real event shape', () =>
     } as never, { surfaceOp: 'append' } as never) as { seq: number }
 
     expect(openStep(session)).toBeUndefined()
-    expect(retireSupersededSnapshots(session).retired).toEqual([first.seq])
-    expect(visibleSnapshots(session).map(snapshot => snapshot.text)).toEqual(['orphan-b'])
+    expect(retireSupersededSnapshots(session).retired).toEqual([first.seq, second.seq])
+    expect(visibleSnapshots(session)).toEqual([])
   })
 
   it('retires many accumulated snapshots down to one, as a long session leaves them', async () => {
@@ -179,8 +177,8 @@ describe('memory snapshot retirement on the host\u2019s real event shape', () =>
     const all = seqs.flat()
     expect(visibleSnapshots(session)).toHaveLength(5)
     const retired = retireSupersededSnapshots(session).retired
-    expect(retired).toHaveLength(4)
-    expect(visibleSnapshots(session).map(snapshot => snapshot.text)).toEqual(['snapshot-five'])
+    expect(retired).toHaveLength(5)
+    expect(visibleSnapshots(session)).toEqual([])
   })
 })
 
@@ -259,8 +257,8 @@ describe('retirement reaches the helper through the lifecycle wiring', () => {
     expect('step' in snapshotEvent.data).toBe(false)
 
     const retired = retireSupersededSnapshots(session as never).retired
-    expect(retired).toEqual([older])
-    expect(visibleSnapshots(session as never).map(snapshot => snapshot.text)).toEqual(['new'])
+    expect(retired).toEqual([older, newer])
+    expect(visibleSnapshots(session as never)).toEqual([])
     expect(surfaceNodes).not.toContain(older)
   })
 })
